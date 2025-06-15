@@ -65,7 +65,7 @@ function MobileNavigation(
 ) {
 	return (
 		<Popover {...props}>
-			<PopoverButton className='group flex items-center rounded-full bg-zinc-800/90 px-4 py-2 text-sm font-medium text-zinc-200 ring-1 ring-white/10 backdrop-blur-sm hover:ring-white/20'>
+			<PopoverButton className='group flex items-center rounded-full bg-zinc-900/70 px-4 py-2 text-sm font-medium text-zinc-200 ring-1 ring-zinc-700/40 backdrop-blur-lg transition-all duration-200 hover:bg-zinc-900/80 hover:ring-zinc-600/50'>
 				Menu
 				<ChevronDownIcon className='ml-3 h-auto w-2 stroke-zinc-500 group-hover:stroke-zinc-400' />
 			</PopoverButton>
@@ -125,7 +125,7 @@ function NavItem({
 function DesktopNavigation(props: React.ComponentPropsWithoutRef<'nav'>) {
 	return (
 		<nav {...props}>
-			<ul className='flex rounded-full bg-zinc-800/90 px-3 text-sm font-medium text-zinc-200 shadow-lg ring-1 ring-white/10 backdrop-blur-sm'>
+			<ul className='flex rounded-full bg-zinc-900/70 px-3 text-sm font-medium text-zinc-200 shadow-xl ring-1 ring-zinc-700/40 backdrop-blur-lg'>
 				<NavItem href='/'>Accueil</NavItem>
 				<NavItem href='/about'>À propos</NavItem>
 			</ul>
@@ -147,7 +147,7 @@ function AvatarContainer({
 		<div
 			className={clsx(
 				className,
-				'h-10 w-10 rounded-full bg-zinc-800/90 p-0.5 shadow-lg ring-1 ring-white/10 backdrop-blur-sm'
+				'h-10 w-10 rounded-full bg-zinc-900/70 p-0.5 shadow-xl ring-1 ring-zinc-700/40 backdrop-blur-lg'
 			)}
 			{...props}
 		/>

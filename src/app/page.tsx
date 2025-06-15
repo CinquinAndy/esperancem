@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import Link from 'next/link'
 
 import { Button } from '@/components/Button'
@@ -7,6 +8,7 @@ import {
 	TikTokIcon,
 	WattpadIcon,
 } from '@/components/SocialIcons'
+import bookCover from '@/images/photos/cover_on_book.jpg'
 
 function MailIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
 	return (
@@ -74,18 +76,22 @@ function Newsletter() {
 	)
 }
 
-function BookCoverPlaceholder() {
+function BookCover() {
 	return (
 		<div className='group relative'>
-			<div className='aspect-[2/3] w-full overflow-hidden rounded-xl bg-zinc-800 shadow-lg'>
-				{/* Placeholder for the book cover */}
-				<div className='flex h-full w-full items-center justify-center'>
-					<div className='text-center text-zinc-400'>
-						<p className='text-2xl font-bold'>Cœurs Sombres</p>
-						<p className='mt-2 text-lg'>Esperance Masson</p>
-					</div>
-				</div>
+			<div className='aspect-[2/3] w-full overflow-hidden rounded-xl bg-zinc-900 shadow-2xl ring-1 ring-zinc-700/50'>
+				<Image
+					src={bookCover}
+					alt="Couverture du livre Cœurs Sombres d'Esperance Masson"
+					className='h-full w-full object-cover transition duration-300 group-hover:scale-105'
+					sizes='(min-width: 1024px) 20rem, 16rem'
+					priority
+				/>
+				{/* Effet de survol élégant */}
+				<div className='absolute inset-0 bg-gradient-to-t from-zinc-900/20 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100' />
 			</div>
+			{/* Glow effect autour du livre */}
+			<div className='absolute -inset-0.5 -z-10 rounded-xl bg-gradient-to-br from-red-500/20 via-purple-500/10 to-zinc-500/10 opacity-75 blur-sm' />
 		</div>
 	)
 }
@@ -96,21 +102,21 @@ function CoeursSombres() {
 			<div>
 				<h2 className='text-lg font-semibold text-zinc-100'>Cœurs Sombres</h2>
 				<p className='mt-2 text-sm text-zinc-400'>
-					Fuyant un passé qui la hante, Angèle rêve de reprendre le contrôle de
+					{`Fuyant un passé qui la hante, Angèle rêve de reprendre le contrôle de
 					sa vie et part avec sa meilleure amie aux États-Unis pour tout
 					recommencer. Mais sa quête de liberté vire au cauchemar lorsqu'elle
 					tombe sous l'emprise de Lucas Ferrari, un chef de mafia aussi froid
 					qu'impitoyable, prêt à tout pour assouvir une vengeance qui le
-					consume.
+					consume.`}
 				</p>
 				<p className='mt-4 text-sm text-zinc-400'>
-					Pris dans un jeu de pouvoir et de manipulation, tous deux découvrent
-					qu'ils sont liés par des secrets capables de tout détruire.
+					{`Pris dans un jeu de pouvoir et de manipulation, tous deux découvrent
+					qu'ils sont liés par des secrets capables de tout détruire.`}
 				</p>
 				<p className='mt-4 text-sm text-zinc-400'>
-					Entre haine et attirance, leur lutte pour survivre pourrait bien les
+					{`Entre haine et attirance, leur lutte pour survivre pourrait bien les
 					mener à leur perte. Succomberont-ils aux ténèbres du désir ou
-					trouveront-ils enfin la paix au prix de leur âme ?
+					trouveront-ils enfin la paix au prix de leur âme ?`}
 				</p>
 			</div>
 
@@ -119,22 +125,22 @@ function CoeursSombres() {
 					Classements #1 sur Wattpad
 				</h3>
 				<div className='mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm font-medium text-zinc-400'>
-					<p>
+					<p className='w-full'>
 						#1{' '}
 						<span className='font-semibold text-zinc-200'>
 							ennemiestolovers
 						</span>{' '}
 						(24/04/2025)
 					</p>
-					<p>
+					<p className='w-full'>
 						#1 <span className='font-semibold text-zinc-200'>amitiés</span>{' '}
 						(28/04/2025)
 					</p>
-					<p>
+					<p className='w-full'>
 						#1 <span className='font-semibold text-zinc-200'>trahisons</span>{' '}
 						(26/05/2025)
 					</p>
-					<p>
+					<p className='w-full'>
 						#1 <span className='font-semibold text-zinc-200'>meurtres</span>{' '}
 						(30/05/2025)
 					</p>
@@ -179,6 +185,7 @@ export default async function Home() {
 						<SocialLink
 							href='https://www.wattpad.com/user/Esperancem'
 							aria-label='Follow on Wattpad'
+							className='scale-150'
 							icon={WattpadIcon}
 						/>
 					</div>
@@ -188,7 +195,7 @@ export default async function Home() {
 			<Container className='mt-24 md:mt-28'>
 				<div className='mx-auto grid max-w-xl grid-cols-1 items-start gap-y-20 lg:max-w-none lg:grid-cols-2'>
 					<div className='flex flex-col gap-16'>
-						<BookCoverPlaceholder />
+						<BookCover />
 					</div>
 					<div className='space-y-10 lg:pl-16 xl:pl-24'>
 						<CoeursSombres />

@@ -1,7 +1,9 @@
 import { type Metadata } from 'next'
 
 import { Providers } from '@/app/providers'
+import { BackgroundToggle } from '@/components/BackgroundToggle'
 import { Layout } from '@/components/Layout'
+import { TurbulentBackground } from '@/components/TurbulentBackground'
 import '@/app/globals.css'
 
 export const metadata: Metadata = {
@@ -25,7 +27,9 @@ export default function RootLayout({
 }) {
 	return (
 		<html lang='en' className='h-full antialiased'>
-			<body className='flex h-full bg-black'>
+			<body className='flex h-full'>
+				<TurbulentBackground />
+				<BackgroundToggle />
 				<Providers>
 					<div className='flex w-full'>
 						<Layout>{children}</Layout>
