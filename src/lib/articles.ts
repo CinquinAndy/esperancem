@@ -1,44 +1,37 @@
-import glob from 'glob'
-import { promisify } from 'util'
 import fs from 'fs/promises'
-import path from 'path'
+import { glob } from 'glob'
 import matter from 'gray-matter'
-
-const globPromise = promisify(glob)
+import path from 'path'
 
 export interface Article {
-  title: string
-  description: string
-  date: string
+	title: string
+	description: string
+	date: string
 }
 
 export interface ArticleWithSlug extends Article {
-  slug: string
+	slug: string
 }
 
-async function getArticle(
-  filePath: string,
-): Promise<ArticleWithSlug> {
-  let slug = path.basename(path.dirname(filePath))
-  let fileContents = await fs.readFile(filePath, 'utf8')
-  let { data } = matter(fileContents)
+async function getArticle(filePath: string): Promise<ArticleWithSlug> {
+	const slug = path.basename(path.dirname(filePath))
+	const fileContents = await fs.readFile(filePath, 'utf8')
+	const { data } = matter(fileContents)
 
-  return {
-    slug,
-    title: data.title,
-    description: data.description,
-    date: data.date,
-  }
+	return {
+		date: data.date,
+		description: data.description,
+		slug,
+		title: data.title,
+	}
 }
 
 export async function getAllArticles(): Promise<ArticleWithSlug[]> {
-  let articlePaths = await globPromise(
-    'src/app/articles/**/page.mdx',
-  )
+	const articlePaths = await glob('src/app/articles/**/page.mdx')
 
-  let articles = await Promise.all(
-    articlePaths.map(getArticle),
-  )
+	const articles = await Promise.all(articlePaths.map(getArticle))
 
-  return articles.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-} 
+	return articles.sort(
+		(a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+	)
+}
