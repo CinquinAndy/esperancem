@@ -1,7 +1,7 @@
 import { ImageResponse } from 'next/og'
 
 // Image metadata
-export const alt = 'Dark Hearts - Dark Romance by Esperance Masson'
+export const alt = 'Cœurs Sombres - Dark Romance par Espérance Masson'
 export const size = {
 	height: 630,
 	width: 1200,
@@ -68,7 +68,7 @@ export default async function Image() {
 							textShadow: '0 4px 8px rgba(0,0,0,0.5)',
 						}}
 					>
-						Dark Hearts
+						Cœurs Sombres
 					</div>
 
 					{/* Teal accent line */}
@@ -91,7 +91,7 @@ export default async function Image() {
 							marginBottom: '32px',
 						}}
 					>
-						Dark Romance #1 on Wattpad
+						Dark Romance #1 sur Wattpad
 					</div>
 
 					{/* Author */}
@@ -103,7 +103,7 @@ export default async function Image() {
 							marginBottom: '40px',
 						}}
 					>
-						by Esperance Masson
+						par Espérance Masson
 					</div>
 
 					{/* Stats with site colors */}
@@ -131,7 +131,7 @@ export default async function Image() {
 							>
 								+100k
 							</div>
-							<div style={{ color: '#a1a1aa', fontSize: 16 }}>Reads</div>
+							<div style={{ color: '#a1a1aa', fontSize: 16 }}>Lectures</div>
 						</div>
 						<div
 							style={{
@@ -169,7 +169,7 @@ export default async function Image() {
 							>
 								⭐️ 4.9
 							</div>
-							<div style={{ color: '#a1a1aa', fontSize: 16 }}>Rating</div>
+							<div style={{ color: '#a1a1aa', fontSize: 16 }}>Note</div>
 						</div>
 					</div>
 
@@ -183,8 +183,8 @@ export default async function Image() {
 							textAlign: 'center',
 						}}
 					>
-						Between hatred and attraction, Angèle and Lucas Ferrari discover
-						they are bound by secrets capable of destroying everything...
+						Entre haine et attirance, Angèle et Lucas Ferrari découvrent
+						qu&apos;ils sont liés par des secrets capables de tout détruire...
 					</div>
 				</div>
 
@@ -225,7 +225,7 @@ export default async function Image() {
 						right: '40px',
 					}}
 				>
-					esperance-masson.fr
+					https://esperance-masson.fr
 				</div>
 			</div>
 		),
