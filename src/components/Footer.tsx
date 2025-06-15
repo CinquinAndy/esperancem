@@ -70,11 +70,11 @@ export function Footer() {
 
 								{/* Email Contact */}
 								<Link
-									href='mailto:esperancemasson@gmail.com'
+									href='mailto:esperance.masson@gmail.com'
 									className='group flex items-center text-sm font-medium text-zinc-400 transition hover:text-teal-400'
 								>
 									<MailIcon className='h-4 w-4 flex-none fill-zinc-500 transition group-hover:fill-teal-400' />
-									<span className='ml-2'>esperancemasson@gmail.com</span>
+									<span className='ml-2'>esperance.masson@gmail.com</span>
 								</Link>
 							</div>
 

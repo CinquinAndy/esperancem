@@ -69,7 +69,7 @@ export default function About() {
 					</div>
 					<div className='lg:order-first lg:row-span-2'>
 						<h1 className='text-4xl font-bold tracking-tight text-zinc-100 sm:text-5xl'>
-							Je suis Esperance Masson.
+							Je suis Espérance Masson
 						</h1>
 						<div className='mt-6 space-y-7 text-base text-zinc-400'>
 							<p>Salut tout le monde ! J&apos;espère que vous allez bien.</p>
@@ -109,11 +109,11 @@ export default function About() {
 							</SocialLink>
 							<li className='mt-8 border-t border-zinc-700/40 pt-8'>
 								<SocialLink
-									href='mailto:esperancemasson@gmail.com'
+									href='mailto:esperance.masson@gmail.com'
 									icon={MailIcon}
 									className='items-center'
 								>
-									esperancemasson@gmail.com
+									esperance.masson@gmail.com
 								</SocialLink>
 							</li>
 						</ul>
@@ -149,8 +149,8 @@ export default function About() {
 							</h2>
 							<div className='mt-6 space-y-6 text-base text-zinc-400'>
 								<p>
-									<strong className='text-zinc-200'>Cœurs Sombres</strong> est
-									né d&apos;une passion pour les histoires complexes où
+									<span className='text-zinc-200 italic'>Cœurs Sombres</span>{' '}
+									est né d&apos;une passion pour les histoires complexes où
 									l&apos;amour et la violence s&apos;entremêlent.
 								</p>
 								<p>

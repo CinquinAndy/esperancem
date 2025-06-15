@@ -1,15 +1,18 @@
 'use client'
 
 import NumberFlow from '@number-flow/react'
+import { useEffect, useState } from 'react'
 
 import { useWattpadStats } from '@/contexts/WattpadStatsContext'
 
 interface StatItemProps {
 	value: string
 	label: string
+	shouldAnimate?: boolean
 }
 
-function StatItem({ label, value }: StatItemProps) {
+function StatItem({ label, shouldAnimate = false, value }: StatItemProps) {
+	const [displayValue, setDisplayValue] = useState(0)
 	// Convert value to number for animation (handle K, M suffixes)
 	const getNumericValue = (val: string): number => {
 		if (!val || val === '0') return 0
@@ -30,11 +33,27 @@ function StatItem({ label, value }: StatItemProps) {
 
 	const numericValue = getNumericValue(value)
 
+	// Animation effect to start from 0 and animate to the real value
+	useEffect(() => {
+		if (shouldAnimate && numericValue > 0) {
+			// Start from 0
+			setDisplayValue(0)
+			// After a short delay, animate to the real value
+			const timer = setTimeout(() => {
+				setDisplayValue(numericValue)
+			}, 300) // 300ms delay before animation starts
+
+			return () => clearTimeout(timer)
+		} else {
+			setDisplayValue(numericValue)
+		}
+	}, [numericValue, shouldAnimate])
+
 	return (
 		<div className='group flex flex-col items-center rounded-lg p-2 transition-all duration-300'>
 			<div className='mb-1 text-2xl font-bold text-white'>
 				<NumberFlow
-					value={numericValue}
+					value={displayValue}
 					format={{
 						maximumFractionDigits: 1,
 						notation: 'standard',
@@ -56,16 +75,36 @@ function StatItem({ label, value }: StatItemProps) {
 
 export function WattpadStats() {
 	const { stats } = useWattpadStats()
+	const [hasAnimated, setHasAnimated] = useState(false)
+
+	// Trigger animation on first load when stats are available
+	useEffect(() => {
+		if (stats && !hasAnimated) {
+			setHasAnimated(true)
+		}
+	}, [stats, hasAnimated])
 
 	return (
 		<div className='mx-auto w-full max-w-7xl'>
 			{/* Stats Grid */}
 			<div className='grid grid-cols-1 gap-6 md:grid-cols-3'>
-				<StatItem value={stats?.reads ?? '0'} label='Lectures' />
+				<StatItem
+					value={stats?.reads ?? '0'}
+					label='Lectures'
+					shouldAnimate={hasAnimated}
+				/>
 
-				<StatItem value={stats?.votes ?? '0'} label={`J'aime`} />
+				<StatItem
+					value={stats?.votes ?? '0'}
+					label={`J'aime`}
+					shouldAnimate={hasAnimated}
+				/>
 
-				<StatItem value={stats?.parts ?? '0'} label='Chapitres' />
+				<StatItem
+					value={stats?.parts ?? '0'}
+					label='Chapitres'
+					shouldAnimate={hasAnimated}
+				/>
 			</div>
 		</div>
 	)
