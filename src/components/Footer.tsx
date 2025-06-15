@@ -7,27 +7,6 @@ import {
 	WattpadIcon,
 } from '@/components/SocialIcons'
 
-function NavLink({
-	children,
-	className,
-	href,
-}: {
-	className?: string
-	href: string
-	children: React.ReactNode
-}) {
-	return (
-		<li className={className}>
-			<Link
-				href={href}
-				className='group flex text-sm font-medium text-zinc-200 transition hover:text-teal-400'
-			>
-				{children}
-			</Link>
-		</li>
-	)
-}
-
 function SocialLink({
 	children,
 	href,
@@ -65,16 +44,10 @@ export function Footer() {
 			<ContainerOuter>
 				<div className='border-t border-zinc-700/40 pt-10 pb-16'>
 					<ContainerInner>
-						<div className='flex flex-col items-center justify-between gap-8 lg:flex-row lg:gap-6'>
-							{/* Navigation Links */}
-							<ul className='flex flex-col items-center gap-2 text-sm font-medium text-zinc-200 lg:order-first'>
-								<NavLink href='/'>Accueil</NavLink>
-								<NavLink href='/about'>À propos</NavLink>
-							</ul>
-
+						<div className='flex flex-col items-center justify-between gap-6 md:flex-row'>
 							{/* Social Links */}
-							<div className='flex flex-col items-center gap-4 lg:order-2'>
-								<div className='flex flex-wrap justify-center gap-6'>
+							<div className='flex flex-col items-center gap-4 md:items-start'>
+								<div className='flex flex-wrap justify-center gap-6 md:justify-start'>
 									<SocialLink
 										href='https://www.instagram.com/esp_masson/'
 										icon={InstagramIcon}
@@ -106,7 +79,7 @@ export function Footer() {
 							</div>
 
 							{/* Copyright */}
-							<div className='flex flex-col items-center gap-2 text-center text-sm text-zinc-500 lg:order-3'>
+							<div className='flex flex-col items-center gap-2 text-center text-sm text-zinc-500 md:items-end md:text-right'>
 								<p>&copy; {new Date().getFullYear()} Esperance Masson.</p>
 								<p>
 									All rights reserved.{' '}
