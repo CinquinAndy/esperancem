@@ -48,8 +48,36 @@ function MailIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
 
 export const metadata: Metadata = {
 	description:
-		'À propos d&apos;Esperance Masson, autrice de la dark romance "Cœurs Sombres".',
-	title: 'À propos',
+		'Découvrez Espérance Masson, autrice française passionnée de dark romance. Créatrice du bestseller "Cœurs Sombres" sur Wattpad, elle explore les profondeurs de l\'âme humaine à travers des histoires intenses et captivantes. Suivez esp_masson sur Instagram et TikTok.',
+	keywords: [
+		'Espérance Masson biographie',
+		'autrice française dark romance',
+		'esp_masson Instagram',
+		'écrivaine française Wattpad',
+		'auteure Cœurs Sombres',
+		'romancière française',
+		'dark romance France',
+		'@_esperance_masson TikTok',
+		'autrice française 2024',
+		'écrivaine romance sombre',
+		'littérature française contemporaine',
+		'romance française indépendante',
+	],
+	openGraph: {
+		description:
+			'Rencontrez Espérance Masson, l\'autrice derrière le phénomène "Cœurs Sombres". Une plume française qui excelle dans la dark romance et les romances sombres.',
+		images: [
+			{
+				alt: "Portrait d'Espérance Masson, autrice de dark romance",
+				height: 630,
+				url: '/images/esperance-masson-portrait.jpg',
+				width: 1200,
+			},
+		],
+		title: "À propos d'Espérance Masson - Autrice de Cœurs Sombres",
+		url: 'https://esperance-masson.fr/about',
+	},
+	title: "À propos d'Espérance Masson - Autrice Dark Romance | Cœurs Sombres",
 }
 
 export default function About() {
@@ -69,18 +97,30 @@ export default function About() {
 					</div>
 					<div className='lg:order-first lg:row-span-2'>
 						<h1 className='text-4xl font-bold tracking-tight text-zinc-100 sm:text-5xl'>
-							Je suis Espérance Masson
+							Je suis Espérance Masson, autrice française de dark romance
 						</h1>
 						<div className='mt-6 space-y-7 text-base text-zinc-400'>
 							<p>Salut tout le monde ! J&apos;espère que vous allez bien.</p>
 							<p>
 								Bienvenue dans mon univers où j&apos;explore les profondeurs de
-								l&apos;âme humaine à travers des romances sombres, intenses et
-								captivantes.
+								l&apos;âme humaine à travers des dark romances françaises,
+								intenses et captivantes. En tant qu&apos;autrice française
+								spécialisée dans la romance sombre, je crée des histoires qui
+								questionnent les limites entre l&apos;amour et l&apos;obsession.
 							</p>
 							<p>
-								N&apos;hésitez pas à venir me retrouver sur mes réseaux pour
-								découvrir les coulisses de l&apos;écriture de mon premier roman.
+								Mon roman &quot;Cœurs Sombres&quot; a conquis plus de 100k
+								lecteurs sur Wattpad et atteint la première place dans plusieurs
+								catégories. Cette enemies to lovers mafia romance suit
+								l&apos;histoire troublante d&apos;Angèle et Lucas Ferrari, deux
+								âmes brisées liées par des secrets destructeurs.
+							</p>
+							<p>
+								N&apos;hésitez pas à venir me retrouver sur mes réseaux sociaux
+								(@esp_masson sur Instagram, @_esperance_masson sur TikTok) pour
+								découvrir les coulisses de l&apos;écriture de mes romans et
+								échanger avec d&apos;autres passionnés de dark romance
+								française.
 							</p>
 						</div>
 					</div>
@@ -129,7 +169,7 @@ export default function About() {
 							<div className='group relative'>
 								<Image
 									src={bookCover}
-									alt="Couverture du livre Cœurs Sombres d'Esperance Masson"
+									alt="Couverture du livre Cœurs Sombres d'Espérance masson"
 									className='h-auto w-80 rounded-xl shadow-2xl ring-1 ring-zinc-700/50 transition duration-300 group-hover:scale-105'
 									sizes='(min-width: 1536px) 24rem, (min-width: 1024px) 20rem, (min-width: 768px) 18rem, 16rem'
 									quality={100}
@@ -145,22 +185,34 @@ export default function About() {
 						</div>
 						<div className='lg:pl-8'>
 							<h2 className='text-3xl font-bold tracking-tight text-zinc-100 sm:text-4xl'>
-								Mon premier roman
+								Cœurs Sombres - Mon bestseller Wattpad
 							</h2>
 							<div className='mt-6 space-y-6 text-base text-zinc-400'>
 								<p>
 									<span className='text-zinc-200 italic'>Cœurs Sombres</span>{' '}
 									est né d&apos;une passion pour les histoires complexes où
-									l&apos;amour et la violence s&apos;entremêlent.
+									l&apos;amour et la violence s&apos;entremêlent dans une dark
+									romance française captivante.
 								</p>
 								<p>
 									Cette dark romance explore les zones grises de l&apos;âme
 									humaine, là où la rédemption et la destruction se côtoient
-									dans un équilibre fragile.
+									dans un équilibre fragile. L&apos;histoire d&apos;Angèle et
+									Lucas Ferrari plonge les lecteurs dans un univers de mafia
+									romance où l&apos;enemies to lovers prend une dimension
+									particulièrement intense.
 								</p>
 								<p>
-									Disponible sur Wattpad, ce livre a déjà conquis de nombreux
-									lecteurs avec ses #1 dans plusieurs catégories.
+									Disponible gratuitement sur Wattpad, ce livre a déjà conquis
+									plus de 100k lecteurs et obtenu plusieurs classements #1 dans
+									les catégories enemies to lovers, trahisons, meurtres et
+									amitiés. Cette romance française sombre continue de captiver
+									de nouveaux lecteurs chaque jour.
+								</p>
+								<p>
+									<strong>Suivez-moi :</strong> @esp_masson sur Instagram et
+									@_esperance_masson sur TikTok pour découvrir les coulisses de
+									l&apos;écriture et mes prochains projets de dark romance.
 								</p>
 							</div>
 						</div>

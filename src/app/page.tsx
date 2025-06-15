@@ -1,3 +1,4 @@
+import { type Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
 
@@ -12,6 +13,38 @@ import { WattpadStats } from '@/components/WattpadStats'
 import { WattpadStatsProvider } from '@/contexts/WattpadStatsContext'
 import bookCover from '@/images/photos/cover_on_book.jpg'
 import { fetchWattpadStats } from '@/lib/wattpad'
+
+export const metadata: Metadata = {
+	description:
+		"Découvrez l'univers sombre et passionné d'Espérance Masson. Lisez \"Cœurs Sombres\", son roman dark romance #1 sur Wattpad qui captive plus de 100k lecteurs. Plongez dans une histoire d'enemies to lovers avec Lucas Ferrari et Angèle.",
+	keywords: [
+		'Cœurs Sombres Wattpad',
+		'Lucas Ferrari',
+		'Angèle roman',
+		'dark romance française',
+		'enemies to lovers français',
+		'mafia romance Wattpad',
+		'roman passion sombre',
+		'autrice française Wattpad',
+		'livre gratuit Wattpad',
+		'romance française 2024',
+	],
+	openGraph: {
+		description:
+			'Plongez dans l\'univers dark romance d\'Espérance Masson. "Cœurs Sombres" - Le roman qui fait sensation sur Wattpad avec Lucas Ferrari et Angèle.',
+		images: [
+			{
+				alt: 'Couverture du livre Cœurs Sombres par Espérance Masson',
+				height: 630,
+				url: '/images/coeurs-sombres-cover.jpg',
+				width: 1200,
+			},
+		],
+		title: 'Espérance Masson - Autrice Dark Romance | Cœurs Sombres Wattpad',
+		url: 'https://esperance-masson.fr',
+	},
+	title: 'Accueil - Espérance Masson | Autrice de Cœurs Sombres',
+}
 
 function SocialLink({
 	icon: Icon,
@@ -32,7 +65,7 @@ function BookCover() {
 			<div className='aspect-[2/3] w-full overflow-hidden rounded-xl bg-zinc-900 shadow-2xl ring-1 ring-zinc-700/50'>
 				<Image
 					src={bookCover}
-					alt="Couverture du livre Cœurs Sombres d'Esperance Masson"
+					alt="Couverture du livre Cœurs Sombres d'Espérance masson"
 					className='h-full w-full object-cover transition duration-300 group-hover:scale-105'
 					quality={100}
 					width={1000}
@@ -55,7 +88,9 @@ function DarkHeartsBook() {
 	return (
 		<div className='flex flex-col gap-y-6 rounded-2xl border border-zinc-700/40 p-6'>
 			<div>
-				<h2 className='text-lg font-semibold text-zinc-100'>Cœurs Sombres</h2>
+				<h2 className='text-lg font-semibold text-zinc-100'>
+					Cœurs Sombres - Dark Romance #1 Wattpad
+				</h2>
 				<p className='mt-2 text-sm text-zinc-400'>
 					{`Fuyant un passé qui la hante, Angèle rêve de reprendre le contrôle de
 					sa vie et part avec sa meilleure amie aux États-Unis pour tout
@@ -65,19 +100,21 @@ function DarkHeartsBook() {
 					consume.`}
 				</p>
 				<p className='mt-4 text-sm text-zinc-400'>
-					{`Pris dans un jeu de pouvoir et de manipulation, tous deux découvrent
-					qu'ils sont liés par des secrets capables de tout détruire.`}
+					{`Cette dark romance française explore les thèmes de l'enemies to lovers 
+					et de la mafia romance. Pris dans un jeu de pouvoir et de manipulation, 
+					Angèle et Lucas découvrent qu'ils sont liés par des secrets capables de tout détruire.`}
 				</p>
 				<p className='mt-4 text-sm text-zinc-400'>
 					{`Entre haine et attirance, leur lutte pour survivre pourrait bien les
-					mener à leur perte. Succomberont-ils aux ténèbres du désir ou
-					trouveront-ils enfin la paix au prix de leur âme ?`}
+					mener à leur perte. Cette romance française intense captive les lecteurs
+					Wattpad avec ses personnages complexes et son intrigue haletante. 
+					Succomberont-ils aux ténèbres du désir ou trouveront-ils enfin la paix au prix de leur âme ?`}
 				</p>
 			</div>
 
 			<div>
 				<h3 className='text-md font-semibold text-zinc-100'>
-					Classements #1 sur Wattpad
+					Succès Wattpad - Classements #1
 				</h3>
 				<div className='mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm font-medium text-zinc-400'>
 					<p className='w-full'>
@@ -99,6 +136,11 @@ function DarkHeartsBook() {
 						#1 <span className='font-semibold text-zinc-200'>meurtres</span>{' '}
 						(30/05/2025)
 					</p>
+					<p className='w-full text-zinc-300'>
+						Plus de{' '}
+						<span className='font-semibold text-zinc-200'>100k lectures</span>{' '}
+						sur Wattpad
+					</p>
 				</div>
 			</div>
 
@@ -107,7 +149,7 @@ function DarkHeartsBook() {
 				variant='secondary'
 				className='group mt-4 w-full'
 			>
-				Lire sur Wattpad
+				Lire Cœurs Sombres gratuitement sur Wattpad
 			</Button>
 		</div>
 	)
@@ -121,27 +163,30 @@ export default async function Home() {
 			<Container className='mt-9'>
 				<div className='max-w-2xl'>
 					<h1 className='text-4xl font-bold tracking-tight text-zinc-100 sm:text-5xl'>
-						Espérance Masson, autrice de dark romance
+						Espérance Masson, autrice française de dark romance
 					</h1>
 					<p className='mt-6 text-base text-zinc-400'>
-						Bienvenue dans mon univers. J&apos;écris des histoires d&apos;âmes
-						tourmentées, d&apos;amours impossibles et de la part d&apos;ombre
-						qui sommeille en chacun de nous.
+						Bienvenue dans l&apos;univers sombre et passionné d&apos;Espérance
+						Masson. Autrice française spécialisée dans la dark romance,
+						j&apos;écris des histoires d&apos;âmes tourmentées, d&apos;amours
+						impossibles et de la part d&apos;ombre qui sommeille en chacun de
+						nous. Découvrez &quot;Cœurs Sombres&quot;, mon roman #1 sur Wattpad
+						qui captive plus de 100k lecteurs passionnés de romance française.
 					</p>
 					<div className='mt-6 flex gap-6'>
 						<SocialLink
 							href='https://www.instagram.com/esp_masson/'
-							aria-label='Follow on Instagram'
+							aria-label='Suivez Espérance Masson sur Instagram esp_masson'
 							icon={InstagramIcon}
 						/>
 						<SocialLink
 							href='https://www.tiktok.com/@_esperance_masson'
-							aria-label='Follow on TikTok'
+							aria-label='Suivez Espérance Masson sur TikTok _esperance_masson'
 							icon={TikTokIcon}
 						/>
 						<SocialLink
 							href='https://www.wattpad.com/user/Esperancem'
-							aria-label='Follow on Wattpad'
+							aria-label='Lisez les romans d Espérance Masson sur Wattpad'
 							className='scale-150'
 							icon={WattpadIcon}
 						/>

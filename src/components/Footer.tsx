@@ -80,7 +80,7 @@ export function Footer() {
 
 							{/* Copyright */}
 							<div className='flex flex-col items-center gap-2 text-center text-sm text-zinc-500 md:items-end md:text-right'>
-								<p>&copy; {new Date().getFullYear()} Esperance Masson.</p>
+								<p>&copy; {new Date().getFullYear()} Espérance masson</p>
 								<p>
 									All rights reserved.{' '}
 									<span className='text-red-400'>Made with ♡</span> by{' '}
