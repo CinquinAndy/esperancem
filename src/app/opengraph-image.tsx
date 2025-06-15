@@ -1,7 +1,7 @@
 import { ImageResponse } from 'next/og'
 
 // Image metadata
-export const alt = 'Cœurs Sombres - Dark Romance par Espérance Masson'
+export const alt = 'Dark Hearts - Dark Romance by Esperance Masson'
 export const size = {
 	height: 630,
 	width: 1200,
@@ -15,8 +15,8 @@ export default async function Image() {
 			<div
 				style={{
 					alignItems: 'center',
-					backgroundColor: '#0a0a0a', // Même background que le site
-					// Simulation de l'effet turbulent avec des gradients
+					backgroundColor: '#0a0a0a', // Same background as the site
+					// Simulation of turbulent effect with gradients
 					backgroundImage: `
 						radial-gradient(ellipse at 20% 40%, rgba(0, 70, 67, 0.05) 0%, transparent 50%),
 						radial-gradient(ellipse at 80% 60%, rgba(68, 64, 60, 0.05) 0%, transparent 50%),
@@ -31,7 +31,7 @@ export default async function Image() {
 					width: '100%',
 				}}
 			>
-				{/* Vignette effect comme sur le site */}
+				{/* Vignette effect like on the site */}
 				<div
 					style={{
 						background:
@@ -60,7 +60,7 @@ export default async function Image() {
 					{/* Main Title */}
 					<div
 						style={{
-							color: '#f4f4f5', // zinc-100 du site
+							color: '#f4f4f5', // zinc-100 from site
 							fontSize: 64,
 							fontWeight: 'bold',
 							lineHeight: 1.1,
@@ -68,7 +68,7 @@ export default async function Image() {
 							textShadow: '0 4px 8px rgba(0,0,0,0.5)',
 						}}
 					>
-						Cœurs Sombres
+						Dark Hearts
 					</div>
 
 					{/* Teal accent line */}
@@ -91,22 +91,22 @@ export default async function Image() {
 							marginBottom: '32px',
 						}}
 					>
-						Dark Romance #1 sur Wattpad
+						Dark Romance #1 on Wattpad
 					</div>
 
 					{/* Author */}
 					<div
 						style={{
-							color: '#a1a1aa', // zinc-400 comme sur le site
+							color: '#a1a1aa', // zinc-400 like on the site
 							fontSize: 24,
 							fontStyle: 'italic',
 							marginBottom: '40px',
 						}}
 					>
-						par Espérance Masson
+						by Esperance Masson
 					</div>
 
-					{/* Stats avec les couleurs du site */}
+					{/* Stats with site colors */}
 					<div
 						style={{
 							alignItems: 'center',
@@ -118,8 +118,8 @@ export default async function Image() {
 						<div
 							style={{
 								alignItems: 'center',
-								backgroundColor: 'rgba(39, 39, 42, 0.3)', // zinc-800 subtil
-								border: '1px solid #3f3f46', // zinc-700 comme les bordures du site
+								backgroundColor: 'rgba(39, 39, 42, 0.3)', // subtle zinc-800
+								border: '1px solid #3f3f46', // zinc-700 like site borders
 								borderRadius: '12px',
 								display: 'flex',
 								flexDirection: 'column',
@@ -131,7 +131,7 @@ export default async function Image() {
 							>
 								+100k
 							</div>
-							<div style={{ color: '#a1a1aa', fontSize: 16 }}>Lectures</div>
+							<div style={{ color: '#a1a1aa', fontSize: 16 }}>Reads</div>
 						</div>
 						<div
 							style={{
@@ -169,26 +169,26 @@ export default async function Image() {
 							>
 								⭐️ 4.9
 							</div>
-							<div style={{ color: '#a1a1aa', fontSize: 16 }}>Note</div>
+							<div style={{ color: '#a1a1aa', fontSize: 16 }}>Rating</div>
 						</div>
 					</div>
 
 					{/* Tagline */}
 					<div
 						style={{
-							color: '#71717a', // zinc-500 comme les textes secondaires
+							color: '#71717a', // zinc-500 like secondary texts
 							fontSize: 18,
 							lineHeight: 1.5,
 							maxWidth: '800px',
 							textAlign: 'center',
 						}}
 					>
-						Entre haine et attirance, Angèle et Lucas Ferrari découvrent
-						qu&apos;ils sont liés par des secrets capables de tout détruire...
+						Between hatred and attraction, Angèle and Lucas Ferrari discover
+						they are bound by secrets capable of destroying everything...
 					</div>
 				</div>
 
-				{/* Glow effect subtil comme autour du livre */}
+				{/* Subtle glow effect like around the book */}
 				<div
 					style={{
 						background:
@@ -214,11 +214,11 @@ export default async function Image() {
 					}}
 				/>
 
-				{/* Website URL avec couleur teal */}
+				{/* Website URL with teal color */}
 				<div
 					style={{
 						bottom: '30px',
-						color: '#14b8a6', // teal-500 pour l'URL
+						color: '#14b8a6', // teal-500 for URL
 						fontSize: 16,
 						fontWeight: '500',
 						position: 'absolute',
