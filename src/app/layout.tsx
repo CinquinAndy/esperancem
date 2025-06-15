@@ -1,16 +1,16 @@
 import { type Metadata } from 'next'
-import { The_Nautigal } from 'next/font/google'
+import { Alex_Brush } from 'next/font/google'
 
 import { Providers } from '@/app/providers'
 import { Layout } from '@/components/Layout'
 import { TurbulentBackground } from '@/components/TurbulentBackground'
 import '@/app/globals.css'
 
-const nautigal = The_Nautigal({
+const alexBrush = Alex_Brush({
 	display: 'swap',
 	subsets: ['latin'],
-	variable: '--font-nautigal',
-	weight: ['400', '700'],
+	variable: '--font-alex-brush',
+	weight: ['400'],
 })
 
 export const metadata: Metadata = {
@@ -33,7 +33,7 @@ export default function RootLayout({
 	children: React.ReactNode
 }) {
 	return (
-		<html lang='en' className={`h-full antialiased ${nautigal.variable}`}>
+		<html lang='en' className={`h-full antialiased ${alexBrush.variable}`}>
 			<body className='flex h-full'>
 				<TurbulentBackground />
 				<Providers>
