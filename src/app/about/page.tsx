@@ -131,7 +131,13 @@ export default function About() {
 									src={bookCover}
 									alt="Couverture du livre Cœurs Sombres d'Esperance Masson"
 									className='h-auto w-80 rounded-xl shadow-2xl ring-1 ring-zinc-700/50 transition duration-300 group-hover:scale-105'
-									sizes='(min-width: 1024px) 20rem, 16rem'
+									sizes='(min-width: 1536px) 24rem, (min-width: 1024px) 20rem, (min-width: 768px) 18rem, 16rem'
+									quality={100}
+									placeholder='blur'
+									blurDataURL='data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGBkbHB0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyLli2A4Haw6gZEYGTrHWJ2PNgHr3nz8CBAw+lFhpX2HaH9bcfaSXWGaRmknyLli2A4Haw6gZEYGTrHWJ2PNgHr3nz8CBAw+lFhpX2HaH9bcfaSXWGaRmknyLli2A4Haw6gZEYGTrHWJ2PNgHr3nz8CBAw+lFhpX2HaH9bcfaSXWGaRmknyLli2A4Haw6gZ'
+									unoptimized={false}
+									width={320}
+									height={480}
 								/>
 								{/* Glow effect subtil */}
 								<div className='absolute -inset-0.5 -z-10 rounded-xl bg-gradient-to-br from-red-500/10 via-purple-500/5 to-zinc-500/5 opacity-75 blur-sm' />

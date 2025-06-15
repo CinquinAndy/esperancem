@@ -135,3 +135,31 @@ body::before {
 	background: rgba(0, 0, 0, 0.03);
 	backdrop-filter: blur(0.3px);
 }
+
+/* Optimisations pour images haute qualité */
+img {
+	image-rendering: -webkit-optimize-contrast;
+	image-rendering: crisp-edges;
+	backface-visibility: hidden;
+	transform: translateZ(0);
+}
+
+/* Amélioration spécifique pour les couvertures de livre */
+[alt*='Couverture'] {
+	image-rendering: high-quality !important;
+	image-rendering: -webkit-optimize-contrast !important;
+	-webkit-backface-visibility: hidden;
+	-webkit-transform: translateZ(0);
+	transform: translateZ(0);
+	/* Anti-aliasing amélioré */
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	/* Netteté maximale */
+	filter: contrast(1.02) saturate(1.05) brightness(1.01);
+}
+
+/* Effet de netteté au survol */
+[alt*='Couverture']:hover {
+	filter: contrast(1.05) saturate(1.1) brightness(1.02) sharpen(0.1);
+	transition: filter 300ms ease-in-out;
+}

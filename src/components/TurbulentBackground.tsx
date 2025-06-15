@@ -17,12 +17,12 @@ export function TurbulentBackground() {
 		turbSpeedLocation: null as WebGLUniformLocation | null,
 	})
 
-	// Configuration du shader (plus subtil pour le background)
+	// Shader configuration (more subtle for background)
 	const config = {
-		intensity: 0.6, // Plus doux
-		turbAmp: 0.4, // Plus subtil
-		turbFreq: 1.5, // Moins intense
-		turbSpeed: 0.15, // Plus lent
+		intensity: 0.6, // Softer
+		turbAmp: 0.4, // More subtle
+		turbFreq: 1.5, // Less intense
+		turbSpeed: 0.15, // Slower
 	}
 
 	useEffect(() => {
@@ -30,7 +30,7 @@ export function TurbulentBackground() {
 		if (!canvas) return
 
 		const init = () => {
-			// Initialiser WebGL
+			// Initialize WebGL
 			const gl =
 				(canvas.getContext('webgl') as WebGLRenderingContext | null) ||
 				(canvas.getContext(
@@ -52,7 +52,7 @@ export function TurbulentBackground() {
 			resize()
 			window.addEventListener('resize', resize)
 
-			// Créer les shaders
+			// Create shaders
 			const createShader = (type: number, source: string) => {
 				const shader = gl.createShader(type)
 				if (!shader) return null
@@ -75,7 +75,7 @@ export function TurbulentBackground() {
 				}
 			`
 
-			// Shader adapté de Shadertoy avec optimisations pour background
+			// Shader adapted from Shadertoy with background optimizations
 			const fragmentShaderSource = `
 				precision highp float;
 				
@@ -114,7 +114,7 @@ export function TurbulentBackground() {
 					vec2 p = 2.0 * (gl_FragCoord.xy * 2.0 - u_resolution.xy) / u_resolution.y;
 					p = turbulence(p);
 					
-					// Couleurs plus sombres et subtiles pour background
+					// Darker and subtler colors for background
 					vec3 col = 0.3 * u_intensity * exp(0.08 * p.x * vec3(-0.5, 0.2, 1.2));
 					
 					float brightness = dot(cos(p * 2.5), sin(-p.yx * 2.5 * 0.618)) + 2.5;
@@ -122,7 +122,7 @@ export function TurbulentBackground() {
 					
 					col = 1.0 - exp(-col * 0.8);
 					
-					// Assombrir encore plus pour être un vrai background
+					// Darken even more to be a true background
 					col *= 0.4;
 					
 					gl_FragColor = vec4(col, 1.0);
