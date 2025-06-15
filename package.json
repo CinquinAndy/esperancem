@@ -1,27 +1,50 @@
 {
   "name": "esperancem",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "lint:fix": "next lint --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "prettier": "prettier --write .",
+    "prettier:check": "prettier --check .",
+    "prepare": "husky"
   },
   "dependencies": {
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "next": "15.3.3"
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "next": "15.3.3",
+    "@eslint/js": "9.29.0",
+    "clsx": "2.1.1",
+    "autoprefixer": "10.4.21",
+    "framer-motion": "12.18.1",
+    "postcss": "8.5.5",
+    "tailwind-merge": "3.3.1"
   },
   "devDependencies": {
-    "typescript": "^5",
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "@tailwindcss/postcss": "^4",
-    "tailwindcss": "^4",
-    "eslint": "^9",
+    "typescript": "5.8.3",
+    "@next/eslint-plugin-next": "15.3.3",
+    "@types/node": "24.0.1",
+    "@types/react": "19.1.8",
+    "@types/react-dom": "19.1.6",
+    "@typescript-eslint/eslint-plugin": "8.34.0",
+    "@typescript-eslint/parser": "8.34.0",
+    "eslint-config-prettier": "10.1.5",
+    "eslint-plugin-perfectionist": "4.14.0",
+    "eslint-plugin-prettier": "5.4.1",
+    "eslint-plugin-react": "7.37.5",
+    "@tailwindcss/postcss": "4.1.10",
+    "tailwindcss": "4.1.10",
+    "eslint": "9.29.0",
     "eslint-config-next": "15.3.3",
-    "@eslint/eslintrc": "^3"
+    "@eslint/eslintrc": "3.3.1",
+    "prettier": "3.5.3",
+    "prettier-plugin-tailwindcss": "0.6.12",
+    "husky": "9.1.7",
+    "typescript-eslint": "8.34.0"
   }
 }

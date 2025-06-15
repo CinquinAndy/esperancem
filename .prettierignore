@@ -1,0 +1,18 @@
+# Helm templates
+helm/templates/
+helm/Chart.yaml
+helm/values.yaml
+
+# Build outputs
+.next/
+dist/
+build/
+
+# Dependencies
+node_modules/
+
+# Environment files
+.env*
+
+# Logs
+*.log 
