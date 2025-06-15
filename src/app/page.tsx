@@ -46,36 +46,6 @@ function SocialLink({
 	)
 }
 
-function Newsletter() {
-	return (
-		<form
-			action='/thank-you'
-			className='rounded-2xl border border-zinc-700/40 p-6'
-		>
-			<h2 className='flex text-sm font-semibold text-zinc-100'>
-				<MailIcon className='h-6 w-6 flex-none' />
-				<span className='ml-3'>Restez informé</span>
-			</h2>
-			<p className='mt-2 text-sm text-zinc-400'>
-				Recevez une notification à chaque nouvelle publication. Vous pouvez vous
-				désinscrire à tout moment.
-			</p>
-			<div className='mt-6 flex'>
-				<input
-					type='email'
-					placeholder='Adresse e-mail'
-					aria-label='Email address'
-					required
-					className='min-w-0 flex-auto appearance-none rounded-md border border-zinc-700 bg-zinc-800 px-3 py-[calc(theme(spacing.2)-1px)] shadow-md shadow-zinc-800/5 placeholder:text-zinc-400 focus:border-teal-400 focus:ring-4 focus:ring-teal-400/10 focus:outline-none sm:text-sm'
-				/>
-				<Button type='submit' className='ml-4 flex-none'>
-					Rejoindre
-				</Button>
-			</div>
-		</form>
-	)
-}
-
 function BookCover() {
 	return (
 		<div className='group relative'>
@@ -204,7 +174,6 @@ export default async function Home() {
 					</div>
 					<div className='space-y-10 lg:pl-16 xl:pl-24'>
 						<DarkHeartsBook />
-						<Newsletter />
 					</div>
 				</div>
 			</Container>

@@ -17,12 +17,12 @@ export function TurbulentBackground() {
 		turbSpeedLocation: null as WebGLUniformLocation | null,
 	})
 
-	// Shader configuration optimized for background (subtler than original)
+	// Shader configuration adapted for background (subtler than demo)
 	const config = {
-		intensity: 0.7, // Slightly more intense than before but still subtle
-		turbAmp: 0.5, // Moderate amplitude
-		turbFreq: 1.8, // Good frequency for background
-		turbSpeed: 0.2, // Moderate speed
+		intensity: 0.4, // Much subtler for background
+		turbAmp: 0.7, // Same as demo
+		turbFreq: 2.0, // Same as demo
+		turbSpeed: 0.3, // Same as demo
 	}
 
 	useEffect(() => {
@@ -75,8 +75,8 @@ export function TurbulentBackground() {
 				}
 			`
 
-			// Enhanced "Turbulent Dark" shader adapted from Shadertoy (@XorDev)
-			// Optimized for background use with subtle colors
+			// Exact copy of the "Turbulent Dark" shader from the HTML demo
+			// Original shader by @XorDev - Adapted from Shadertoy
 			const fragmentShaderSource = `
 				precision highp float;
 				
@@ -87,11 +87,11 @@ export function TurbulentBackground() {
 				uniform float u_turbFreq;
 				uniform float u_intensity;
 				
-				// Enhanced turbulence parameters
+				// Constants adapted for controls
 				#define TURB_NUM 10.0
 				#define TURB_EXP 1.4
 				
-				// Advanced turbulence function from Shadertoy
+				// Turbulence function adapted from Shadertoy
 				vec2 turbulence(vec2 p) {
 					float freq = u_turbFreq;
 					
@@ -122,27 +122,21 @@ export function TurbulentBackground() {
 				}
 				
 				void main() {
-					// Screen coordinates, centered and aspect-corrected
+					// Screen coordinates, centered and aspect-corrected (EXACT COPY)
 					vec2 p = 2.0 * (gl_FragCoord.xy * 2.0 - u_resolution.xy) / u_resolution.y;
 					
 					// Apply turbulence
 					p = turbulence(p);
 					
-					// Enhanced color gradient (adapted for background with dark theme)
-					vec3 col = 0.4 * u_intensity * exp(0.08 * p.x * vec3(-0.8, 0.1, 1.8));
+					// Subtle blue and yellow gradient (adapted with intensity control) (EXACT COPY)
+					vec3 col = 0.5 * u_intensity * exp(0.1 * p.x * vec3(-1.0, 0.0, 2.0));
 					
-					// Vary brightness with enhanced pattern
-					float brightness = dot(cos(p * 2.8), sin(-p.yx * 2.8 * 0.618)) + 2.2;
+					// Vary brightness (EXACT COPY)
+					float brightness = dot(cos(p * 3.0), sin(-p.yx * 3.0 * 0.618)) + 2.0;
 					col /= brightness;
 					
-					// Exponential tonemap
-					col = 1.0 - exp(-col * 0.9);
-					
-					// Darken for background use while keeping the quality
-					col *= 0.35;
-					
-					// Add subtle color tinting for dark romance theme
-					col = mix(col, col * vec3(0.9, 0.85, 1.1), 0.3);
+					// Exponential tonemap (EXACT COPY)
+					col = 1.0 - exp(-col);
 					
 					gl_FragColor = vec4(col, 1.0);
 				}
@@ -234,9 +228,9 @@ export function TurbulentBackground() {
 			data-turbulent-background
 			className='fixed inset-0 -z-10 h-full w-full'
 			style={{
-				filter: 'blur(0.5px) contrast(1.1) brightness(0.9) saturate(1.2)',
+				filter: 'blur(0.3px) contrast(0.8) brightness(0.7) saturate(1.0)',
 				mixBlendMode: 'screen',
-				opacity: 0.8,
+				opacity: 0.6,
 			}}
 		/>
 	)
