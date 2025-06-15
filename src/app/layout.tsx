@@ -1,5 +1,6 @@
 import { type Metadata } from 'next'
 import { Alex_Brush } from 'next/font/google'
+import Script from 'next/script'
 
 import { Providers } from '@/app/providers'
 import { Layout } from '@/components/Layout'
@@ -180,6 +181,11 @@ export default function RootLayout({
 				/>
 			</head>
 			<body className='flex h-full'>
+				<Script
+					src='https://umami.wadefade.fr/script.js'
+					data-website-id='aee78575-7896-44d1-adf5-fedd348d5210'
+					strategy='afterInteractive'
+				/>
 				<TurbulentBackground />
 				<Providers>
 					<div className='flex w-full'>
