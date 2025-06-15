@@ -17,12 +17,12 @@ export function TurbulentBackground() {
 		turbSpeedLocation: null as WebGLUniformLocation | null,
 	})
 
-	// Shader configuration (more subtle for background)
+	// Shader configuration optimized for background (subtler than original)
 	const config = {
-		intensity: 0.6, // Softer
-		turbAmp: 0.4, // More subtle
-		turbFreq: 1.5, // Less intense
-		turbSpeed: 0.15, // Slower
+		intensity: 0.7, // Slightly more intense than before but still subtle
+		turbAmp: 0.5, // Moderate amplitude
+		turbFreq: 1.8, // Good frequency for background
+		turbSpeed: 0.2, // Moderate speed
 	}
 
 	useEffect(() => {
@@ -75,7 +75,8 @@ export function TurbulentBackground() {
 				}
 			`
 
-			// Shader adapted from Shadertoy with background optimizations
+			// Enhanced "Turbulent Dark" shader adapted from Shadertoy (@XorDev)
+			// Optimized for background use with subtle colors
 			const fragmentShaderSource = `
 				precision highp float;
 				
@@ -86,17 +87,26 @@ export function TurbulentBackground() {
 				uniform float u_turbFreq;
 				uniform float u_intensity;
 				
-				#define TURB_NUM 8.0
-				#define TURB_EXP 1.3
+				// Enhanced turbulence parameters
+				#define TURB_NUM 10.0
+				#define TURB_EXP 1.4
 				
+				// Advanced turbulence function from Shadertoy
 				vec2 turbulence(vec2 p) {
 					float freq = u_turbFreq;
+					
+					// Rotation matrix for turbulence
 					mat2 rot = mat2(0.6, -0.8, 0.8, 0.6);
 					
+					// Loop through turbulence octaves
 					for(float i = 0.0; i < TURB_NUM; i++) {
+						// Scroll along rotated y coordinate
 						float phase = freq * dot(p, rot[1]) + u_turbSpeed * u_time + i;
+						
+						// Add perpendicular sine wave offset
 						p += u_turbAmp * rot[0] * sin(phase) / freq;
 						
+						// Rotation for next octave
 						rot = mat2(
 							rot[0][0] * 0.6 - rot[0][1] * (-0.8),
 							rot[0][0] * (-0.8) + rot[0][1] * 0.6,
@@ -104,6 +114,7 @@ export function TurbulentBackground() {
 							rot[1][0] * (-0.8) + rot[1][1] * 0.6
 						);
 						
+						// Scale for next octave
 						freq *= TURB_EXP;
 					}
 					
@@ -111,19 +122,27 @@ export function TurbulentBackground() {
 				}
 				
 				void main() {
+					// Screen coordinates, centered and aspect-corrected
 					vec2 p = 2.0 * (gl_FragCoord.xy * 2.0 - u_resolution.xy) / u_resolution.y;
+					
+					// Apply turbulence
 					p = turbulence(p);
 					
-					// Darker and subtler colors for background
-					vec3 col = 0.3 * u_intensity * exp(0.08 * p.x * vec3(-0.5, 0.2, 1.2));
+					// Enhanced color gradient (adapted for background with dark theme)
+					vec3 col = 0.4 * u_intensity * exp(0.08 * p.x * vec3(-0.8, 0.1, 1.8));
 					
-					float brightness = dot(cos(p * 2.5), sin(-p.yx * 2.5 * 0.618)) + 2.5;
+					// Vary brightness with enhanced pattern
+					float brightness = dot(cos(p * 2.8), sin(-p.yx * 2.8 * 0.618)) + 2.2;
 					col /= brightness;
 					
-					col = 1.0 - exp(-col * 0.8);
+					// Exponential tonemap
+					col = 1.0 - exp(-col * 0.9);
 					
-					// Darken even more to be a true background
-					col *= 0.4;
+					// Darken for background use while keeping the quality
+					col *= 0.35;
+					
+					// Add subtle color tinting for dark romance theme
+					col = mix(col, col * vec3(0.9, 0.85, 1.1), 0.3);
 					
 					gl_FragColor = vec4(col, 1.0);
 				}
@@ -207,7 +226,7 @@ export function TurbulentBackground() {
 			}
 			window.removeEventListener('resize', () => {})
 		}
-	}, [])
+	}, [config.intensity, config.turbAmp, config.turbFreq, config.turbSpeed])
 
 	return (
 		<canvas
@@ -215,9 +234,9 @@ export function TurbulentBackground() {
 			data-turbulent-background
 			className='fixed inset-0 -z-10 h-full w-full'
 			style={{
-				filter: 'blur(0.8px) contrast(0.9) brightness(0.8) saturate(1.1)',
-				mixBlendMode: 'soft-light',
-				opacity: 0.7,
+				filter: 'blur(0.5px) contrast(1.1) brightness(0.9) saturate(1.2)',
+				mixBlendMode: 'screen',
+				opacity: 0.8,
 			}}
 		/>
 	)

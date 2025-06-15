@@ -96,7 +96,7 @@ body {
 	overflow-x: hidden;
 }
 
-/* Styles pour le background shader turbulent */
+/* Styles for turbulent shader background */
 canvas[data-turbulent-background] {
 	position: fixed;
 	top: 0;
@@ -107,7 +107,7 @@ canvas[data-turbulent-background] {
 	pointer-events: none;
 }
 
-/* Effet de vignettage subtil pour adoucir les bords */
+/* Subtle vignetting effect to soften edges */
 body::before {
 	content: '';
 	position: fixed;
@@ -128,7 +128,7 @@ body::before {
 	pointer-events: none;
 }
 
-/* Amélioration du contraste pour les éléments de contenu */
+/* Contrast improvement for content elements */
 .content-overlay {
 	position: relative;
 	z-index: 1;
@@ -136,7 +136,7 @@ body::before {
 	backdrop-filter: blur(0.3px);
 }
 
-/* Optimisations pour images haute qualité */
+/* High quality image optimizations */
 img {
 	image-rendering: -webkit-optimize-contrast;
 	image-rendering: crisp-edges;
@@ -144,21 +144,21 @@ img {
 	transform: translateZ(0);
 }
 
-/* Amélioration spécifique pour les couvertures de livre */
+/* Specific improvement for book covers */
 [alt*='Couverture'] {
 	image-rendering: high-quality !important;
 	image-rendering: -webkit-optimize-contrast !important;
 	-webkit-backface-visibility: hidden;
 	-webkit-transform: translateZ(0);
 	transform: translateZ(0);
-	/* Anti-aliasing amélioré */
+	/* Enhanced anti-aliasing */
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
-	/* Netteté maximale */
+	/* Maximum sharpness */
 	filter: contrast(1.02) saturate(1.05) brightness(1.01);
 }
 
-/* Effet de netteté au survol */
+/* Sharpness effect on hover */
 [alt*='Couverture']:hover {
 	filter: contrast(1.05) saturate(1.1) brightness(1.02) sharpen(0.1);
 	transition: filter 300ms ease-in-out;

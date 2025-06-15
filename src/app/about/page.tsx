@@ -121,7 +121,7 @@ export default function About() {
 				</div>
 			</Container>
 
-			{/* Section dédiée au livre */}
+			{/* Book section */}
 			<Container className='mt-24 sm:mt-32'>
 				<div className='mx-auto max-w-2xl lg:max-w-5xl'>
 					<div className='mx-auto grid max-w-xl grid-cols-1 gap-y-20 lg:max-w-none lg:grid-cols-2'>
@@ -139,7 +139,7 @@ export default function About() {
 									width={320}
 									height={480}
 								/>
-								{/* Glow effect subtil */}
+								{/* Subtle glow effect */}
 								<div className='absolute -inset-0.5 -z-10 rounded-xl bg-gradient-to-br from-red-500/10 via-purple-500/5 to-zinc-500/5 opacity-75 blur-sm' />
 							</div>
 						</div>
