@@ -1,16 +1,14 @@
-import clsx from 'clsx'
 import { type Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
 
 import { Container } from '@/components/Container'
 import {
-	GitHubIcon,
 	InstagramIcon,
-	LinkedInIcon,
-	XIcon,
+	TikTokIcon,
+	WattpadIcon,
 } from '@/components/SocialIcons'
-import portraitImage from '@/images/portrait.jpg'
+import portraitImage from '@/images/avatar.jpeg'
 
 function SocialLink({
 	children,
@@ -24,7 +22,7 @@ function SocialLink({
 	children: React.ReactNode
 }) {
 	return (
-		<li className={clsx(className, 'flex')}>
+		<li className={className}>
 			<Link
 				href={href}
 				className='group flex text-sm font-medium text-zinc-200 transition hover:text-teal-500'
@@ -49,8 +47,8 @@ function MailIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
 
 export const metadata: Metadata = {
 	description:
-		"I'm Spencer Sharp. I live in New York City, where I design the future.",
-	title: 'About',
+		'À propos d&apos;Esperance Masson, auteure de la dark romance "Cœurs Sombres".',
+	title: 'À propos',
 }
 
 export default function About() {
@@ -69,59 +67,51 @@ export default function About() {
 				</div>
 				<div className='lg:order-first lg:row-span-2'>
 					<h1 className='text-4xl font-bold tracking-tight text-zinc-100 sm:text-5xl'>
-						I'm Spencer Sharp. I live in New York City, where I design the
-						future.
+						Je suis Esperance Masson.
 					</h1>
 					<div className='mt-6 space-y-7 text-base text-zinc-400'>
+						<p>Salut tout le monde ! J&apos;espère que vous allez bien.</p>
 						<p>
-							I've loved making things for as long as I can remember, and wrote
-							my first program when I was 6 years old, just two weeks after my
-							mom brought home the brand new Macintosh LC 550 that I taught
-							myself to type on.
+							Bienvenue dans mon univers où j&apos;explore les profondeurs de
+							l&apos;âme humaine à travers des romances sombres, intenses et
+							captivantes.
 						</p>
 						<p>
-							The only thing I loved more than computers as a kid was space.
-							When I was 8, I climbed the 40-foot oak tree at the back of our
-							yard while wearing my older sister's motorcycle helmet, counted
-							down from three, and jumped — hoping the tree was tall enough that
-							with just a bit of momentum I'd be able to get to orbit.
-						</p>
-						<p>
-							I spent the next few summers indoors working on a rocket design,
-							while I recovered from the multiple surgeries it took to fix my
-							badly broken legs. It took nine iterations, but when I was 15 I
-							sent my dad's Blackberry into orbit and was able to transmit a
-							photo back down to our family computer from space.
-						</p>
-						<p>
-							Today, I'm the founder of Planetaria, where we're working on
-							civilian space suits and manned shuttle kits you can assemble at
-							home so that the next generation of kids really <em>can</em> make
-							it to orbit — from the comfort of their own backyards.
+							N&apos;hésitez pas à venir me retrouver sur mes réseaux pour
+							découvrir les coulisses de l&apos;écriture de mon premier roman.
 						</p>
 					</div>
 				</div>
 				<div className='lg:pl-20'>
 					<ul role='list'>
-						<SocialLink href='#' icon={XIcon} className='mt-4'>
-							Follow on X
+						<SocialLink
+							href='https://www.instagram.com/esp_masson/'
+							icon={InstagramIcon}
+							className='mt-4'
+						>
+							Suivez-moi sur Instagram
 						</SocialLink>
-						<SocialLink href='#' icon={InstagramIcon} className='mt-4'>
-							Follow on Instagram
+						<SocialLink
+							href='https://www.tiktok.com/@_esperance_masson'
+							icon={TikTokIcon}
+							className='mt-4'
+						>
+							Suivez-moi sur TikTok
 						</SocialLink>
-						<SocialLink href='#' icon={GitHubIcon} className='mt-4'>
-							Follow on GitHub
-						</SocialLink>
-						<SocialLink href='#' icon={LinkedInIcon} className='mt-4'>
-							Follow on LinkedIn
+						<SocialLink
+							href='https://www.wattpad.com/user/Esperancem'
+							icon={WattpadIcon}
+							className='mt-4'
+						>
+							Découvrez mes écrits sur Wattpad
 						</SocialLink>
 						<li className='mt-8 border-t border-zinc-700/40 pt-8'>
 							<SocialLink
-								href='mailto:spencer@planetaria.tech'
+								href='mailto:esperancemasson@gmail.com'
 								icon={MailIcon}
 								className='items-center'
 							>
-								spencer@planetaria.tech
+								esperancemasson@gmail.com
 							</SocialLink>
 						</li>
 					</ul>

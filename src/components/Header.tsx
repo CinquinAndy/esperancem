@@ -10,10 +10,10 @@ import clsx from 'clsx'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 
 import { Container } from '@/components/Container'
-import avatarImage from '@/images/avatar.jpg'
+import avatarImage from '@/images/avatar.jpeg'
 
 function CloseIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
 	return (
@@ -86,11 +86,8 @@ function MobileNavigation(
 				</div>
 				<nav className='mt-6'>
 					<ul className='-my-2 divide-y divide-zinc-100/5 text-base text-zinc-300'>
-						<MobileNavItem href='/about'>About</MobileNavItem>
-						<MobileNavItem href='/articles'>Articles</MobileNavItem>
-						<MobileNavItem href='/projects'>Projects</MobileNavItem>
-						<MobileNavItem href='/speaking'>Speaking</MobileNavItem>
-						<MobileNavItem href='/uses'>Uses</MobileNavItem>
+						<MobileNavItem href='/'>Accueil</MobileNavItem>
+						<MobileNavItem href='/about'>À propos</MobileNavItem>
 					</ul>
 				</nav>
 			</PopoverPanel>
@@ -129,11 +126,8 @@ function DesktopNavigation(props: React.ComponentPropsWithoutRef<'nav'>) {
 	return (
 		<nav {...props}>
 			<ul className='flex rounded-full bg-zinc-800/90 px-3 text-sm font-medium text-zinc-200 shadow-lg ring-1 ring-white/10 backdrop-blur-sm'>
-				<NavItem href='/about'>About</NavItem>
-				<NavItem href='/articles'>Articles</NavItem>
-				<NavItem href='/projects'>Projects</NavItem>
-				<NavItem href='/speaking'>Speaking</NavItem>
-				<NavItem href='/uses'>Uses</NavItem>
+				<NavItem href='/'>Accueil</NavItem>
+				<NavItem href='/about'>À propos</NavItem>
 			</ul>
 		</nav>
 	)
