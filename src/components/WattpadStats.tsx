@@ -8,13 +8,12 @@ import { useWattpadStats } from '@/hooks/useWattpadStats'
 import { Button } from './Button'
 
 interface StatItemProps {
-	icon: string
 	value: string
 	label: string
 	loading?: boolean
 }
 
-function StatItem({ icon, label, loading, value }: StatItemProps) {
+function StatItem({ label, loading, value }: StatItemProps) {
 	// Convert value to number for animation (handle K, M suffixes)
 	const getNumericValue = (val: string): number => {
 		if (!val || val === '0') return 0
@@ -36,11 +35,7 @@ function StatItem({ icon, label, loading, value }: StatItemProps) {
 	const numericValue = getNumericValue(value)
 
 	return (
-		<div className='group flex flex-col items-center rounded-lg border border-white/10 bg-white/5 p-6 backdrop-blur-sm transition-all duration-300 hover:border-white/20'>
-			<div className='mb-2 text-2xl transition-transform duration-300 group-hover:scale-110'>
-				{icon}
-			</div>
-
+		<div className='group flex flex-col items-center rounded-lg p-2 transition-all duration-300'>
 			<div className='mb-1 text-2xl font-bold text-white'>
 				{loading ? (
 					<div className='h-8 w-16 animate-pulse rounded bg-white/20'></div>
@@ -52,40 +47,24 @@ function StatItem({ icon, label, loading, value }: StatItemProps) {
 							notation: numericValue >= 1000 ? 'compact' : 'standard',
 						}}
 						locales='en-US'
-						className='font-mono'
+						className='font-mono text-6xl'
 					/>
 				)}
 			</div>
 
-			<div className='text-sm font-medium text-white/70'>{label}</div>
+			<div className='text-sm font-medium text-white/70 italic'>{label}</div>
 		</div>
 	)
 }
 
 export function WattpadStats() {
-	const { error, lastUpdated, loading, refreshStats, stats } = useWattpadStats()
+	const { error, loading, refreshStats, stats } = useWattpadStats()
 	const [isRefreshing, setIsRefreshing] = useState(false)
 
 	const handleRefresh = async () => {
 		setIsRefreshing(true)
 		await refreshStats()
 		setIsRefreshing(false)
-	}
-
-	const formatLastUpdated = (date: Date | null) => {
-		if (!date) return 'Never'
-		const now = new Date()
-		const diffInHours = Math.floor(
-			(now.getTime() - date.getTime()) / (1000 * 60 * 60)
-		)
-
-		if (diffInHours < 1) return 'Just now'
-		if (diffInHours === 1) return '1 hour ago'
-		if (diffInHours < 24) return `${diffInHours} hours ago`
-
-		const diffInDays = Math.floor(diffInHours / 24)
-		if (diffInDays === 1) return '1 day ago'
-		return `${diffInDays} days ago`
 	}
 
 	if (error && !stats) {
@@ -116,69 +95,26 @@ export function WattpadStats() {
 	}
 
 	return (
-		<div className='mx-auto w-full max-w-4xl'>
-			{/* Header */}
-			<div className='mb-8 text-center'>
-				<h2 className='mb-2 text-3xl font-bold text-white'>
-					Wattpad Statistics
-				</h2>
-				<p className='text-white/60'>
-					Live statistics from Esperance&apos;s Wattpad profile
-				</p>
-
-				{/* Last updated info */}
-				<div className='mt-4 flex items-center justify-center gap-4 text-sm text-white/50'>
-					<span>Last updated: {formatLastUpdated(lastUpdated)}</span>
-					<Button
-						onClick={handleRefresh}
-						disabled={isRefreshing || loading}
-						className='px-3 py-1 text-xs'
-					>
-						{isRefreshing ? (
-							<div className='flex items-center gap-2'>
-								<div className='h-3 w-3 animate-spin rounded-full border-2 border-white/30 border-t-white'></div>
-								Refreshing...
-							</div>
-						) : (
-							'Refresh'
-						)}
-					</Button>
-				</div>
-			</div>
-
+		<div className='mx-auto w-full max-w-7xl'>
 			{/* Stats Grid */}
 			<div className='grid grid-cols-1 gap-6 md:grid-cols-3'>
 				<StatItem
-					icon='👁️'
 					value={stats?.reads || '0'}
-					label='Reads'
+					label='Lectures'
 					loading={loading}
 				/>
 
 				<StatItem
-					icon='❤️'
 					value={stats?.votes || '0'}
-					label='Votes'
+					label={`J'aime`}
 					loading={loading}
 				/>
 
 				<StatItem
-					icon='📚'
 					value={stats?.parts || '0'}
-					label='Chapters'
+					label='Chapitres'
 					loading={loading}
 				/>
-			</div>
-
-			{/* Footer info */}
-			<div className='mt-8 rounded-lg border border-white/10 bg-white/5 p-4 text-center'>
-				<p className='text-sm text-white/60'>
-					📊 Statistics are automatically updated every 24 hours to respect
-					Wattpad&apos;s servers
-				</p>
-				<p className='mt-1 text-xs text-white/40'>
-					Data is cached locally for better performance
-				</p>
 			</div>
 		</div>
 	)

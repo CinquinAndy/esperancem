@@ -1,9 +1,17 @@
 import { type Metadata } from 'next'
+import { The_Nautigal } from 'next/font/google'
 
 import { Providers } from '@/app/providers'
 import { Layout } from '@/components/Layout'
 import { TurbulentBackground } from '@/components/TurbulentBackground'
 import '@/app/globals.css'
+
+const nautigal = The_Nautigal({
+	display: 'swap',
+	subsets: ['latin'],
+	variable: '--font-nautigal',
+	weight: ['400', '700'],
+})
 
 export const metadata: Metadata = {
 	alternates: {
@@ -25,7 +33,7 @@ export default function RootLayout({
 	children: React.ReactNode
 }) {
 	return (
-		<html lang='en' className='h-full antialiased'>
+		<html lang='en' className={`h-full antialiased ${nautigal.variable}`}>
 			<body className='flex h-full'>
 				<TurbulentBackground />
 				<Providers>

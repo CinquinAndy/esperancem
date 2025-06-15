@@ -8,6 +8,7 @@ import {
 	TikTokIcon,
 	WattpadIcon,
 } from '@/components/SocialIcons'
+import { WattpadStats } from '@/components/WattpadStats'
 import bookCover from '@/images/photos/cover_on_book.jpg'
 
 function SocialLink({
@@ -142,6 +143,10 @@ export default async function Home() {
 						/>
 					</div>
 				</div>
+			</Container>
+
+			<Container className='mt-16 md:mt-20'>
+				<WattpadStats />
 			</Container>
 
 			<Container className='mt-24 md:mt-28'>

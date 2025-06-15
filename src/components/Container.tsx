@@ -28,7 +28,7 @@ export const ContainerInner = forwardRef<
 })
 
 export const Container = forwardRef<
-	React.ElementRef<typeof ContainerOuter>,
+	React.ComponentRef<typeof ContainerOuter>,
 	React.ComponentPropsWithoutRef<typeof ContainerOuter>
 >(function Container({ children, ...props }, ref) {
 	return (
