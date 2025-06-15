@@ -9,7 +9,9 @@ import {
 	WattpadIcon,
 } from '@/components/SocialIcons'
 import { WattpadStats } from '@/components/WattpadStats'
+import { WattpadStatsProvider } from '@/contexts/WattpadStatsContext'
 import bookCover from '@/images/photos/cover_on_book.jpg'
+import { fetchWattpadStats } from '@/lib/wattpad'
 
 function SocialLink({
 	icon: Icon,
@@ -112,12 +114,14 @@ function DarkHeartsBook() {
 }
 
 export default async function Home() {
+	// Fetch Wattpad stats server-side for better NumberFlow performance
+	const initialStats = await fetchWattpadStats()
 	return (
-		<>
+		<WattpadStatsProvider initialStats={initialStats}>
 			<Container className='mt-9'>
 				<div className='max-w-2xl'>
 					<h1 className='text-4xl font-bold tracking-tight text-zinc-100 sm:text-5xl'>
-						Esperance Masson, auteure de dark romance.
+						Esperance Masson, autrice de dark romance.
 					</h1>
 					<p className='mt-6 text-base text-zinc-400'>
 						Bienvenue dans mon univers. J&apos;écris des histoires d&apos;âmes
@@ -159,6 +163,6 @@ export default async function Home() {
 					</div>
 				</div>
 			</Container>
-		</>
+		</WattpadStatsProvider>
 	)
 }

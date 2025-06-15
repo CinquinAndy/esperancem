@@ -48,7 +48,7 @@ function MailIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
 
 export const metadata: Metadata = {
 	description:
-		'À propos d&apos;Esperance Masson, auteure de la dark romance "Cœurs Sombres".',
+		'À propos d&apos;Esperance Masson, autrice de la dark romance "Cœurs Sombres".',
 	title: 'À propos',
 }
 

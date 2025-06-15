@@ -3,7 +3,7 @@
 import NumberFlow from '@number-flow/react'
 import { useState } from 'react'
 
-import { useWattpadStats } from '@/hooks/useWattpadStats'
+import { useWattpadStats } from '@/contexts/WattpadStatsContext'
 
 import { Button } from './Button'
 
@@ -37,22 +37,19 @@ function StatItem({ label, loading, value }: StatItemProps) {
 	return (
 		<div className='group flex flex-col items-center rounded-lg p-2 transition-all duration-300'>
 			<div className='mb-1 text-2xl font-bold text-white'>
-				{loading ? (
-					<div className='h-8 w-16 animate-pulse rounded bg-white/20'></div>
-				) : (
-					<NumberFlow
-						value={numericValue}
-						format={{
-							maximumFractionDigits: 1,
-							notation: numericValue >= 1000 ? 'compact' : 'standard',
-						}}
-						locales='en-US'
-						className='font-mono text-6xl'
-					/>
-				)}
+				<NumberFlow
+					value={numericValue}
+					format={{
+						maximumFractionDigits: 1,
+						notation: numericValue >= 1000 ? 'compact' : 'standard',
+					}}
+					locales='en-US'
+					className='font-nautigal text-6xl'
+				/>
 			</div>
-
-			<div className='text-sm font-medium text-white/70 italic'>{label}</div>
+			<div className='font-mono text-lg font-medium text-white/70 italic'>
+				{label}
+			</div>
 		</div>
 	)
 }

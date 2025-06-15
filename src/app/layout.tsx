@@ -20,9 +20,9 @@ export const metadata: Metadata = {
 		},
 	},
 	description:
-		'Site officiel d\'Esperance Masson, auteure de la dark romance "Cœurs Sombres". Découvrez son travail et ses dernières actualités.',
+		'Site officiel d\'Esperance Masson, autrice de la dark romance "Cœurs Sombres". Découvrez son travail et ses dernières actualités.',
 	title: {
-		default: 'Esperance Masson - Auteure de Cœurs Sombres',
+		default: 'Esperance Masson - Autrice de Cœurs Sombres',
 		template: '%s - Esperance Masson',
 	},
 }
