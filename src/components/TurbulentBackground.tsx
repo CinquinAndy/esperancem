@@ -152,7 +152,7 @@ export function TurbulentBackground() {
 			gl.useProgram(program)
 			programRef.current = program
 
-			// Obtenir les emplacements des uniforms
+			// Get uniform locations
 			uniformsRef.current = {
 				intensityLocation: gl.getUniformLocation(program, 'u_intensity'),
 				resolutionLocation: gl.getUniformLocation(program, 'u_resolution'),
@@ -162,7 +162,7 @@ export function TurbulentBackground() {
 				turbSpeedLocation: gl.getUniformLocation(program, 'u_turbSpeed'),
 			}
 
-			// Créer la géométrie (quad plein écran)
+			// Create geometry (fullscreen quad)
 			const vertices = new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1])
 
 			const buffer = gl.createBuffer()
@@ -173,14 +173,14 @@ export function TurbulentBackground() {
 			gl.enableVertexAttribArray(positionLocation)
 			gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0)
 
-			// Démarrer l'animation
+			// Start animation
 			const animate = () => {
 				if (!gl || !programRef.current) return
 
 				const currentTime = (Date.now() - startTimeRef.current) / 1000
 				const uniforms = uniformsRef.current
 
-				// Mettre à jour les uniforms
+				// Update uniforms
 				gl.uniform1f(uniforms.timeLocation, currentTime)
 				gl.uniform2f(uniforms.resolutionLocation, canvas.width, canvas.height)
 				gl.uniform1f(uniforms.turbSpeedLocation, config.turbSpeed)
@@ -188,7 +188,7 @@ export function TurbulentBackground() {
 				gl.uniform1f(uniforms.turbFreqLocation, config.turbFreq)
 				gl.uniform1f(uniforms.intensityLocation, config.intensity)
 
-				// Dessiner
+				// Render
 				gl.clearColor(0, 0, 0, 1)
 				gl.clear(gl.COLOR_BUFFER_BIT)
 				gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
