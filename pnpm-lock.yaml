@@ -12,43 +12,43 @@ importers:
         specifier: 9.29.0
         version: 9.29.0
       '@headlessui/react':
-        specifier: ^2.2.4
+        specifier: 2.2.4
         version: 2.2.4(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@mapbox/rehype-prism':
-        specifier: ^0.9.0
+        specifier: 0.9.0
         version: 0.9.0
       '@mdx-js/loader':
-        specifier: ^3.1.0
+        specifier: 3.1.0
         version: 3.1.0(acorn@8.15.0)
       '@mdx-js/react':
-        specifier: ^3.1.0
+        specifier: 3.1.0
         version: 3.1.0(@types/react@19.1.8)(react@19.1.0)
       '@next/mdx':
-        specifier: ^15.3.3
+        specifier: 15.3.3
         version: 15.3.3(@mdx-js/loader@3.1.0(acorn@8.15.0))(@mdx-js/react@3.1.0(@types/react@19.1.8)(react@19.1.0))
       '@number-flow/react':
-        specifier: ^0.5.10
+        specifier: 0.5.10
         version: 0.5.10(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@tailwindcss/typography':
-        specifier: ^0.5.16
+        specifier: 0.5.16
         version: 0.5.16(tailwindcss@4.1.10)
       '@types/webpack-env':
-        specifier: ^1.18.8
+        specifier: 1.18.8
         version: 1.18.8
       autoprefixer:
         specifier: 10.4.21
         version: 10.4.21(postcss@8.5.5)
       cheerio:
-        specifier: ^1.1.0
+        specifier: 1.1.0
         version: 1.1.0
       clsx:
         specifier: 2.1.1
         version: 2.1.1
       fast-glob:
-        specifier: ^3.3.3
+        specifier: 3.3.3
         version: 3.3.3
       feed:
-        specifier: ^5.1.0
+        specifier: 5.1.0
         version: 5.1.0
       framer-motion:
         specifier: 12.18.1
@@ -66,10 +66,10 @@ importers:
         specifier: 19.1.0
         version: 19.1.0(react@19.1.0)
       remark-gfm:
-        specifier: ^4.0.1
+        specifier: 4.0.1
         version: 4.0.1
       sharp:
-        specifier: ^0.34.2
+        specifier: 0.34.2
         version: 0.34.2
       tailwind-merge:
         specifier: 3.3.1
@@ -124,7 +124,7 @@ importers:
         specifier: 3.5.3
         version: 3.5.3
       prettier-plugin-tailwindcss:
-        specifier: ^0.6.12
+        specifier: 0.6.12
         version: 0.6.12(prettier@3.5.3)
       tailwindcss:
         specifier: 4.1.10
