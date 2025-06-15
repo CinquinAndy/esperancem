@@ -32,14 +32,6 @@ export const metadata: Metadata = {
 	openGraph: {
 		description:
 			'Plongez dans l\'univers dark romance d\'Espérance Masson. "Cœurs Sombres" - Le roman qui fait sensation sur Wattpad avec Lucas Ferrari et Angèle.',
-		images: [
-			{
-				alt: 'Couverture du livre Cœurs Sombres par Espérance Masson',
-				height: 630,
-				url: '/images/coeurs-sombres-cover.jpg',
-				width: 1200,
-			},
-		],
 		title: 'Espérance Masson - Autrice Dark Romance | Cœurs Sombres Wattpad',
 		url: 'https://esperance-masson.fr',
 	},

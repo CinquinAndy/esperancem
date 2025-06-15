@@ -131,13 +131,13 @@ export default function RootLayout({
 									aggregateRating: {
 										'@type': 'AggregateRating',
 										bestRating: '5',
-										ratingCount: '1000',
-										ratingValue: '4.8',
+										ratingCount: '3000',
+										ratingValue: '5',
 									},
 									author: {
 										'@id': 'https://esperance-masson.fr/#person',
 									},
-									datePublished: '2024',
+									datePublished: '2025',
 									description:
 										"Roman dark romance suivant Angèle qui tombe sous l'emprise de Lucas Ferrari, un chef de mafia. Entre haine et attirance, leur lutte pour survivre pourrait bien les mener à leur perte.",
 									genre: ['Dark Romance', 'Romance', 'Fiction'],
@@ -173,11 +173,6 @@ export default function RootLayout({
 							],
 						}),
 					}}
-				/>
-				<link rel='canonical' href='https://esperance-masson.fr' />
-				<meta
-					name='google-site-verification'
-					content='your-google-verification-code'
 				/>
 			</head>
 			<body className='flex h-full'>
