@@ -52,22 +52,10 @@ export default async function Image() {
 							width: '280px',
 						}}
 					>
-						{/* Placeholder for portrait - you can replace with actual image URL */}
-						<div
-							style={{
-								alignItems: 'center',
-								background: 'linear-gradient(135deg, #14b8a6, #0891b2)',
-								color: '#ffffff',
-								display: 'flex',
-								fontSize: 72,
-								fontWeight: 'bold',
-								height: '100%',
-								justifyContent: 'center',
-								width: '100%',
-							}}
-						>
-							EM
-						</div>
+						<img
+							src='https://esperancem.fr/images/'
+							alt='Espérance Masson'
+						/>
 					</div>
 				</div>
 
