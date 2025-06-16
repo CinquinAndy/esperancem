@@ -162,8 +162,10 @@ export default async function Home() {
 						Masson. Autrice française spécialisée dans la dark romance,
 						j&apos;écris des histoires d&apos;âmes tourmentées, d&apos;amours
 						impossibles et de la part d&apos;ombre qui sommeille en chacun de
-						nous. Découvrez &quot;Cœurs Sombres&quot;, mon roman #1 sur Wattpad
-						qui captive plus de 85k lecteurs passionnés de romance française.
+						nous.
+						<br />
+						Découvrez &quot;Cœurs Sombres&quot;, mon roman #1 sur Wattpad qui
+						captive plus de 85k lecteurs passionnés de romance française.
 					</p>
 					<div className='mt-6 flex gap-6'>
 						<SocialLink
