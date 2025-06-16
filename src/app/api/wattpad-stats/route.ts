@@ -61,28 +61,23 @@ export async function GET() {
 		$('.meta.social-meta').each((index, element) => {
 			const $element = $(element)
 
-			// Extract reads: both displayed text and complete value from data-original-title
+			// Extract reads: both displayed text and complete value from title attribute
 			const readsSpan = $element.find('.read-count')
-			console.info('Found read-count spans:', readsSpan.length)
-
 			if (readsSpan.length > 0) {
 				// Get displayed text (like "84.7K")
 				const readsText = readsSpan.text().trim()
-				console.info('Reads text:', readsText)
 				const readsMatch = readsText.match(/[\d.]+[KMB]?/)
 				if (readsMatch) {
 					reads = readsMatch[0]
 				}
 
-				// Get complete value from data-original-title attribute
-				const originalTitle = readsSpan.attr('data-original-title')
-				console.info('Original title attribute:', originalTitle)
-				if (originalTitle) {
-					// Extract number from "84,758 Lectures" format
-					const readsCompleteMatch = originalTitle.match(/^([\d,]+)/)
+				// Get complete value from title attribute
+				const titleAttr = readsSpan.attr('title')
+				if (titleAttr) {
+					// Extract number from "84,794 Reads" format
+					const readsCompleteMatch = titleAttr.match(/^([\d,]+)/)
 					if (readsCompleteMatch) {
-						readsComplete = readsCompleteMatch[1].replace(/,/g, '') // Remove commas: "84758"
-						console.info('Extracted readsComplete:', readsComplete)
+						readsComplete = readsCompleteMatch[1].replace(/,/g, '') // Remove commas: "84794"
 					}
 				}
 			}
@@ -137,11 +132,11 @@ export async function GET() {
 				) {
 					if (reads === '0') reads = text
 
-					// Try to get complete reads from data-original-title if not already found
+					// Try to get complete reads from title attribute if not already found
 					if (readsComplete === '0') {
-						const originalTitle = $span.attr('data-original-title')
-						if (originalTitle) {
-							const completeMatch = originalTitle.match(/^([\d,]+)/)
+						const titleAttr = $span.attr('title')
+						if (titleAttr) {
+							const completeMatch = titleAttr.match(/^([\d,]+)/)
 							if (completeMatch) {
 								readsComplete = completeMatch[1].replace(/,/g, '')
 							}
