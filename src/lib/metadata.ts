@@ -82,7 +82,7 @@ export async function generateLayoutMetadata(): Promise<Metadata> {
 		],
 		metadataBase: new URL('https://esperancem.fr'),
 		openGraph: {
-			description: `Découvrez l'univers d'Espérance Masson, autrice française de dark romance. "Cœurs Sombres" - #1 sur Wattpad avec plus de ${formattedReads.replace('+', '')} lectures.`,
+			description: `Découvrez l'univers d'Espérance Masson, autrice française de dark romance. "Cœurs Sombres" - sur Wattpad avec plus de ${formattedReads.replace('+', '')} lectures.`,
 			images: [
 				{
 					alt: 'Espérance Masson - Autrice de Cœurs Sombres',
@@ -121,9 +121,6 @@ export async function generateLayoutMetadata(): Promise<Metadata> {
 			images: ['/images/og-image.jpg'],
 			site: '@esp_masson',
 			title: 'Espérance Masson - Autrice de Dark Romance | Cœurs Sombres',
-		},
-		verification: {
-			google: process.env.GOOGLE_SITE_VERIFICATION,
 		},
 	}
 }

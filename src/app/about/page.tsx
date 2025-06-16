@@ -153,7 +153,7 @@ export default async function About() {
 							>
 								Découvrez mes écrits sur Wattpad
 							</SocialLink>
-							<li className='mt-8 border-t border-zinc-700/40 pt-8'>
+							<div className='mt-8 border-t border-zinc-700/40 pt-8'>
 								<SocialLink
 									href='mailto:esperance.masson@gmail.com'
 									icon={MailIcon}
@@ -161,7 +161,7 @@ export default async function About() {
 								>
 									esperance.masson@gmail.com
 								</SocialLink>
-							</li>
+							</div>
 						</ul>
 					</div>
 				</div>
