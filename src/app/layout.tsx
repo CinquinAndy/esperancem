@@ -5,6 +5,7 @@ import Script from 'next/script'
 import { Providers } from '@/app/providers'
 import { Layout } from '@/components/Layout'
 import { TurbulentBackground } from '@/components/TurbulentBackground'
+import { generateLayoutMetadata } from '@/lib/metadata'
 import '@/app/globals.css'
 
 const alexBrush = Alex_Brush({
@@ -14,80 +15,9 @@ const alexBrush = Alex_Brush({
 	weight: ['400'],
 })
 
-export const metadata: Metadata = {
-	alternates: {
-		canonical: 'https://esperancem.fr',
-		languages: {
-			'fr-FR': 'https://esperancem.fr',
-		},
-	},
-	authors: [{ name: 'Espérance Masson' }],
-	category: 'Literature & Fiction',
-	classification: 'Dark Romance, Literature',
-	creator: 'Espérance Masson',
-	description:
-		'Site officiel d\'Espérance Masson, autrice française de dark romance. Découvrez "Cœurs Sombres", son roman #1 sur Wattpad avec des milliers de lectures. Dark romance, enemies to lovers, mafia romance.',
-	keywords: [
-		'Espérance Masson',
-		'autrice française',
-		'dark romance',
-		'Cœurs Sombres',
-		'Wattpad',
-		'roman français',
-		'enemies to lovers',
-		'mafia romance',
-		'romance sombre',
-		'livre français',
-		'auteure dark romance',
-		'esp_masson',
-		'Lucas Ferrari',
-		'Angèle',
-		'romance française',
-		'littérature française contemporaine',
-	],
-	metadataBase: new URL('https://esperancem.fr'),
-	openGraph: {
-		description:
-			'Découvrez l\'univers d\'Espérance Masson, autrice française de dark romance. "Cœurs Sombres" - #1 sur Wattpad avec des milliers de lectures.',
-		images: [
-			{
-				alt: 'Espérance Masson - Autrice de Cœurs Sombres',
-				height: 630,
-				url: '/images/og-image.jpg',
-				width: 1200,
-			},
-		],
-		locale: 'fr_FR',
-		siteName: 'Espérance Masson - Autrice',
-		title: 'Espérance Masson - Autrice de Dark Romance | Cœurs Sombres',
-		type: 'website',
-		url: 'https://esperancem.fr',
-	},
-	publisher: 'Espérance Masson',
-	robots: {
-		follow: true,
-		googleBot: {
-			follow: true,
-			index: true,
-			'max-image-preview': 'large',
-			'max-snippet': -1,
-			'max-video-preview': -1,
-		},
-		index: true,
-	},
-	title: {
-		default:
-			'Espérance Masson - Autrice de Dark Romance | Cœurs Sombres sur Wattpad',
-		template: '%s - Espérance Masson',
-	},
-	twitter: {
-		card: 'summary_large_image',
-		creator: '@esp_masson',
-		description:
-			'Découvrez "Cœurs Sombres", le roman dark romance #1 sur Wattpad par Espérance Masson.',
-		images: ['/images/twitter-card.jpg'],
-		title: 'Espérance Masson - Autrice de Dark Romance',
-	},
+// Generate metadata dynamically with real Wattpad stats
+export async function generateMetadata(): Promise<Metadata> {
+	return await generateLayoutMetadata()
 }
 
 export default function RootLayout({

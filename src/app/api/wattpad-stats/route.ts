@@ -1,4 +1,5 @@
 import * as cheerio from 'cheerio'
+import { revalidatePath } from 'next/cache'
 import { NextResponse } from 'next/server'
 
 interface WattpadStats {
@@ -127,6 +128,10 @@ export async function GET() {
 
 		// Update cache
 		statsCache = stats
+
+		// Revalidate pages that use this data for SSG
+		revalidatePath('/')
+		revalidatePath('/about')
 
 		return NextResponse.json({
 			cached: false,

@@ -1,6 +1,6 @@
 'use client'
 
-import NumberFlow from '@number-flow/react'
+// import NumberFlow from '@number-flow/react' // Package not installed
 import { useEffect, useState } from 'react'
 
 import { useWattpadStats } from '@/contexts/WattpadStatsContext'
@@ -52,19 +52,9 @@ function StatItem({ label, shouldAnimate = false, value }: StatItemProps) {
 	return (
 		<div className='group flex flex-col items-center rounded-lg p-2 transition-all duration-300'>
 			<div className='mb-1 text-2xl font-bold text-white'>
-				<NumberFlow
-					value={displayValue}
-					format={{
-						maximumFractionDigits: 1,
-						notation: 'standard',
-					}}
-					transformTiming={{
-						duration: 1000,
-						easing: 'ease-in-out',
-					}}
-					locales='en-US'
-					className='font-alex-brush text-6xl'
-				/>
+				<span className='font-alex-brush text-6xl'>
+					{displayValue.toLocaleString('fr-FR')}
+				</span>
 			</div>
 			<div className='font-mono text-lg font-medium text-white/70 italic'>
 				{label}

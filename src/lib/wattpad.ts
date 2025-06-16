@@ -49,6 +49,33 @@ export function formatWattpadStat(value: string): string {
 	}
 }
 
+// Utility function to display exact stats for landing page
+export function formatWattpadStatExact(value: string): string {
+	if (!value || value === '0') return '85,000'
+
+	// Convert value to number (handle K, M suffixes)
+	const getNumericValue = (val: string): number => {
+		const num = parseFloat(val.replace(/[kmb]/i, ''))
+		const suffix = val.slice(-1).toLowerCase()
+
+		switch (suffix) {
+			case 'k':
+				return num * 1000
+			case 'm':
+				return num * 1000000
+			case 'b':
+				return num * 1000000000
+			default:
+				return parseFloat(val) || 0
+		}
+	}
+
+	const numericValue = getNumericValue(value)
+
+	// Return exact number with commas
+	return numericValue.toLocaleString('fr-FR')
+}
+
 export async function fetchWattpadStats(): Promise<WattpadStats | null> {
 	try {
 		const response = await fetch('https://www.wattpad.com/user/Esperancem', {
@@ -62,7 +89,8 @@ export async function fetchWattpadStats(): Promise<WattpadStats | null> {
 				'User-Agent':
 					'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
 			},
-			next: { revalidate: 86400 }, // 24 hours cache
+			// ISR: revalidate every 24 hours
+			next: { revalidate: 86400 },
 		})
 
 		if (!response.ok) {

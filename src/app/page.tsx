@@ -9,34 +9,13 @@ import {
 	TikTokIcon,
 	WattpadIcon,
 } from '@/components/SocialIcons'
-import { WattpadStats } from '@/components/WattpadStats'
-import { WattpadStatsProvider } from '@/contexts/WattpadStatsContext'
-import { useFormattedWattpadStats } from '@/hooks/useFormattedWattpadStats'
+import { SSGWattpadStats } from '@/components/SSGWattpadStats'
 import bookCover from '@/images/photos/cover_on_book.jpg'
-import { fetchWattpadStats } from '@/lib/wattpad'
+import { generateHomeMetadata } from '@/lib/metadata'
+import { fetchWattpadStats, formatWattpadStat } from '@/lib/wattpad'
 
-export const metadata: Metadata = {
-	description:
-		"Découvrez l'univers sombre et passionné d'Espérance Masson. Lisez \"Cœurs Sombres\", son premier roman dark romance sur Wattpad qui captive des milliers de lecteurs. Plongez dans une histoire d'enemies to lovers avec Lucas Ferrari et Angèle.",
-	keywords: [
-		'Cœurs Sombres Wattpad',
-		'Lucas Ferrari',
-		'Angèle roman',
-		'dark romance française',
-		'enemies to lovers français',
-		'mafia romance Wattpad',
-		'roman passion sombre',
-		'autrice française Wattpad',
-		'livre gratuit Wattpad',
-		'romance française 2025',
-	],
-	openGraph: {
-		description:
-			'Plongez dans l\'univers dark romance d\'Espérance Masson. "Cœurs Sombres" - Son premier roman dark romance sur Wattpad.',
-		title: 'Espérance Masson - Autrice Dark Romance | Cœurs Sombres Wattpad',
-		url: 'https://esperancem.fr',
-	},
-	title: 'Accueil - Espérance Masson | Autrice de Cœurs Sombres',
+export async function generateMetadata(): Promise<Metadata> {
+	return await generateHomeMetadata()
 }
 
 function SocialLink({
@@ -52,8 +31,12 @@ function SocialLink({
 	)
 }
 
-function WattpadReadsText() {
-	const { formattedReads } = useFormattedWattpadStats()
+interface WattpadReadsTextProps {
+	stats: Awaited<ReturnType<typeof fetchWattpadStats>>
+}
+
+function WattpadReadsText({ stats }: WattpadReadsTextProps) {
+	const formattedReads = stats?.reads ? formatWattpadStat(stats.reads) : '85k+'
 	return (
 		<span className='font-semibold text-zinc-200'>
 			{formattedReads} lectures
@@ -86,7 +69,11 @@ function BookCover() {
 	)
 }
 
-function DarkHeartsBook() {
+interface DarkHeartsBookProps {
+	stats: Awaited<ReturnType<typeof fetchWattpadStats>>
+}
+
+function DarkHeartsBook({ stats }: DarkHeartsBookProps) {
 	return (
 		<div className='flex flex-col gap-y-6 rounded-2xl border border-zinc-700/40 p-6'>
 			<div>
@@ -150,7 +137,7 @@ function DarkHeartsBook() {
 						(16/06/2025)
 					</p>
 					<p className='w-full text-zinc-300'>
-						Plus de <WattpadReadsText /> sur Wattpad
+						Plus de <WattpadReadsText stats={stats} /> sur Wattpad
 					</p>
 				</div>
 			</div>
@@ -167,10 +154,11 @@ function DarkHeartsBook() {
 }
 
 export default async function Home() {
-	// Fetch Wattpad stats server-side for better NumberFlow performance
-	const initialStats = await fetchWattpadStats()
+	// Fetch Wattpad stats server-side for SSG with ISR
+	const stats = await fetchWattpadStats()
+
 	return (
-		<WattpadStatsProvider initialStats={initialStats}>
+		<>
 			<Container className='mt-9'>
 				<div className='max-w-2xl'>
 					<h1 className='text-4xl font-bold tracking-tight text-zinc-100 sm:text-5xl'>
@@ -205,7 +193,7 @@ export default async function Home() {
 			</Container>
 
 			<Container className='mt-16 md:mt-20'>
-				<WattpadStats />
+				<SSGWattpadStats stats={stats} />
 			</Container>
 
 			<Container className='mt-24 md:mt-28'>
@@ -214,10 +202,10 @@ export default async function Home() {
 						<BookCover />
 					</div>
 					<div className='space-y-10 lg:pl-16 xl:pl-24'>
-						<DarkHeartsBook />
+						<DarkHeartsBook stats={stats} />
 					</div>
 				</div>
 			</Container>
-		</WattpadStatsProvider>
+		</>
 	)
 }
