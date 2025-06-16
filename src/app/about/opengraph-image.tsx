@@ -1,6 +1,6 @@
 import { ImageResponse } from 'next/og'
 
-import { fetchWattpadStats } from '@/lib/wattpad'
+import { fetchWattpadStats, formatWattpadStat } from '@/lib/wattpad'
 
 // Image metadata
 export const alt = "Portrait d'Espérance Masson, autrice de dark romance"
@@ -153,11 +153,9 @@ export default async function Image() {
 									fontWeight: 'bold',
 								}}
 							>
-								{stats?.readsComplete
-									? `${Math.floor(parseInt(stats.readsComplete) / 1000)}k+`
-									: '85k+'}
+								{stats?.reads ? formatWattpadStat(stats.reads) : '85k+'}
 							</div>
-							<div style={{ color: '#71717a', fontSize: 14 }}>Lecteurs</div>
+							<div style={{ color: '#71717a', fontSize: 14 }}>Lectures</div>
 						</div>
 
 						<div
@@ -174,9 +172,9 @@ export default async function Image() {
 									fontWeight: 'bold',
 								}}
 							>
-								#1
+								{stats?.votes || '5k+'}
 							</div>
-							<div style={{ color: '#71717a', fontSize: 14 }}>Classements</div>
+							<div style={{ color: '#71717a', fontSize: 14 }}>J&apos;aime</div>
 						</div>
 
 						<div
@@ -193,7 +191,7 @@ export default async function Image() {
 									fontWeight: 'bold',
 								}}
 							>
-								{stats?.parts || '47'}
+								{stats?.parts || '50+'}
 							</div>
 							<div style={{ color: '#71717a', fontSize: 14 }}>Chapitres</div>
 						</div>
