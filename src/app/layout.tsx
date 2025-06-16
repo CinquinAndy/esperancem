@@ -26,7 +26,7 @@ export const metadata: Metadata = {
 	classification: 'Dark Romance, Literature',
 	creator: 'Espérance Masson',
 	description:
-		'Site officiel d\'Espérance Masson, autrice française de dark romance. Découvrez "Cœurs Sombres", son roman #1 sur Wattpad avec plus de 85k lectures. Dark romance, enemies to lovers, mafia romance.',
+		'Site officiel d\'Espérance Masson, autrice française de dark romance. Découvrez "Cœurs Sombres", son roman #1 sur Wattpad avec des milliers de lectures. Dark romance, enemies to lovers, mafia romance.',
 	keywords: [
 		'Espérance Masson',
 		'autrice française',
@@ -48,7 +48,7 @@ export const metadata: Metadata = {
 	metadataBase: new URL('https://esperancem.fr'),
 	openGraph: {
 		description:
-			'Découvrez l\'univers d\'Espérance Masson, autrice française de dark romance. "Cœurs Sombres" - #1 sur Wattpad avec plus de 85k lectures.',
+			'Découvrez l\'univers d\'Espérance Masson, autrice française de dark romance. "Cœurs Sombres" - #1 sur Wattpad avec des milliers de lectures.',
 		images: [
 			{
 				alt: 'Espérance Masson - Autrice de Cœurs Sombres',

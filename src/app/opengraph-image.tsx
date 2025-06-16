@@ -1,6 +1,6 @@
 import { ImageResponse } from 'next/og'
 
-import { fetchWattpadStats } from '@/lib/wattpad'
+import { fetchWattpadStats, formatWattpadStat } from '@/lib/wattpad'
 
 // Image metadata
 export const alt = 'Cœurs Sombres - Dark Romance par Espérance Masson'
@@ -145,7 +145,7 @@ export default async function Image() {
 									fontWeight: 'bold',
 								}}
 							>
-								{stats?.reads || '85k+'}
+								{stats?.reads ? formatWattpadStat(stats.reads) : '85k+'}
 							</div>
 							<div style={{ color: '#a1a1aa', fontSize: 14 }}>Lectures</div>
 						</div>

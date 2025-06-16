@@ -7,6 +7,48 @@ interface WattpadStats {
 	lastUpdated: number
 }
 
+// Utility function to format stats value, rounding down to nearest hundred
+export function formatWattpadStat(value: string): string {
+	if (!value || value === '0') return '85k+'
+
+	// Convert value to number (handle K, M suffixes)
+	const getNumericValue = (val: string): number => {
+		const num = parseFloat(val.replace(/[kmb]/i, ''))
+		const suffix = val.slice(-1).toLowerCase()
+
+		switch (suffix) {
+			case 'k':
+				return num * 1000
+			case 'm':
+				return num * 1000000
+			case 'b':
+				return num * 1000000000
+			default:
+				return parseFloat(val) || 0
+		}
+	}
+
+	const numericValue = getNumericValue(value)
+
+	// Round down to nearest hundred
+	const roundedDown = Math.floor(numericValue / 100) * 100
+
+	// Format back to K/M notation
+	if (roundedDown >= 1000000) {
+		const millions = Math.floor(roundedDown / 1000000)
+		const thousands = Math.floor((roundedDown % 1000000) / 1000)
+		return thousands > 0
+			? `${millions}.${Math.floor(thousands / 100)}M+`
+			: `${millions}M+`
+	} else if (roundedDown >= 1000) {
+		const thousands = Math.floor(roundedDown / 1000)
+		const hundreds = Math.floor((roundedDown % 1000) / 100)
+		return hundreds > 0 ? `${thousands}.${hundreds}k+` : `${thousands}k+`
+	} else {
+		return `${roundedDown}+`
+	}
+}
+
 export async function fetchWattpadStats(): Promise<WattpadStats | null> {
 	try {
 		const response = await fetch('https://www.wattpad.com/user/Esperancem', {

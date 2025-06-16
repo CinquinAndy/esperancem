@@ -11,12 +11,13 @@ import {
 } from '@/components/SocialIcons'
 import { WattpadStats } from '@/components/WattpadStats'
 import { WattpadStatsProvider } from '@/contexts/WattpadStatsContext'
+import { useFormattedWattpadStats } from '@/hooks/useFormattedWattpadStats'
 import bookCover from '@/images/photos/cover_on_book.jpg'
 import { fetchWattpadStats } from '@/lib/wattpad'
 
 export const metadata: Metadata = {
 	description:
-		"Découvrez l'univers sombre et passionné d'Espérance Masson. Lisez \"Cœurs Sombres\", son premier roman dark romance sur Wattpad qui captive plus de 85k lecteurs. Plongez dans une histoire d'enemies to lovers avec Lucas Ferrari et Angèle.",
+		"Découvrez l'univers sombre et passionné d'Espérance Masson. Lisez \"Cœurs Sombres\", son premier roman dark romance sur Wattpad qui captive des milliers de lecteurs. Plongez dans une histoire d'enemies to lovers avec Lucas Ferrari et Angèle.",
 	keywords: [
 		'Cœurs Sombres Wattpad',
 		'Lucas Ferrari',
@@ -48,6 +49,15 @@ function SocialLink({
 		<Link className='group -m-1 p-1' {...props}>
 			<Icon className='h-6 w-6 fill-zinc-400 transition group-hover:fill-zinc-300' />
 		</Link>
+	)
+}
+
+function WattpadReadsText() {
+	const { formattedReads } = useFormattedWattpadStats()
+	return (
+		<span className='font-semibold text-zinc-200'>
+			{formattedReads} lectures
+		</span>
 	)
 }
 
@@ -140,9 +150,7 @@ function DarkHeartsBook() {
 						(16/06/2025)
 					</p>
 					<p className='w-full text-zinc-300'>
-						Plus de{' '}
-						<span className='font-semibold text-zinc-200'>85k lectures</span>{' '}
-						sur Wattpad
+						Plus de <WattpadReadsText /> sur Wattpad
 					</p>
 				</div>
 			</div>

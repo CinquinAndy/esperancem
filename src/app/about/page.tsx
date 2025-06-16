@@ -8,8 +8,11 @@ import {
 	TikTokIcon,
 	WattpadIcon,
 } from '@/components/SocialIcons'
+import { WattpadStatsText } from '@/components/WattpadStatsText'
+import { WattpadStatsProvider } from '@/contexts/WattpadStatsContext'
 import portraitImage from '@/images/avatar.jpeg'
 import bookCover from '@/images/photos/cover_on_book.jpg'
+import { fetchWattpadStats } from '@/lib/wattpad'
 
 function SocialLink({
 	children,
@@ -80,9 +83,11 @@ export const metadata: Metadata = {
 	title: "À propos d'Espérance Masson - Autrice Dark Romance | Cœurs Sombres",
 }
 
-export default function About() {
+export default async function About() {
+	const initialStats = await fetchWattpadStats()
+
 	return (
-		<>
+		<WattpadStatsProvider initialStats={initialStats}>
 			<Container className='mt-16 sm:mt-32'>
 				<div className='grid grid-cols-1 gap-y-16 lg:grid-cols-2 lg:grid-rows-[auto_1fr] lg:gap-y-12'>
 					<div className='lg:pl-20'>
@@ -109,11 +114,12 @@ export default function About() {
 								questionnent les limites entre l&apos;amour et l&apos;obsession.
 							</p>
 							<p>
-								Mon roman &quot;Cœurs Sombres&quot; a conquis plus de 85k
-								lecteurs sur Wattpad et atteint la première place dans plusieurs
-								catégories. Cette enemies to lovers mafia romance suit
-								l&apos;histoire troublante d&apos;Angèle et Lucas Ferrari, deux
-								âmes brisées liées par des secrets destructeurs.
+								Mon roman &quot;Cœurs Sombres&quot; a conquis plus de{' '}
+								<WattpadStatsText type='reads' suffix=' lecteurs' /> sur Wattpad
+								et atteint la première place dans plusieurs catégories. Cette
+								enemies to lovers mafia romance suit l&apos;histoire troublante
+								d&apos;Angèle et Lucas Ferrari, deux âmes brisées liées par des
+								secrets destructeurs.
 							</p>
 							<p>
 								N&apos;hésitez pas à venir me retrouver sur mes réseaux sociaux
@@ -204,10 +210,11 @@ export default function About() {
 								</p>
 								<p>
 									Disponible gratuitement sur Wattpad, ce livre a déjà conquis
-									plus de 85k lecteurs et obtenu plusieurs classements #1 dans
-									les catégories enemies to lovers, trahisons, meurtres et
-									amitiés. Cette romance française sombre continue de captiver
-									de nouveaux lecteurs chaque jour.
+									plus de <WattpadStatsText type='reads' suffix=' lecteurs' />{' '}
+									et obtenu plusieurs classements #1 dans les catégories enemies
+									to lovers, trahisons, meurtres et amitiés. Cette romance
+									française sombre continue de captiver de nouveaux lecteurs
+									chaque jour.
 								</p>
 								<p>
 									<strong>Suivez-moi :</strong> @esp_masson sur Instagram et
@@ -219,6 +226,6 @@ export default function About() {
 					</div>
 				</div>
 			</Container>
-		</>
+		</WattpadStatsProvider>
 	)
 }
