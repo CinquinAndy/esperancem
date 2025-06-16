@@ -15,7 +15,7 @@ interface WattpadStatsResponse {
 }
 
 const CACHE_KEY = 'wattpad-stats-cache'
-const CACHE_DURATION = 24 * 60 * 60 * 1000 // 24 hours in milliseconds
+const CACHE_DURATION = 6 * 60 * 60 * 1000 // 6 hours in milliseconds
 
 export function useWattpadStats() {
 	const [stats, setStats] = useState<WattpadStats | null>(null)
@@ -76,7 +76,7 @@ export function useWattpadStats() {
 	useEffect(() => {
 		fetchStats()
 
-		// Set up automatic refresh every 24 hours
+		// Set up automatic refresh every 6 hours
 		const interval = setInterval(() => {
 			fetchStats()
 		}, CACHE_DURATION)

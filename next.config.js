@@ -35,7 +35,7 @@ const nextConfig = {
 				headers: [
 					{
 						key: 'Cache-Control',
-						value: 's-maxage=86400, stale-while-revalidate=604800', // 24h cache, 1 week stale
+						value: 's-maxage=21600, stale-while-revalidate=86400', // 6h cache, 1 day stale
 					},
 				],
 				source: '/api/wattpad-stats',

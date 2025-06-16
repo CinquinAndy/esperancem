@@ -96,8 +96,8 @@ export async function fetchWattpadStats(): Promise<WattpadStats | null> {
 				'User-Agent':
 					'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
 			},
-			// ISR: revalidate every 24 hours
-			next: { revalidate: 86400 },
+			// ISR: revalidate every 6 hours
+			next: { revalidate: 21600 },
 		})
 
 		if (!response.ok) {

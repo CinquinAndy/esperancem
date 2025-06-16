@@ -8,7 +8,7 @@ let cacheTimestamp = 0
 
 async function getWattpadStats() {
 	const now = Date.now()
-	const CACHE_DURATION = 24 * 60 * 60 * 1000 // 24 heures
+	const CACHE_DURATION = 6 * 60 * 60 * 1000 // 6 heures
 
 	if (!cachedStats || now - cacheTimestamp > CACHE_DURATION) {
 		cachedStats = await fetchWattpadStats()
