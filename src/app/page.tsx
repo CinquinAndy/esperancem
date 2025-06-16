@@ -9,7 +9,7 @@ import {
 	TikTokIcon,
 	WattpadIcon,
 } from '@/components/SocialIcons'
-import { SSGWattpadStats } from '@/components/SSGWattpadStats'
+import { WattpadStats } from '@/components/WattpadStats'
 import bookCover from '@/images/photos/cover_on_book.jpg'
 import { generateHomeMetadata } from '@/lib/metadata'
 import { fetchWattpadStats, formatWattpadStat } from '@/lib/wattpad'
@@ -192,8 +192,9 @@ export default async function Home() {
 				</div>
 			</Container>
 
+			{/* Wattpad Stats */}
 			<Container className='mt-16 md:mt-20'>
-				<SSGWattpadStats stats={stats} />
+				<WattpadStats />
 			</Container>
 
 			<Container className='mt-24 md:mt-28'>

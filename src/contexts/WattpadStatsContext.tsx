@@ -1,6 +1,12 @@
 'use client'
 
-import { createContext, useContext, useEffect, useState } from 'react'
+import {
+	createContext,
+	useCallback,
+	useContext,
+	useEffect,
+	useState,
+} from 'react'
 
 interface WattpadStats {
 	reads: string
@@ -37,55 +43,59 @@ export function WattpadStatsProvider({
 	const [loading, setLoading] = useState(!initialStats)
 	const [error, setError] = useState<string | null>(null)
 
-	const fetchStats = async (force = false) => {
-		try {
-			setLoading(true)
-			setError(null)
+	const fetchStats = useCallback(
+		async (force = false) => {
+			try {
+				setLoading(true)
+				setError(null)
 
-			// Check local cache first (only if not forced and no initial stats)
-			if (!force && !initialStats) {
-				const cachedData = localStorage.getItem(CACHE_KEY)
-				if (cachedData) {
-					const parsed: WattpadStats = JSON.parse(cachedData)
-					const now = Date.now()
+				// Check local cache first (only if not forced and no initial stats)
+				if (!force && !initialStats) {
+					const cachedData = localStorage.getItem(CACHE_KEY)
+					if (cachedData) {
+						const parsed: WattpadStats = JSON.parse(cachedData)
+						const now = Date.now()
 
-					if (now - parsed.lastUpdated < CACHE_DURATION) {
-						setStats(parsed)
-						setLoading(false)
-						return
+						if (now - parsed.lastUpdated < CACHE_DURATION) {
+							setStats(parsed)
+							setLoading(false)
+							return
+						}
 					}
 				}
-			}
 
-			// Fetch from API
-			const response = await fetch('/api/wattpad-stats')
-			const result = await response.json()
+				// Fetch from API
+				const response = await fetch('/api/wattpad-stats')
+				const result = await response.json()
 
-			if (result.success && result.data) {
-				// Update local cache
+				if (result.success && result.data) {
+					// Update local cache
+					if (typeof window !== 'undefined') {
+						localStorage.setItem(CACHE_KEY, JSON.stringify(result.data))
+					}
+					setStats(result.data)
+				} else {
+					throw new Error(result.error || 'Failed to fetch stats')
+				}
+			} catch (err) {
+				const errorMessage =
+					err instanceof Error ? err.message : 'Unknown error'
+				setError(errorMessage)
+
+				// Try to use cached data as fallback
 				if (typeof window !== 'undefined') {
-					localStorage.setItem(CACHE_KEY, JSON.stringify(result.data))
+					const cachedData = localStorage.getItem(CACHE_KEY)
+					if (cachedData) {
+						const parsed: WattpadStats = JSON.parse(cachedData)
+						setStats(parsed)
+					}
 				}
-				setStats(result.data)
-			} else {
-				throw new Error(result.error || 'Failed to fetch stats')
+			} finally {
+				setLoading(false)
 			}
-		} catch (err) {
-			const errorMessage = err instanceof Error ? err.message : 'Unknown error'
-			setError(errorMessage)
-
-			// Try to use cached data as fallback
-			if (typeof window !== 'undefined') {
-				const cachedData = localStorage.getItem(CACHE_KEY)
-				if (cachedData) {
-					const parsed: WattpadStats = JSON.parse(cachedData)
-					setStats(parsed)
-				}
-			}
-		} finally {
-			setLoading(false)
-		}
-	}
+		},
+		[initialStats]
+	)
 
 	const refreshStats = () => fetchStats(true)
 

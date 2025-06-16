@@ -3,7 +3,10 @@
 import NumberFlow from '@number-flow/react'
 import { useEffect, useState } from 'react'
 
-import { useWattpadStats } from '@/contexts/WattpadStatsContext'
+import {
+	useWattpadStats,
+	WattpadStatsProvider,
+} from '@/contexts/WattpadStatsContext'
 
 interface StatItemProps {
 	value: string
@@ -52,9 +55,19 @@ function StatItem({ label, shouldAnimate = false, value }: StatItemProps) {
 	return (
 		<div className='group flex flex-col items-center rounded-lg p-2 transition-all duration-300'>
 			<div className='mb-1 text-2xl font-bold text-white'>
-				<span className='font-alex-brush text-6xl'>
-					{displayValue.toLocaleString('fr-FR')}
-				</span>
+				<NumberFlow
+					value={displayValue}
+					format={{
+						maximumFractionDigits: 1,
+						notation: 'standard',
+					}}
+					transformTiming={{
+						duration: 1000,
+						easing: 'ease-in-out',
+					}}
+					locales='fr-FR'
+					className='font-alex-brush text-6xl'
+				/>
 			</div>
 			<div className='font-mono text-lg font-medium text-white/70 italic'>
 				{label}
@@ -63,7 +76,7 @@ function StatItem({ label, shouldAnimate = false, value }: StatItemProps) {
 	)
 }
 
-export function WattpadStats() {
+function WattpadStatsContent() {
 	const { stats } = useWattpadStats()
 	const [hasAnimated, setHasAnimated] = useState(false)
 
@@ -72,7 +85,8 @@ export function WattpadStats() {
 		if (stats && !hasAnimated) {
 			setHasAnimated(true)
 		}
-	}, [stats, hasAnimated])
+	}, [stats, 
+		hasAnimated])
 
 	return (
 		<div className='mx-auto w-full max-w-7xl'>
@@ -97,5 +111,13 @@ export function WattpadStats() {
 				/>
 			</div>
 		</div>
+	)
+}
+
+export function WattpadStats() {
+	return (
+		<WattpadStatsProvider>
+			<WattpadStatsContent />
+		</WattpadStatsProvider>
 	)
 }
