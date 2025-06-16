@@ -53,7 +53,7 @@ export default async function Image() {
 						}}
 					>
 						<img
-							src='https://esperancem.fr/avatar.jpg'
+							src='https://esperancem.fr/avatar.jpeg'
 							alt='Espérance Masson'
 							width='280'
 							height='280'
@@ -123,9 +123,10 @@ export default async function Image() {
 							maxWidth: '600px',
 						}}
 					>
-						Créatrice de &quot;Cœurs Sombres&quot;, j&apos;explore les
-						profondeurs de l&apos;âme humaine à travers des histoires intenses
-						et captivantes.
+						Créatrice de{' '}
+						<span style={{ fontStyle: 'italic' }}>Cœurs Sombres</span>, j&apos;
+						explore les profondeurs de l&apos;âme humaine à travers des
+						histoires intenses et captivantes.
 					</div>
 
 					{/* Stats */}

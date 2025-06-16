@@ -2,13 +2,12 @@ import { type Metadata } from 'next'
 
 import { fetchWattpadStats, formatWattpadStat } from './wattpad'
 
-// Cache pour éviter de refetch les stats à chaque génération de métadonnées
 let cachedStats: Awaited<ReturnType<typeof fetchWattpadStats>> | null = null
 let cacheTimestamp = 0
 
 async function getWattpadStats() {
 	const now = Date.now()
-	const CACHE_DURATION = 6 * 60 * 60 * 1000 // 6 heures
+	const CACHE_DURATION = 6 * 60 * 60 * 1000
 
 	if (!cachedStats || now - cacheTimestamp > CACHE_DURATION) {
 		cachedStats = await fetchWattpadStats()
@@ -61,7 +60,7 @@ export async function generateLayoutMetadata(): Promise<Metadata> {
 		category: 'Literature & Fiction',
 		classification: 'Dark Romance, Literature',
 		creator: 'Espérance Masson',
-		description: `Site officiel d'Espérance Masson, autrice française de dark romance. Découvrez "Cœurs Sombres", son roman #1 sur Wattpad avec plus de ${formattedReads.replace('+', '')} lectures. Dark romance, enemies to lovers, mafia romance.`,
+		description: `Site officiel d'Espérance Masson, autrice française de dark romance. Découvrez "Cœurs Sombres", son premier roman sur Wattpad avec plus de ${formattedReads.replace('+', '')} lectures. Dark romance, enemies to lovers, mafia romance.`,
 		keywords: [
 			'Espérance Masson',
 			'autrice française',
@@ -109,7 +108,7 @@ export async function generateLayoutMetadata(): Promise<Metadata> {
 		twitter: {
 			card: 'summary_large_image',
 			creator: '@esp_masson',
-			description: `Découvrez l'univers d'Espérance Masson, autrice française de dark romance. "Cœurs Sombres" - #1 sur Wattpad avec plus de ${formattedReads.replace('+', '')} lectures.`,
+			description: `Découvrez l'univers d'Espérance Masson, autrice française de dark romance. "Cœurs Sombres" - son premier roman sur Wattpad avec plus de ${formattedReads.replace('+', '')} lectures.`,
 			site: '@esp_masson',
 			title: 'Espérance Masson - Autrice de Dark Romance | Cœurs Sombres',
 		},
@@ -140,7 +139,7 @@ export async function generateAboutMetadata(): Promise<Metadata> {
 			'romance française indépendante',
 		],
 		openGraph: {
-			description: `Rencontrez Espérance Masson, l'autrice derrière le phénomène "Cœurs Sombres". Une plume française qui excelle dans la dark romance avec plus de ${formattedReads} lecteurs.`,
+			description: `Rencontrez Espérance Masson, l'autrice derrière le roman "Cœurs Sombres". Une plume française qui excelle dans la dark romance avec plus de ${formattedReads} lecteurs.`,
 			title: "À propos d'Espérance Masson - Autrice de Cœurs Sombres",
 			url: 'https://esperancem.fr/about',
 		},
