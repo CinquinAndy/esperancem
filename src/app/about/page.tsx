@@ -51,7 +51,7 @@ function MailIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
 
 export const metadata: Metadata = {
 	description:
-		'Découvrez Espérance Masson, autrice française passionnée de dark romance. Créatrice du bestseller "Cœurs Sombres" sur Wattpad, elle explore les profondeurs de l\'âme humaine à travers des histoires intenses et captivantes. Suivez esp_masson sur Instagram et TikTok.',
+		'Découvrez Espérance Masson, autrice française passionnée de dark romance. Créatrice du roman "Cœurs Sombres" sur Wattpad, elle explore les profondeurs de l\'âme humaine à travers des histoires intenses et captivantes. Suivez esp_masson sur Instagram et TikTok.',
 	keywords: [
 		'Espérance Masson biographie',
 		'autrice française dark romance',
@@ -61,7 +61,7 @@ export const metadata: Metadata = {
 		'romancière française',
 		'dark romance France',
 		'@_esperance_masson TikTok',
-		'autrice française 2024',
+		'autrice française 2025',
 		'écrivaine romance sombre',
 		'littérature française contemporaine',
 		'romance française indépendante',

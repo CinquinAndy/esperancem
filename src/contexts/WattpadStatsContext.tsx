@@ -45,8 +45,7 @@ export function WattpadStatsProvider({
 	const [error, setError] = useState<string | null>(null)
 
 	const fetchStats = useCallback(
-		// async (force = false) => {
-		async (force = true) => {
+		async (force = false) => {
 			try {
 				setLoading(true)
 				setError(null)

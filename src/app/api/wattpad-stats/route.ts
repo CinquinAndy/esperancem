@@ -11,8 +11,7 @@ interface WattpadStats {
 }
 
 // Cache duration: 24 hours in milliseconds
-// const CACHE_DURATION = 24 * 60 * 60 * 1000
-const CACHE_DURATION = 0
+const CACHE_DURATION = 24 * 60 * 60 * 1000
 
 // Simple in-memory cache (in production, consider using Redis or database)
 let statsCache: WattpadStats | null = null
