@@ -106,7 +106,7 @@ export default async function Image() {
 							marginBottom: '12px',
 						}}
 					>
-						Dark Romance à succès sur Wattpad
+						Dark Romance sur Wattpad
 					</div>
 
 					{/* Author */}
