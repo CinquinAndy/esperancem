@@ -82,6 +82,7 @@ export default async function Image() {
 					<div
 						style={{
 							color: '#f4f4f5',
+							display: 'block',
 							fontSize: 48,
 							fontWeight: 'bold',
 							lineHeight: 1.1,
@@ -95,6 +96,7 @@ export default async function Image() {
 					<div
 						style={{
 							background: '#14b8a6',
+							display: 'block',
 							height: '1px',
 							marginBottom: '16px',
 							width: '80px',
@@ -105,6 +107,7 @@ export default async function Image() {
 					<div
 						style={{
 							color: '#d4d4d8',
+							display: 'block',
 							fontSize: 24,
 							fontWeight: '300',
 							marginBottom: '24px',
@@ -117,16 +120,15 @@ export default async function Image() {
 					<div
 						style={{
 							color: '#a1a1aa',
+							display: 'block',
 							fontSize: 18,
 							lineHeight: 1.4,
 							marginBottom: '32px',
 							maxWidth: '600px',
 						}}
 					>
-						Créatrice de{' '}
-						<span style={{ fontStyle: 'italic' }}>Cœurs Sombres</span>, j&apos;
-						explore les profondeurs de l&apos;âme humaine à travers des
-						histoires intenses et captivantes.
+						Créatrice de Cœurs Sombres, j&apos;explore les profondeurs de
+						l&apos;âme humaine à travers des histoires intenses et captivantes.
 					</div>
 
 					{/* Stats */}
@@ -147,13 +149,22 @@ export default async function Image() {
 							<div
 								style={{
 									color: '#14b8a6',
+									display: 'block',
 									fontSize: 28,
 									fontWeight: 'bold',
 								}}
 							>
 								{stats?.reads ? formatWattpadStat(stats.reads) : '85k+'}
 							</div>
-							<div style={{ color: '#71717a', fontSize: 14 }}>Lectures</div>
+							<div
+								style={{
+									color: '#71717a',
+									display: 'block',
+									fontSize: 14,
+								}}
+							>
+								Lectures
+							</div>
 						</div>
 
 						<div
@@ -166,13 +177,22 @@ export default async function Image() {
 							<div
 								style={{
 									color: '#14b8a6',
+									display: 'block',
 									fontSize: 28,
 									fontWeight: 'bold',
 								}}
 							>
 								{stats?.votes || '5k+'}
 							</div>
-							<div style={{ color: '#71717a', fontSize: 14 }}>J&apos;aime</div>
+							<div
+								style={{
+									color: '#71717a',
+									display: 'block',
+									fontSize: 14,
+								}}
+							>
+								J&apos;aime
+							</div>
 						</div>
 
 						<div
@@ -185,13 +205,22 @@ export default async function Image() {
 							<div
 								style={{
 									color: '#14b8a6',
+									display: 'block',
 									fontSize: 28,
 									fontWeight: 'bold',
 								}}
 							>
 								{stats?.parts || '50+'}
 							</div>
-							<div style={{ color: '#71717a', fontSize: 14 }}>Chapitres</div>
+							<div
+								style={{
+									color: '#71717a',
+									display: 'block',
+									fontSize: 14,
+								}}
+							>
+								Chapitres
+							</div>
 						</div>
 					</div>
 
@@ -216,6 +245,7 @@ export default async function Image() {
 							<div
 								style={{
 									color: '#14b8a6',
+									display: 'block',
 									fontSize: 14,
 									fontWeight: '500',
 								}}
@@ -236,6 +266,7 @@ export default async function Image() {
 							<div
 								style={{
 									color: '#14b8a6',
+									display: 'block',
 									fontSize: 14,
 									fontWeight: '500',
 								}}
@@ -261,6 +292,7 @@ export default async function Image() {
 							<div
 								style={{
 									color: '#14b8a6',
+									display: 'block',
 									fontSize: 14,
 									fontWeight: '500',
 								}}
@@ -276,6 +308,7 @@ export default async function Image() {
 					style={{
 						background:
 							'radial-gradient(circle at 20% 80%, rgba(20, 184, 166, 0.05) 0%, transparent 50%)',
+						display: 'block',
 						height: '100%',
 						left: 0,
 						position: 'absolute',
