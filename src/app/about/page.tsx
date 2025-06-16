@@ -12,6 +12,7 @@ import { WattpadStatsText } from '@/components/WattpadStatsText'
 import { WattpadStatsProvider } from '@/contexts/WattpadStatsContext'
 import portraitImage from '@/images/avatar.jpeg'
 import bookCover from '@/images/photos/cover_on_book.jpg'
+import { generateAboutMetadata } from '@/lib/metadata'
 import { fetchWattpadStats } from '@/lib/wattpad'
 
 function SocialLink({
@@ -49,38 +50,8 @@ function MailIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
 	)
 }
 
-export const metadata: Metadata = {
-	description:
-		'Découvrez Espérance Masson, autrice française passionnée de dark romance. Créatrice du roman "Cœurs Sombres" sur Wattpad, elle explore les profondeurs de l\'âme humaine à travers des histoires intenses et captivantes. Suivez esp_masson sur Instagram et TikTok.',
-	keywords: [
-		'Espérance Masson biographie',
-		'autrice française dark romance',
-		'esp_masson Instagram',
-		'écrivaine française Wattpad',
-		'auteure Cœurs Sombres',
-		'romancière française',
-		'dark romance France',
-		'@_esperance_masson TikTok',
-		'autrice française 2025',
-		'écrivaine romance sombre',
-		'littérature française contemporaine',
-		'romance française indépendante',
-	],
-	openGraph: {
-		description:
-			'Rencontrez Espérance Masson, l\'autrice derrière le phénomène "Cœurs Sombres". Une plume française qui excelle dans la dark romance et les romances sombres.',
-		images: [
-			{
-				alt: "Portrait d'Espérance Masson, autrice de dark romance",
-				height: 630,
-				url: '/images/esperance-masson-portrait.jpg',
-				width: 1200,
-			},
-		],
-		title: "À propos d'Espérance Masson - Autrice de Cœurs Sombres",
-		url: 'https://esperancem.fr/about',
-	},
-	title: "À propos d'Espérance Masson - Autrice Dark Romance | Cœurs Sombres",
+export async function generateMetadata(): Promise<Metadata> {
+	return await generateAboutMetadata()
 }
 
 export default async function About() {
