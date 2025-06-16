@@ -127,10 +127,8 @@ export default async function Image() {
 							maxWidth: '600px',
 						}}
 					>
-						Créatrice de{' '}
-						<span style={{ fontStyle: 'italic' }}>Cœurs Sombres</span>,
-						j&apos;explore les profondeurs de l&apos;âme humaine à travers des
-						histoires intenses et captivantes.
+						Créatrice de Cœurs Sombres, j&apos;explore les profondeurs de
+						l&apos;âme humaine à travers des histoires intenses et captivantes.
 					</div>
 
 					{/* Stats */}
