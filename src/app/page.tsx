@@ -164,8 +164,8 @@ export default async function Home() {
 						impossibles et de la part d&apos;ombre qui sommeille en chacun de
 						nous.
 						<br />
-						Découvrez &quot;Cœurs Sombres&quot;, mon roman #1 sur Wattpad qui
-						captive plus de 85k lecteurs passionnés de romance française.
+						Découvrez &quot;Cœurs Sombres&quot;, mon premier roman sur Wattpad
+						qui captive plus de 85k lecteurs passionnés de romance française.
 					</p>
 					<div className='mt-6 flex gap-6'>
 						<SocialLink
