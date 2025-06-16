@@ -108,7 +108,7 @@ function WattpadStatsContent() {
 
 				<StatItem
 					value={stats?.votes ?? '0'}
-					label={`J'aime`}
+					label={`Votes`}
 					shouldAnimate={hasAnimated}
 				/>
 

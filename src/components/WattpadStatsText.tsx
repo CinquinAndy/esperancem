@@ -3,7 +3,7 @@
 import { useFormattedWattpadStats } from '@/hooks/useFormattedWattpadStats'
 
 interface WattpadStatsTextProps {
-	type: 'reads' | 'votes' | 'parts'
+	type: 'reads' | 'votes' | 'parts' | 'readsComplete'
 	fallback?: string
 	prefix?: string
 	suffix?: string
@@ -15,8 +15,12 @@ export function WattpadStatsText({
 	suffix = '',
 	type,
 }: WattpadStatsTextProps) {
-	const { formattedParts, formattedReads, formattedVotes } =
-		useFormattedWattpadStats()
+	const {
+		formattedParts,
+		formattedReads,
+		formattedReadsComplete,
+		formattedVotes,
+	} = useFormattedWattpadStats()
 
 	const getValue = () => {
 		switch (type) {
@@ -26,6 +30,8 @@ export function WattpadStatsText({
 				return formattedVotes
 			case 'parts':
 				return formattedParts
+			case 'readsComplete':
+				return formattedReadsComplete
 			default:
 				return fallback
 		}
