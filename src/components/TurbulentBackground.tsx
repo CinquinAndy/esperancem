@@ -228,7 +228,7 @@ export function TurbulentBackground() {
 			data-turbulent-background
 			className='fixed inset-0 -z-10 h-full w-full'
 			style={{
-				filter: 'blur(0.3px) contrast(1.1) brightness(0.8) saturate(1.3)',
+				filter: 'blur(0.3px) contrast(1.1) brightness(1.2) saturate(1.5)',
 				mixBlendMode: 'screen',
 				opacity: 0.9,
 			}}
