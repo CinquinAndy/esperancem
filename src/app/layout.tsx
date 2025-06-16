@@ -16,9 +16,9 @@ const alexBrush = Alex_Brush({
 
 export const metadata: Metadata = {
 	alternates: {
-		canonical: 'https://esperance-masson.fr',
+		canonical: 'https://esperancem.fr',
 		languages: {
-			'fr-FR': 'https://esperance-masson.fr',
+			'fr-FR': 'https://esperancem.fr',
 		},
 	},
 	authors: [{ name: 'Espérance Masson' }],
@@ -45,7 +45,7 @@ export const metadata: Metadata = {
 		'romance française',
 		'littérature française contemporaine',
 	],
-	metadataBase: new URL('https://esperance-masson.fr'),
+	metadataBase: new URL('https://esperancem.fr'),
 	openGraph: {
 		description:
 			'Découvrez l\'univers d\'Espérance Masson, autrice française de dark romance. "Cœurs Sombres" - #1 sur Wattpad avec plus de 100k lectures.',
@@ -61,7 +61,7 @@ export const metadata: Metadata = {
 		siteName: 'Espérance Masson - Autrice',
 		title: 'Espérance Masson - Autrice de Dark Romance | Cœurs Sombres',
 		type: 'website',
-		url: 'https://esperance-masson.fr',
+		url: 'https://esperancem.fr',
 	},
 	publisher: 'Espérance Masson',
 	robots: {
@@ -105,7 +105,7 @@ export default function RootLayout({
 							'@context': 'https://schema.org',
 							'@graph': [
 								{
-									'@id': 'https://esperance-masson.fr/#person',
+									'@id': 'https://esperancem.fr/#person',
 									'@type': 'Person',
 									alternateName: 'esp_masson',
 									description:
@@ -119,14 +119,14 @@ export default function RootLayout({
 										'https://www.tiktok.com/@_esperance_masson',
 										'https://www.wattpad.com/user/Esperancem',
 									],
-									url: 'https://esperance-masson.fr',
+									url: 'https://esperancem.fr',
 									worksFor: {
 										'@type': 'Organization',
 										name: 'Indépendante',
 									},
 								},
 								{
-									'@id': 'https://esperance-masson.fr/#book-coeurs-sombres',
+									'@id': 'https://esperancem.fr/#book-coeurs-sombres',
 									'@type': 'Book',
 									aggregateRating: {
 										'@type': 'AggregateRating',
@@ -135,7 +135,7 @@ export default function RootLayout({
 										ratingValue: '5',
 									},
 									author: {
-										'@id': 'https://esperance-masson.fr/#person',
+										'@id': 'https://esperancem.fr/#person',
 									},
 									datePublished: '2025',
 									description:
@@ -153,7 +153,7 @@ export default function RootLayout({
 									url: 'https://www.wattpad.com/story/368278312-c%C5%93urs-sombres',
 								},
 								{
-									'@id': 'https://esperance-masson.fr/#website',
+									'@id': 'https://esperancem.fr/#website',
 									'@type': 'WebSite',
 									description:
 										"Site officiel d'Espérance Masson, autrice de dark romance",
@@ -162,13 +162,12 @@ export default function RootLayout({
 									potentialAction: {
 										'@type': 'SearchAction',
 										'query-input': 'required name=search_term_string',
-										target:
-											'https://esperance-masson.fr/?s={search_term_string}',
+										target: 'https://esperancem.fr/?s={search_term_string}',
 									},
 									publisher: {
-										'@id': 'https://esperance-masson.fr/#person',
+										'@id': 'https://esperancem.fr/#person',
 									},
-									url: 'https://esperance-masson.fr',
+									url: 'https://esperancem.fr',
 								},
 							],
 						}),

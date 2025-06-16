@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next'
 
 export default function robots(): MetadataRoute.Robots {
-	const baseUrl = 'https://esperance-masson.fr'
+	const baseUrl = 'https://esperancem.fr'
 
 	return {
 		host: baseUrl,

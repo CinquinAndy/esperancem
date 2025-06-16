@@ -20,10 +20,11 @@ export default async function Image() {
 			<div
 				style={{
 					alignItems: 'stretch',
-					backgroundColor: '#0a0a0a',
+					background: 'linear-gradient(145deg, #0a0a0a, #1a1a1a)',
 					display: 'flex',
 					height: '100%',
-					width: '100%',
+					justifyContent: 'center',
+					width: '1200px',
 				}}
 			>
 				{/* Column 1: Stylized Book Cover */}
@@ -31,9 +32,9 @@ export default async function Image() {
 					style={{
 						alignItems: 'center',
 						display: 'flex',
-						flex: '0 0 280px',
+						flex: '0 0 300px',
+						padding: '0 50px 0 50px',
 						justifyContent: 'center',
-						padding: '40px 20px',
 					}}
 				>
 					<div
@@ -51,69 +52,13 @@ export default async function Image() {
 							width: '240px',
 						}}
 					>
-						{/* Book cover design */}
-						<div
+						<img
+							src='https://esperancem.fr/cover_on_book.jpg'
+							alt='Couverture Cœurs Sombres'
+							width='240'
+							height='400'
 							style={{
-								color: '#f4f4f5',
-								fontSize: 24,
-								fontWeight: 'bold',
-								marginBottom: '12px',
-								textAlign: 'center',
-							}}
-						>
-							CŒURS
-						</div>
-						<div
-							style={{
-								background: '#14b8a6',
-								height: '2px',
-								marginBottom: '12px',
-								width: '60px',
-							}}
-						/>
-						<div
-							style={{
-								color: '#f4f4f5',
-								fontSize: 24,
-								fontWeight: 'bold',
-								marginBottom: '24px',
-								textAlign: 'center',
-							}}
-						>
-							SOMBRES
-						</div>
-						<div
-							style={{
-								background: 'linear-gradient(45deg, #ef4444, #8b5cf6)',
-								borderRadius: '50%',
-								height: '80px',
-								opacity: 0.3,
-								width: '80px',
-							}}
-						/>
-						<div
-							style={{
-								color: '#a1a1aa',
-								fontSize: 14,
-								fontStyle: 'italic',
-								marginTop: '24px',
-								textAlign: 'center',
-							}}
-						>
-							Espérance Masson
-						</div>
-
-						{/* Glow effect */}
-						<div
-							style={{
-								background:
-									'linear-gradient(45deg, rgba(239, 68, 68, 0.1), rgba(147, 51, 234, 0.1))',
 								borderRadius: '12px',
-								height: '100%',
-								left: '-2px',
-								position: 'absolute',
-								top: '-2px',
-								width: '100%',
 							}}
 						/>
 					</div>
@@ -123,10 +68,10 @@ export default async function Image() {
 				<div
 					style={{
 						display: 'flex',
-						flex: '1',
+						flex: '0 0 700px',
 						flexDirection: 'column',
+						padding: '0 0px 0 100px',
 						justifyContent: 'center',
-						padding: '60px 40px 60px 20px',
 					}}
 				>
 					{/* Title */}
@@ -146,7 +91,7 @@ export default async function Image() {
 					<div
 						style={{
 							background: '#14b8a6',
-							height: '3px',
+							height: '1px',
 							marginBottom: '16px',
 							width: '100px',
 						}}
@@ -161,7 +106,7 @@ export default async function Image() {
 							marginBottom: '12px',
 						}}
 					>
-						Dark Romance #3 sur Wattpad
+						Dark Romance à succès sur Wattpad
 					</div>
 
 					{/* Author */}
@@ -187,8 +132,6 @@ export default async function Image() {
 						<div
 							style={{
 								alignItems: 'center',
-								backgroundColor: 'rgba(39, 39, 42, 0.4)',
-								border: '1px solid #3f3f46',
 								borderRadius: '10px',
 								display: 'flex',
 								flexDirection: 'column',
@@ -210,8 +153,6 @@ export default async function Image() {
 						<div
 							style={{
 								alignItems: 'center',
-								backgroundColor: 'rgba(39, 39, 42, 0.4)',
-								border: '1px solid #3f3f46',
 								borderRadius: '10px',
 								display: 'flex',
 								flexDirection: 'column',
@@ -233,8 +174,6 @@ export default async function Image() {
 						<div
 							style={{
 								alignItems: 'center',
-								backgroundColor: 'rgba(39, 39, 42, 0.4)',
-								border: '1px solid #3f3f46',
 								borderRadius: '10px',
 								display: 'flex',
 								flexDirection: 'column',
@@ -283,16 +222,16 @@ export default async function Image() {
 								fontWeight: '500',
 							}}
 						>
-							📖 esperance-masson.fr
+							📖 https://esperancem.fr
 						</div>
 						<div
 							style={{
-								color: '#a1a1aa',
+								color: '#14b8a6',
 								fontSize: 14,
-								fontWeight: '400',
+								fontWeight: '500',
 							}}
 						>
-							📚 Gratuit sur Wattpad
+							📚 https://www.wattpad.com/user/Esperancem
 						</div>
 					</div>
 				</div>

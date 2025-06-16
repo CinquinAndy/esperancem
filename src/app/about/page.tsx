@@ -75,7 +75,7 @@ export const metadata: Metadata = {
 			},
 		],
 		title: "À propos d'Espérance Masson - Autrice de Cœurs Sombres",
-		url: 'https://esperance-masson.fr/about',
+		url: 'https://esperancem.fr/about',
 	},
 	title: "À propos d'Espérance Masson - Autrice Dark Romance | Cœurs Sombres",
 }
