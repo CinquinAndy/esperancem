@@ -145,7 +145,7 @@ export default async function Image() {
 									fontWeight: 'bold',
 								}}
 							>
-								{stats?.reads || '100k+'}
+								{stats?.reads || '85k+'}
 							</div>
 							<div style={{ color: '#a1a1aa', fontSize: 14 }}>Lectures</div>
 						</div>

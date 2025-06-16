@@ -109,7 +109,7 @@ export default function About() {
 								questionnent les limites entre l&apos;amour et l&apos;obsession.
 							</p>
 							<p>
-								Mon roman &quot;Cœurs Sombres&quot; a conquis plus de 100k
+								Mon roman &quot;Cœurs Sombres&quot; a conquis plus de 85k
 								lecteurs sur Wattpad et atteint la première place dans plusieurs
 								catégories. Cette enemies to lovers mafia romance suit
 								l&apos;histoire troublante d&apos;Angèle et Lucas Ferrari, deux
@@ -204,7 +204,7 @@ export default function About() {
 								</p>
 								<p>
 									Disponible gratuitement sur Wattpad, ce livre a déjà conquis
-									plus de 100k lecteurs et obtenu plusieurs classements #1 dans
+									plus de 85k lecteurs et obtenu plusieurs classements #1 dans
 									les catégories enemies to lovers, trahisons, meurtres et
 									amitiés. Cette romance française sombre continue de captiver
 									de nouveaux lecteurs chaque jour.

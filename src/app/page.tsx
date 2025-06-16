@@ -16,7 +16,7 @@ import { fetchWattpadStats } from '@/lib/wattpad'
 
 export const metadata: Metadata = {
 	description:
-		"Découvrez l'univers sombre et passionné d'Espérance Masson. Lisez \"Cœurs Sombres\", son roman dark romance #1 sur Wattpad qui captive plus de 100k lecteurs. Plongez dans une histoire d'enemies to lovers avec Lucas Ferrari et Angèle.",
+		"Découvrez l'univers sombre et passionné d'Espérance Masson. Lisez \"Cœurs Sombres\", son roman dark romance #1 sur Wattpad qui captive plus de 85k lecteurs. Plongez dans une histoire d'enemies to lovers avec Lucas Ferrari et Angèle.",
 	keywords: [
 		'Cœurs Sombres Wattpad',
 		'Lucas Ferrari',
@@ -130,7 +130,7 @@ function DarkHeartsBook() {
 					</p>
 					<p className='w-full text-zinc-300'>
 						Plus de{' '}
-						<span className='font-semibold text-zinc-200'>100k lectures</span>{' '}
+						<span className='font-semibold text-zinc-200'>85k lectures</span>{' '}
 						sur Wattpad
 					</p>
 				</div>
@@ -163,7 +163,7 @@ export default async function Home() {
 						j&apos;écris des histoires d&apos;âmes tourmentées, d&apos;amours
 						impossibles et de la part d&apos;ombre qui sommeille en chacun de
 						nous. Découvrez &quot;Cœurs Sombres&quot;, mon roman #1 sur Wattpad
-						qui captive plus de 100k lecteurs passionnés de romance française.
+						qui captive plus de 85k lecteurs passionnés de romance française.
 					</p>
 					<div className='mt-6 flex gap-6'>
 						<SocialLink
