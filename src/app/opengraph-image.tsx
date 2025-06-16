@@ -114,7 +114,6 @@ export default async function Image() {
 								position: 'absolute',
 								top: '-2px',
 								width: '100%',
-								zIndex: -1,
 							}}
 						/>
 					</div>
@@ -162,7 +161,7 @@ export default async function Image() {
 							marginBottom: '12px',
 						}}
 					>
-						Dark Romance #1 sur Wattpad
+						Dark Romance #3 sur Wattpad
 					</div>
 
 					{/* Author */}
