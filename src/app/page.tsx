@@ -16,7 +16,7 @@ import { fetchWattpadStats } from '@/lib/wattpad'
 
 export const metadata: Metadata = {
 	description:
-		"Découvrez l'univers sombre et passionné d'Espérance Masson. Lisez \"Cœurs Sombres\", son roman dark romance #1 sur Wattpad qui captive plus de 85k lecteurs. Plongez dans une histoire d'enemies to lovers avec Lucas Ferrari et Angèle.",
+		"Découvrez l'univers sombre et passionné d'Espérance Masson. Lisez \"Cœurs Sombres\", son premier roman dark romance sur Wattpad qui captive plus de 85k lecteurs. Plongez dans une histoire d'enemies to lovers avec Lucas Ferrari et Angèle.",
 	keywords: [
 		'Cœurs Sombres Wattpad',
 		'Lucas Ferrari',
@@ -27,11 +27,11 @@ export const metadata: Metadata = {
 		'roman passion sombre',
 		'autrice française Wattpad',
 		'livre gratuit Wattpad',
-		'romance française 2024',
+		'romance française 2025',
 	],
 	openGraph: {
 		description:
-			'Plongez dans l\'univers dark romance d\'Espérance Masson. "Cœurs Sombres" - Le roman qui fait sensation sur Wattpad avec Lucas Ferrari et Angèle.',
+			'Plongez dans l\'univers dark romance d\'Espérance Masson. "Cœurs Sombres" - Son premier roman dark romance sur Wattpad.',
 		title: 'Espérance Masson - Autrice Dark Romance | Cœurs Sombres Wattpad',
 		url: 'https://esperancem.fr',
 	},
@@ -81,7 +81,7 @@ function DarkHeartsBook() {
 		<div className='flex flex-col gap-y-6 rounded-2xl border border-zinc-700/40 p-6'>
 			<div>
 				<h2 className='text-lg font-semibold text-zinc-100'>
-					Cœurs Sombres - Dark Romance #1 Wattpad
+					Cœurs Sombres - Dark Romance Wattpad
 				</h2>
 				<p className='mt-2 text-sm text-zinc-400'>
 					{`Fuyant un passé qui la hante, Angèle rêve de reprendre le contrôle de
@@ -127,6 +127,17 @@ function DarkHeartsBook() {
 					<p className='w-full'>
 						#1 <span className='font-semibold text-zinc-200'>meurtres</span>{' '}
 						(30/05/2025)
+					</p>
+					<p className='w-full'>
+						#1 <span className='font-semibold text-zinc-200'>crimes</span>{' '}
+						(08/06/2025)
+					</p>
+					<p className='w-full'>
+						#1{' '}
+						<span className='font-semibold text-zinc-200'>
+							proximitée forcée
+						</span>{' '}
+						(16/06/2025)
 					</p>
 					<p className='w-full text-zinc-300'>
 						Plus de{' '}
