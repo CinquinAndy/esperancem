@@ -20,13 +20,13 @@ export default async function Image() {
 			<div
 				style={{
 					alignItems: 'stretch',
-					backgroundColor: '#0a0a0a',
+					backgroundColor: '#0a0a0a', // Same background as the site
 					display: 'flex',
 					height: '100%',
 					width: '100%',
 				}}
 			>
-				{/* Column 1: Stylized Book Cover */}
+				{/* Column 1: Book Cover (9:16 aspect ratio) */}
 				<div
 					style={{
 						alignItems: 'center',
@@ -38,76 +38,30 @@ export default async function Image() {
 				>
 					<div
 						style={{
-							alignItems: 'center',
-							background: 'linear-gradient(145deg, #1a1a1a, #2a2a2a)',
-							border: '2px solid #3f3f46',
 							borderRadius: '12px',
-							boxShadow: '0 10px 30px rgba(0,0,0,0.6)',
-							display: 'flex',
-							flexDirection: 'column',
+							boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
 							height: '400px',
-							justifyContent: 'center',
+							overflow: 'hidden',
 							position: 'relative',
-							width: '240px',
+							width: '240px', // 240/400 = 0.6 (close to 9:16)
 						}}
 					>
-						{/* Book cover design */}
-						<div
+						<img
+							src='https://esperance-masson.fr/images/photos/cover_on_book.jpg'
+							alt='Couverture Cœurs Sombres'
+							width='240'
+							height='400'
 							style={{
-								color: '#f4f4f5',
-								fontSize: 24,
-								fontWeight: 'bold',
-								marginBottom: '12px',
-								textAlign: 'center',
-							}}
-						>
-							CŒURS
-						</div>
-						<div
-							style={{
-								background: '#14b8a6',
-								height: '2px',
-								marginBottom: '12px',
-								width: '60px',
+								height: '100%',
+								objectFit: 'cover',
+								width: '100%',
 							}}
 						/>
-						<div
-							style={{
-								color: '#f4f4f5',
-								fontSize: 24,
-								fontWeight: 'bold',
-								marginBottom: '24px',
-								textAlign: 'center',
-							}}
-						>
-							SOMBRES
-						</div>
-						<div
-							style={{
-								background: 'linear-gradient(45deg, #ef4444, #8b5cf6)',
-								borderRadius: '50%',
-								height: '80px',
-								opacity: 0.3,
-								width: '80px',
-							}}
-						/>
-						<div
-							style={{
-								color: '#a1a1aa',
-								fontSize: 14,
-								fontStyle: 'italic',
-								marginTop: '24px',
-								textAlign: 'center',
-							}}
-						>
-							Espérance Masson
-						</div>
-
-						{/* Glow effect */}
+						{/* Subtle glow effect */}
 						<div
 							style={{
 								background:
-									'linear-gradient(45deg, rgba(239, 68, 68, 0.1), rgba(147, 51, 234, 0.1))',
+									'linear-gradient(45deg, rgba(239, 68, 68, 0.1) 0%, rgba(147, 51, 234, 0.08) 100%)',
 								borderRadius: '12px',
 								height: '100%',
 								left: '-2px',
@@ -133,7 +87,7 @@ export default async function Image() {
 					{/* Title */}
 					<div
 						style={{
-							color: '#f4f4f5',
+							color: '#f4f4f5', // zinc-100
 							fontSize: 52,
 							fontWeight: 'bold',
 							lineHeight: 1.1,
@@ -146,7 +100,7 @@ export default async function Image() {
 					{/* Teal accent line */}
 					<div
 						style={{
-							background: '#14b8a6',
+							background: '#14b8a6', // teal-500
 							height: '3px',
 							marginBottom: '16px',
 							width: '100px',
@@ -156,7 +110,7 @@ export default async function Image() {
 					{/* Subtitle */}
 					<div
 						style={{
-							color: '#d4d4d8',
+							color: '#d4d4d8', // zinc-300
 							fontSize: 24,
 							fontWeight: '300',
 							marginBottom: '12px',
@@ -168,7 +122,7 @@ export default async function Image() {
 					{/* Author */}
 					<div
 						style={{
-							color: '#a1a1aa',
+							color: '#a1a1aa', // zinc-400
 							fontSize: 20,
 							fontStyle: 'italic',
 							marginBottom: '32px',
@@ -258,7 +212,7 @@ export default async function Image() {
 					{/* Description */}
 					<div
 						style={{
-							color: '#71717a',
+							color: '#71717a', // zinc-500
 							fontSize: 16,
 							lineHeight: 1.4,
 							marginBottom: '24px',
@@ -279,7 +233,7 @@ export default async function Image() {
 					>
 						<div
 							style={{
-								color: '#14b8a6',
+								color: '#14b8a6', // teal-500
 								fontSize: 14,
 								fontWeight: '500',
 							}}
@@ -288,7 +242,7 @@ export default async function Image() {
 						</div>
 						<div
 							style={{
-								color: '#a1a1aa',
+								color: '#a1a1aa', // zinc-400
 								fontSize: 14,
 								fontWeight: '400',
 							}}
