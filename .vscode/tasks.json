@@ -4,7 +4,7 @@
 		{
 			"label": "Run ESLint Fix",
 			"type": "shell",
-			"command": "bun run lint:fix",
+			"command": "npm run lint:fix",
 			"group": "build",
 			"presentation": {
 				"reveal": "silent",

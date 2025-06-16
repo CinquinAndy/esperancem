@@ -2,6 +2,7 @@
 	"name": "esperancem",
 	"version": "1.0.0",
 	"private": true,
+	"packageManager": "pnpm",
 	"scripts": {
 		"dev": "next dev --turbopack",
 		"build": "next build",

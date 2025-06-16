@@ -1,21 +1,21 @@
-# Site Officiel d'Espérance Masson
+# Espérance Masson Official Website
 
-Site officiel d'Espérance Masson, autrice française de dark romance.
+Official website for Espérance Masson, French dark romance author.
 
-**Cœurs Sombres** - Son premier roman dark romance sur Wattpad qui captive des milliers de lecteurs.
+**Cœurs Sombres** - Her first dark romance novel on Wattpad captivating thousands of readers.
 
-## Développement
+## Development
 
-Ce site est développé avec amour par Andy Cinquin.
+This website is made with love by Andy Cinquin.
 
-### Technologies
+### Tech Stack
 
-- Next.js 15 avec App Router
+- Next.js 15 with App Router
 - TypeScript
 - Tailwind CSS
-- Architecture SSG + ISR pour des performances optimales
+- SSG + ISR architecture for optimal performance
 
-### Installation
+### Getting Started
 
 ```bash
 npm install
@@ -29,12 +29,22 @@ npm run build
 npm start
 ```
 
-### Revalidation automatique
+### Automatic Revalidation
 
-Les statistiques Wattpad sont mises à jour automatiquement toutes les 24h via ISR.
+Wattpad stats are automatically updated every 24h via ISR.
 
-Pour déclencher manuellement :
+To trigger manual revalidation:
 
 ```bash
 node scripts/revalidate-stats.js
+```
+
+### Environment Variables
+
+Copy `.env.example` to `.env.local` and fill in the required values:
+
+```bash
+SITE_URL=https://your-domain.com
+REVALIDATE_SECRET=your_secret_key
+GOOGLE_SITE_VERIFICATION=your_verification_code
 ```

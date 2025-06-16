@@ -27,7 +27,7 @@ interface WattpadStatsProviderProps {
 }
 
 const CACHE_KEY = 'wattpad-stats-cache'
-const CACHE_DURATION = 24 * 60 * 60 * 1000 // 24 heures
+const CACHE_DURATION = 24 * 60 * 60 * 1000 // 24 hours
 
 export function WattpadStatsProvider({
 	children,
@@ -42,7 +42,7 @@ export function WattpadStatsProvider({
 			setLoading(true)
 			setError(null)
 
-			// Vérifier d'abord le cache local (seulement si pas forcé et pas de stats initiales)
+			// Check local cache first (only if not forced and no initial stats)
 			if (!force && !initialStats) {
 				const cachedData = localStorage.getItem(CACHE_KEY)
 				if (cachedData) {
@@ -57,12 +57,12 @@ export function WattpadStatsProvider({
 				}
 			}
 
-			// Récupérer depuis l'API
+			// Fetch from API
 			const response = await fetch('/api/wattpad-stats')
 			const result = await response.json()
 
 			if (result.success && result.data) {
-				// Mettre à jour le cache local
+				// Update local cache
 				if (typeof window !== 'undefined') {
 					localStorage.setItem(CACHE_KEY, JSON.stringify(result.data))
 				}
@@ -74,7 +74,7 @@ export function WattpadStatsProvider({
 			const errorMessage = err instanceof Error ? err.message : 'Unknown error'
 			setError(errorMessage)
 
-			// Essayer d'utiliser les données en cache comme fallback
+			// Try to use cached data as fallback
 			if (typeof window !== 'undefined') {
 				const cachedData = localStorage.getItem(CACHE_KEY)
 				if (cachedData) {
@@ -90,7 +90,7 @@ export function WattpadStatsProvider({
 	const refreshStats = () => fetchStats(true)
 
 	useEffect(() => {
-		// Récupérer seulement si on n'a pas de stats initiales
+		// Only fetch if we don't have initial stats
 		if (!initialStats) {
 			fetchStats()
 		}
@@ -101,7 +101,7 @@ export function WattpadStatsProvider({
 		}, CACHE_DURATION)
 
 		return () => clearInterval(interval)
-	}, [initialStats])
+	}, [initialStats, fetchStats])
 
 	return (
 		<WattpadStatsContext.Provider

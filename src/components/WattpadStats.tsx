@@ -1,6 +1,6 @@
 'use client'
 
-// import NumberFlow from '@number-flow/react' // Package not installed
+import NumberFlow from '@number-flow/react'
 import { useEffect, useState } from 'react'
 
 import { useWattpadStats } from '@/contexts/WattpadStatsContext'
