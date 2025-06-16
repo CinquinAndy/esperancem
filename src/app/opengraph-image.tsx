@@ -20,7 +20,7 @@ export default async function Image() {
 			<div
 				style={{
 					alignItems: 'stretch',
-					background: 'linear-gradient(145deg, #0a0a0a, #1a1a1a)',
+					backgroundColor: '#0a0a0a',
 					display: 'flex',
 					height: '100%',
 					justifyContent: 'center',
@@ -33,8 +33,8 @@ export default async function Image() {
 						alignItems: 'center',
 						display: 'flex',
 						flex: '0 0 300px',
-						padding: '0 50px 0 50px',
 						justifyContent: 'center',
+						padding: '0 50px 0 50px',
 					}}
 				>
 					<div
@@ -70,8 +70,8 @@ export default async function Image() {
 						display: 'flex',
 						flex: '0 0 700px',
 						flexDirection: 'column',
-						padding: '0 0px 0 100px',
 						justifyContent: 'center',
+						padding: '0 0px 0 100px',
 					}}
 				>
 					{/* Title */}
