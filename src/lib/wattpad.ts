@@ -110,6 +110,7 @@ export async function fetchWattpadStats(): Promise<WattpadStats | null> {
 		let reads = '0'
 		let votes = '0'
 		let parts = '0'
+		let readsComplete = '0'
 
 		// Find the meta social-meta div and extract values
 		$('.meta.social-meta').each((index, element) => {
@@ -144,6 +145,16 @@ export async function fetchWattpadStats(): Promise<WattpadStats | null> {
 					parts = partsMatch[0]
 				}
 			}
+
+			// Extract readsComplete
+			const readsCompleteSpan = $element.find('.read-count')
+			if (readsCompleteSpan.length > 0) {
+				const readsCompleteText = readsCompleteSpan.text().trim()
+				const readsCompleteMatch = readsCompleteText.match(/[\d.]+[KMB]?/)
+				if (readsCompleteMatch) {
+					readsComplete = readsCompleteMatch[0]
+				}
+			}
 		})
 
 		// Alternative parsing if the above doesn't work
@@ -171,6 +182,13 @@ export async function fetchWattpadStats(): Promise<WattpadStats | null> {
 				) {
 					parts = text
 				}
+
+				if (
+					text.match(/^\d+$/) &&
+					$(element).siblings().find('.fa-book').length > 0
+				) {
+					readsComplete = text
+				}
 			})
 		}
 
@@ -178,7 +196,7 @@ export async function fetchWattpadStats(): Promise<WattpadStats | null> {
 			lastUpdated: Date.now(),
 			parts,
 			reads,
-			readsComplete: '0', // This function doesn't extract complete reads
+			readsComplete,
 			votes,
 		}
 	} catch (error) {

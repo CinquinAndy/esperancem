@@ -98,9 +98,9 @@ export default async function Image() {
 					<div
 						style={{
 							background: '#14b8a6',
-							height: '2px',
+							height: '1px',
 							marginBottom: '16px',
-							width: '120px',
+							width: '80px',
 						}}
 					/>
 
