@@ -2,6 +2,7 @@ import * as cheerio from 'cheerio'
 
 interface WattpadStats {
 	reads: string
+	readsComplete: string
 	votes: string
 	parts: string
 	lastUpdated: number
@@ -53,7 +54,13 @@ export function formatWattpadStat(value: string): string {
 export function formatWattpadStatExact(value: string): string {
 	if (!value || value === '0') return '85,000'
 
-	// Convert value to number (handle K, M suffixes)
+	// If value is already a plain number (exact from API), format it directly
+	const plainNumber = parseInt(value.replace(/[^\d]/g, ''))
+	if (!isNaN(plainNumber) && plainNumber > 0) {
+		return plainNumber.toLocaleString('fr-FR')
+	}
+
+	// Convert value to number (handle K, M suffixes as fallback)
 	const getNumericValue = (val: string): number => {
 		const num = parseFloat(val.replace(/[kmb]/i, ''))
 		const suffix = val.slice(-1).toLowerCase()
@@ -171,6 +178,7 @@ export async function fetchWattpadStats(): Promise<WattpadStats | null> {
 			lastUpdated: Date.now(),
 			parts,
 			reads,
+			readsComplete: '0', // This function doesn't extract complete reads
 			votes,
 		}
 	} catch (error) {

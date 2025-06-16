@@ -16,9 +16,17 @@ interface StatItemProps {
 
 function StatItem({ label, shouldAnimate = false, value }: StatItemProps) {
 	const [displayValue, setDisplayValue] = useState(0)
-	// Convert value to number for animation (handle K, M suffixes)
+	// Convert value to number for animation (handle exact numbers and K, M suffixes)
 	const getNumericValue = (val: string): number => {
 		if (!val || val === '0') return 0
+
+		// If value is already a plain number (exact from API), use it directly
+		const plainNumber = parseInt(val.replace(/[^\d]/g, ''))
+		if (!isNaN(plainNumber) && plainNumber > 0 && !/[kmb]/i.test(val)) {
+			return plainNumber
+		}
+
+		// Handle K, M, B suffixes as fallback
 		const num = parseFloat(val.replace(/[kmb]/i, ''))
 		const suffix = val.slice(-1).toLowerCase()
 
@@ -58,8 +66,9 @@ function StatItem({ label, shouldAnimate = false, value }: StatItemProps) {
 				<NumberFlow
 					value={displayValue}
 					format={{
-						maximumFractionDigits: 1,
+						maximumFractionDigits: 0,
 						notation: 'standard',
+						useGrouping: true,
 					}}
 					transformTiming={{
 						duration: 1000,
@@ -85,15 +94,14 @@ function WattpadStatsContent() {
 		if (stats && !hasAnimated) {
 			setHasAnimated(true)
 		}
-	}, [stats, 
-		hasAnimated])
+	}, [stats, hasAnimated])
 
 	return (
 		<div className='mx-auto w-full max-w-7xl'>
 			{/* Stats Grid */}
 			<div className='grid grid-cols-1 gap-6 md:grid-cols-3'>
 				<StatItem
-					value={stats?.reads ?? '0'}
+					value={stats?.readsComplete ?? '0'}
 					label='Lectures'
 					shouldAnimate={hasAnimated}
 				/>

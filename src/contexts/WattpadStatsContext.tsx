@@ -10,6 +10,7 @@ import {
 
 interface WattpadStats {
 	reads: string
+	readsComplete: string
 	votes: string
 	parts: string
 	lastUpdated: number
@@ -44,7 +45,8 @@ export function WattpadStatsProvider({
 	const [error, setError] = useState<string | null>(null)
 
 	const fetchStats = useCallback(
-		async (force = false) => {
+		// async (force = false) => {
+		async (force = true) => {
 			try {
 				setLoading(true)
 				setError(null)
