@@ -288,27 +288,16 @@ export default async function Home() {
 								}}
 								rankings={rankings}
 							/>
-
-							{/* Stats pour Cœurs sombres */}
-							<div className='flex justify-center'>
-								<WattpadStats
-									statsType='coeurs-sombres'
-									title='Cœurs sombres'
-								/>
-							</div>
+						</div>
+						{/* Stats pour Cœurs sombres */}
+						<div className='col-span-2 flex justify-center'>
+							<WattpadStats statsType='coeurs-sombres' title='Cœurs sombres' />
 						</div>
 					</div>
 
 					{/* Second Book - Au Prix du Silence */}
 					<div className='mx-auto grid max-w-xl grid-cols-1 items-start gap-y-20 lg:max-w-none lg:grid-cols-2'>
-						<div className='flex flex-col gap-16 lg:order-2'>
-							<BookCover
-								src={newBookCover}
-								alt="Couverture du livre Au Prix du Silence d'Espérance masson"
-								priority={false}
-							/>
-						</div>
-						<div className='space-y-10 lg:order-1 lg:pr-16 xl:pr-24'>
+						<div className='space-y-10 lg:pr-16 xl:pr-24'>
 							<Book
 								stats={stats}
 								bookContent={{
@@ -336,14 +325,20 @@ export default async function Home() {
 								}}
 								rankings={[]}
 							/>
-
-							{/* Stats pour Au prix du silence */}
-							<div className='flex justify-center'>
-								<WattpadStats
-									statsType='au-prix-du-silence'
-									title='Au prix du silence'
-								/>
-							</div>
+						</div>
+						<div className='flex flex-col gap-16'>
+							<BookCover
+								src={newBookCover}
+								alt="Couverture du livre Au Prix du Silence d'Espérance masson"
+								priority={false}
+							/>
+						</div>
+						{/* Stats pour Au prix du silence */}
+						<div className='col-span-2 flex justify-center'>
+							<WattpadStats
+								statsType='au-prix-du-silence'
+								title='Au prix du silence'
+							/>
 						</div>
 					</div>
 				</div>
