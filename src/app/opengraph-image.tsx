@@ -1,5 +1,6 @@
 import { ImageResponse } from 'next/og'
 
+import { getContentWithFallback } from '@/lib/content'
 import { fetchWattpadStats, formatWattpadStat } from '@/lib/wattpad'
 
 // Image metadata
@@ -12,8 +13,23 @@ export const contentType = 'image/png'
 
 // Image generation
 export default async function Image() {
-	// Fetch real Wattpad stats
-	const stats = await fetchWattpadStats()
+	// Fetch real Wattpad stats and content from PocketBase
+	const [stats, title, subtitle, author] = await Promise.all([
+		fetchWattpadStats(),
+		getContentWithFallback('opengraph', 'image', 'title', 'Cœurs Sombres'),
+		getContentWithFallback(
+			'opengraph',
+			'image',
+			'subtitle',
+			'Dark Romance sur Wattpad'
+		),
+		getContentWithFallback(
+			'opengraph',
+			'image',
+			'author',
+			'par Espérance Masson'
+		),
+	])
 
 	return new ImageResponse(
 		(
@@ -84,7 +100,7 @@ export default async function Image() {
 							marginBottom: '12px',
 						}}
 					>
-						Cœurs Sombres
+						{title}
 					</div>
 
 					{/* Teal accent line */}
@@ -106,7 +122,7 @@ export default async function Image() {
 							marginBottom: '12px',
 						}}
 					>
-						Dark Romance sur Wattpad
+						{subtitle}
 					</div>
 
 					{/* Author */}
@@ -118,7 +134,7 @@ export default async function Image() {
 							marginBottom: '32px',
 						}}
 					>
-						par Espérance Masson
+						{author}
 					</div>
 
 					{/* Real Stats */}

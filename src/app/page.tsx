@@ -14,8 +14,8 @@ import {
 import { WattpadStats } from '@/components/WattpadStats'
 import bookCover from '@/images/photos/cover_on_book.jpg'
 import {
-	getPageMetadata,
 	getContent,
+	getSeoMetadata,
 	getSocialLinks,
 	getWattpadRankings,
 } from '@/lib/content'
@@ -38,7 +38,7 @@ function getIconComponent(iconName: string | undefined) {
 }
 
 export async function generateMetadata(): Promise<Metadata> {
-	const metadata = await getPageMetadata('home')
+	const metadata = await getSeoMetadata('home')
 
 	if (!metadata) {
 		return {
