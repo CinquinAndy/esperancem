@@ -1,4 +1,3 @@
-import { PocketBaseService } from '@/services/pocketbase'
 import type {
 	SiteContent,
 	SeoMetadata,
@@ -7,6 +6,8 @@ import type {
 	WattpadRanking,
 	SiteSetting,
 } from '@/lib/pocketbase'
+
+import { PocketBaseService } from '@/services/pocketbase'
 
 /**
  * Get content by key for a specific page and section

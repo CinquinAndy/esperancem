@@ -15,7 +15,6 @@ import {
 	getPageMetadata,
 	getContent,
 	getSocialLinks,
-	getWattpadStats,
 	getWattpadRankings,
 } from '@/lib/content'
 import { fetchWattpadStats, formatWattpadStat } from '@/lib/wattpad'
@@ -29,6 +28,8 @@ function getIconComponent(iconName: string | undefined) {
 			return TikTokIcon
 		case 'WattpadIcon':
 			return WattpadIcon
+		case 'EmailIcon':
+			return EmailIcon
 		default:
 			return InstagramIcon
 	}
@@ -39,27 +40,27 @@ export async function generateMetadata(): Promise<Metadata> {
 
 	if (!metadata) {
 		return {
-			title: 'Accueil - Espérance Masson | Autrice de Cœurs Sombres',
 			description:
 				"Découvrez l'univers sombre et passionné d'Espérance Masson.",
+			title: 'Accueil - Espérance Masson | Autrice de Cœurs Sombres',
 		}
 	}
 
 	return {
-		title: metadata.title,
 		description: metadata.description,
 		keywords: metadata.keywords,
 		openGraph: {
-			title: metadata.og_title,
 			description: metadata.og_description,
+			title: metadata.og_title,
 			url: metadata.og_url,
 		},
+		title: metadata.title,
 		twitter: {
 			card: 'summary_large_image',
-			title: metadata.twitter_title,
-			description: metadata.twitter_description,
 			creator: metadata.twitter_creator,
+			description: metadata.twitter_description,
 			site: metadata.twitter_site,
+			title: metadata.twitter_title,
 		},
 	}
 }
@@ -119,69 +120,45 @@ interface DarkHeartsBookProps {
 	stats: Awaited<ReturnType<typeof fetchWattpadStats>>
 }
 
-function DarkHeartsBook({ stats }: DarkHeartsBookProps) {
+function DarkHeartsBook({
+	bookContent,
+	rankings,
+	stats,
+}: DarkHeartsBookProps & { bookContent: any; rankings: any[] }) {
 	return (
 		<div className='flex flex-col gap-y-6 rounded-2xl border border-zinc-700/40 p-6'>
 			<div>
 				<h2 className='text-lg font-semibold text-zinc-100'>
-					Cœurs Sombres - Dark Romance Wattpad
+					{bookContent.book_title || 'Cœurs Sombres - Dark Romance Wattpad'}
 				</h2>
 				<p className='mt-2 text-sm text-zinc-400'>
-					{`Fuyant un passé qui la hante, Angèle rêve de reprendre le contrôle de
-					sa vie et part avec sa meilleure amie aux États-Unis pour tout
-					recommencer. Mais sa quête de liberté vire au cauchemar lorsqu'elle
-					tombe sous l'emprise de Lucas Ferrari, un chef de mafia aussi froid
-					qu'impitoyable, prêt à tout pour assouvir une vengeance qui le
-					consume.`}
+					{bookContent.book_description ||
+						"Fuyant un passé qui la hante, Angèle rêve de reprendre le contrôle de sa vie et part avec sa meilleure amie aux États-Unis pour tout recommencer. Mais sa quête de liberté vire au cauchemar lorsqu'elle tombe sous l'emprise de Lucas Ferrari, un chef de mafia aussi froid qu'impitoyable, prêt à tout pour assouvir une vengeance qui le consume."}
 				</p>
 				<p className='mt-4 text-sm text-zinc-400'>
-					{`Cette dark romance française explore les thèmes de l'enemies to lovers 
-					et de la mafia romance. Pris dans un jeu de pouvoir et de manipulation, 
-					Angèle et Lucas découvrent qu'ils sont liés par des secrets capables de tout détruire.`}
+					{bookContent.book_description_2 ||
+						"Cette dark romance française explore les thèmes de l'enemies to lovers et de la mafia romance. Pris dans un jeu de pouvoir et de manipulation, Angèle et Lucas découvrent qu'ils sont liés par des secrets capables de tout détruire."}
 				</p>
 				<p className='mt-4 text-sm text-zinc-400'>
-					{`Entre haine et attirance, leur lutte pour survivre pourrait bien les
-					mener à leur perte. Cette romance française intense captive les lecteurs
-					Wattpad avec ses personnages complexes et son intrigue haletante. 
-					Succomberont-ils aux ténèbres du désir ou trouveront-ils enfin la paix au prix de leur âme ?`}
+					{bookContent.book_description_3 ||
+						'Entre haine et attirance, leur lutte pour survivre pourrait bien les mener à leur perte. Cette romance française intense captive les lecteurs Wattpad avec ses personnages complexes et son intrigue haletante. Succomberont-ils aux ténèbres du désir ou trouveront-ils enfin la paix au prix de leur âme ?'}
 				</p>
 			</div>
 
 			<div>
 				<h3 className='text-md font-semibold text-zinc-100'>
-					Succès Wattpad - Classements #1
+					{bookContent.rankings_title || 'Succès Wattpad - Classements #1'}
 				</h3>
 				<div className='mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm font-medium text-zinc-400'>
-					<p className='w-full'>
-						#1{' '}
-						<span className='font-semibold text-zinc-200'>
-							ennemiestolovers
-						</span>{' '}
-						(24/04/2025)
-					</p>
-					<p className='w-full'>
-						#1 <span className='font-semibold text-zinc-200'>amitiés</span>{' '}
-						(28/04/2025)
-					</p>
-					<p className='w-full'>
-						#1 <span className='font-semibold text-zinc-200'>trahisons</span>{' '}
-						(26/05/2025)
-					</p>
-					<p className='w-full'>
-						#1 <span className='font-semibold text-zinc-200'>meurtres</span>{' '}
-						(30/05/2025)
-					</p>
-					<p className='w-full'>
-						#1 <span className='font-semibold text-zinc-200'>crimes</span>{' '}
-						(08/06/2025)
-					</p>
-					<p className='w-full'>
-						#1{' '}
-						<span className='font-semibold text-zinc-200'>
-							proximitée forcée
-						</span>{' '}
-						(16/06/2025)
-					</p>
+					{rankings.map(ranking => (
+						<p key={ranking.category} className='w-full'>
+							#{ranking.position}{' '}
+							<span className='font-semibold text-zinc-200'>
+								{ranking.category}
+							</span>{' '}
+							({new Date(ranking.date).toLocaleDateString('fr-FR')})
+						</p>
+					))}
 					<p className='w-full text-zinc-300'>
 						Plus de <WattpadReadsText stats={stats} /> sur Wattpad
 					</p>
@@ -193,7 +170,8 @@ function DarkHeartsBook({ stats }: DarkHeartsBookProps) {
 				variant='secondary'
 				className='group mt-4 w-full'
 			>
-				Lire Cœurs Sombres gratuitement sur Wattpad
+				{bookContent.wattpad_button ||
+					'Lire Cœurs Sombres gratuitement sur Wattpad'}
 			</Button>
 		</div>
 	)
@@ -201,14 +179,14 @@ function DarkHeartsBook({ stats }: DarkHeartsBookProps) {
 
 export default async function Home() {
 	// Fetch data from PocketBase
-	const [mainTitle, mainDescription, socialLinks, stats, rankings] =
-		await Promise.all([
+	const [mainTitle, mainDescription, socialLinks, rankings] = await Promise.all(
+		[
 			getContent('home', 'hero', 'main_title'),
 			getContent('home', 'hero', 'main_description'),
 			getSocialLinks(),
-			getWattpadStats(),
 			getWattpadRankings(),
-		])
+		]
+	)
 
 	// Fallback to original content if PocketBase data is not available
 	const title =
@@ -216,6 +194,9 @@ export default async function Home() {
 	const description =
 		mainDescription ||
 		"Bienvenue dans l'univers sombre et passionné d'Espérance Masson. Autrice française spécialisée dans la dark romance, j'écris des histoires d'âmes tourmentées, d'amours impossibles et de la part d'ombre qui sommeille en chacun de nous."
+
+	// Use original API for stats for now (we'll update this later)
+	const stats = await fetchWattpadStats()
 
 	return (
 		<>
@@ -253,7 +234,38 @@ export default async function Home() {
 						<BookCover />
 					</div>
 					<div className='space-y-10 lg:pl-16 xl:pl-24'>
-						<DarkHeartsBook stats={stats} />
+						<DarkHeartsBook
+							stats={stats}
+							bookContent={{
+								book_description: await getContent(
+									'home',
+									'book',
+									'book_description'
+								),
+								book_description_2: await getContent(
+									'home',
+									'book',
+									'book_description_2'
+								),
+								book_description_3: await getContent(
+									'home',
+									'book',
+									'book_description_3'
+								),
+								book_title: await getContent('home', 'book', 'book_title'),
+								rankings_title: await getContent(
+									'home',
+									'book',
+									'rankings_title'
+								),
+								wattpad_button: await getContent(
+									'home',
+									'book',
+									'wattpad_button'
+								),
+							}}
+							rankings={rankings}
+						/>
 					</div>
 				</div>
 			</Container>
