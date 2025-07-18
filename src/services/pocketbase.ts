@@ -7,6 +7,7 @@ import {
 	type WattpadStats,
 	type WattpadRanking,
 	type SiteSetting,
+	type BookType,
 } from '@/lib/pocketbase'
 
 /**
@@ -192,13 +193,17 @@ export class SocialLinksService {
  */
 export class WattpadStatsService {
 	/**
-	 * Get current Wattpad stats
+	 * Get current Wattpad stats for a specific book
 	 */
-	static async getCurrentStats(): Promise<WattpadStats | null> {
+	static async getCurrentStats(book?: BookType): Promise<WattpadStats | null> {
 		const pb = createPocketBase()
 
 		try {
-			const filter = 'is_active = true'
+			let filter = 'is_active = true'
+			if (book) {
+				filter += ` && book = "${book}"`
+			}
+
 			const records = await pb
 				.collection(COLLECTIONS.WATTPAD_STATS)
 				.getList<WattpadStats>(1, 1, {
@@ -210,6 +215,62 @@ export class WattpadStatsService {
 		} catch (error) {
 			console.error('Error fetching Wattpad stats:', error)
 			return null
+		}
+	}
+
+	/**
+	 * Get current stats for all books
+	 */
+	static async getAllBooksStats(): Promise<
+		Record<BookType, WattpadStats | null>
+	> {
+		const pb = createPocketBase()
+
+		try {
+			const records = await pb
+				.collection(COLLECTIONS.WATTPAD_STATS)
+				.getList<WattpadStats>(1, 100, {
+					filter: 'is_active = true',
+					sort: '-created',
+				})
+
+			const stats: Record<BookType, WattpadStats | null> = {
+				'au-prix-du-silence': null,
+				'coeurs-sombres': null,
+			}
+
+			// Group by book and get the most recent for each
+			const bookGroups: Record<BookType, WattpadStats[]> = {
+				'au-prix-du-silence': [],
+				'coeurs-sombres': [],
+			}
+
+			records.items.forEach(record => {
+				if (record.book && bookGroups[record.book]) {
+					bookGroups[record.book].push(record)
+				}
+			})
+
+			// Get the most recent for each book
+			Object.keys(bookGroups).forEach(bookType => {
+				const bookStats = bookGroups[bookType as BookType]
+				if (bookStats.length > 0) {
+					// Sort by created date and take the most recent
+					bookStats.sort(
+						(a, b) =>
+							new Date(b.created).getTime() - new Date(a.created).getTime()
+					)
+					stats[bookType as BookType] = bookStats[0]
+				}
+			})
+
+			return stats
+		} catch (error) {
+			console.error('Error fetching all books stats:', error)
+			return {
+				'au-prix-du-silence': null,
+				'coeurs-sombres': null,
+			}
 		}
 	}
 
@@ -259,9 +320,10 @@ export class WattpadStatsService {
 	}
 
 	/**
-	 * Update or create Wattpad stats
+	 * Update or create Wattpad stats for a specific book
 	 */
-	static async updateStats(stats: {
+	static async updateBookStats(stats: {
+		book: BookType
 		reads: string
 		readsComplete: string
 		votes: string
@@ -270,19 +332,20 @@ export class WattpadStatsService {
 		const pb = createPocketBase()
 
 		try {
-			// Check if we already have stats in PocketBase
+			// Check if we already have stats for this book in PocketBase
 			const existingStats = await pb
 				.collection(COLLECTIONS.WATTPAD_STATS)
 				.getList<WattpadStats>(1, 1, {
-					filter: 'is_active = true',
+					filter: `is_active = true && book = "${stats.book}"`,
 					sort: '-created',
 				})
 
 			const statsData = {
+				book: stats.book,
 				is_active: true,
 				parts: stats.parts,
 				reads: stats.reads,
-				readsComplete: stats.readsComplete,
+				reads_complete: stats.readsComplete,
 				votes: stats.votes,
 			}
 
@@ -304,6 +367,22 @@ export class WattpadStatsService {
 			console.error('Error updating Wattpad stats:', error)
 			return null
 		}
+	}
+
+	/**
+	 * Update or create Wattpad stats (legacy method for backward compatibility)
+	 */
+	static async updateStats(stats: {
+		reads: string
+		readsComplete: string
+		votes: string
+		parts: string
+	}): Promise<WattpadStats | null> {
+		// Default to 'coeurs-sombres' for backward compatibility
+		return this.updateBookStats({
+			book: 'coeurs-sombres',
+			...stats,
+		})
 	}
 }
 
