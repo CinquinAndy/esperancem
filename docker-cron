@@ -1,0 +1,2 @@
+# Wattpad Stats Update - Every 6 hours
+0 */6 * * * cd /home/andycinquin/clonedRepo/esperancem && PB_URL=https://api.esperancem.fr PB_TOKEN=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjb2xsZWN0aW9uSWQiOiJwYmNfMzE0MjYzNTgyMyIsImV4cCI6MzE2MjkyMDk5MiwiaWQiOiJ5YmVhajlpOW5wMjF3MGkiLCJyZWZyZXNoYWJsZSI6ZmFsc2UsInR5cGUiOiJhdXRoIn0.OVYTjjx35O9kKNamtSkkfGrC3esOQfAAOxsr36EE1A8 SITE_URL=https://esperancem.fr REVALIDATE_SECRET=YOUR_SECRET node /home/andycinquin/clonedRepo/esperancem/scripts/update-wattpad-stats.mjs >> logs/wattpad-stats.log 2>&1

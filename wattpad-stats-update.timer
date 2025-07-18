@@ -1,0 +1,10 @@
+[Unit]
+Description=Run Wattpad Stats Update every 6 hours
+Requires=wattpad-stats-update.service
+
+[Timer]
+OnCalendar=*-*-* 00/6:00:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target
