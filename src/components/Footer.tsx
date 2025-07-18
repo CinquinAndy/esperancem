@@ -83,21 +83,26 @@ export async function Footer() {
 							</div>
 
 							{/* Copyright */}
-							<div className='flex flex-col items-center gap-2 text-center text-sm text-zinc-500 md:items-end md:text-right'>
-								<p>&copy; {new Date().getFullYear()} Espérance masson</p>
-								<p>
-									All rights reserved.{' '}
-									<span className='text-red-400'>Made with ♡</span> by{' '}
-									<Link
-										href='https://andy-cinquin.fr'
-										target='_blank'
-										rel='noopener noreferrer'
-										className='font-medium text-zinc-400 underline transition hover:text-teal-400'
-									>
-										Cinquin Andy
-									</Link>
-								</p>
-							</div>
+							<div
+								className='flex flex-col items-center gap-2 text-center text-sm text-zinc-500 md:items-end md:text-right'
+								dangerouslySetInnerHTML={{
+									__html: `
+										<p>&copy; ${new Date().getFullYear()} Espérance masson</p>
+										<p>
+											All rights reserved.
+											<span class="text-red-400">Made with ♡</span> by
+											<a
+												href="https://andy-cinquin.fr"
+												target="_blank"
+												rel="noopener noreferrer"
+												class="font-medium text-zinc-400 underline transition hover:text-teal-400"
+											>
+												Cinquin Andy
+											</a>
+										</p>
+									`,
+								}}
+							/>
 						</div>
 					</ContainerInner>
 				</div>

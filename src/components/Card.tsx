@@ -70,7 +70,12 @@ Card.Description = function CardDescription({
 }: {
 	children: React.ReactNode
 }) {
-	return <p className='relative z-10 mt-2 text-sm text-zinc-400'>{children}</p>
+	return (
+		<div
+			className='relative z-10 mt-2 text-sm text-zinc-400'
+			dangerouslySetInnerHTML={{ __html: children as string }}
+		/>
+	)
 }
 
 Card.Cta = function CardCta({ children }: { children: React.ReactNode }) {
