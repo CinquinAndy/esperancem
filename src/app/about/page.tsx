@@ -162,7 +162,7 @@ export default async function About() {
 						</div>
 						<div className='lg:pl-8'>
 							<h2 className='text-3xl font-bold tracking-tight text-zinc-100 sm:text-4xl'>
-								Cœurs Sombres - Mon bestseller Wattpad
+								Cœurs Sombres - Mon premier roman Wattpad
 							</h2>
 							<div className='mt-6 space-y-6 text-base text-zinc-400'>
 								<p>
@@ -183,9 +183,7 @@ export default async function About() {
 									Disponible gratuitement sur Wattpad, ce livre a déjà conquis
 									plus de <WattpadStatsText type='reads' suffix=' lecteurs' />{' '}
 									et obtenu plusieurs classements #1 dans les catégories enemies
-									to lovers, trahisons, meurtres et amitiés. Cette romance
-									française sombre continue de captiver de nouveaux lecteurs
-									chaque jour.
+									to lovers, trahisons, meurtres et amitiés.
 								</p>
 								<p>
 									<strong>Suivez-moi :</strong> @esp_masson sur Instagram et

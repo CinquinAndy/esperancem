@@ -1,0 +1,194 @@
+---
+alwaysApply: true
+---
+
+there is my pocketbase description :
+
+```
+[
+    {
+        "id": "pbc_4285667772",
+        "listRule": null,
+        "viewRule": null,
+        "createRule": null,
+        "updateRule": null,
+        "deleteRule": null,
+        "name": "test_collection",
+        "type": "base",
+        "fields": [
+            {
+                "autogeneratePattern": "[a-z0-9]{15}",
+                "hidden": false,
+                "id": "text3208210256",
+                "max": 15,
+                "min": 15,
+                "name": "id",
+                "pattern": "^[a-z0-9]+$",
+                "presentable": false,
+                "primaryKey": true,
+                "required": true,
+                "system": true,
+                "type": "text"
+            },
+            {
+                "autogeneratePattern": "",
+                "hidden": false,
+                "id": "text1275561312",
+                "max": 0,
+                "min": 0,
+                "name": "string_name_field",
+                "pattern": "",
+                "presentable": false,
+                "primaryKey": false,
+                "required": false,
+                "system": false,
+                "type": "text"
+            },
+            {
+                "convertURLs": false,
+                "hidden": false,
+                "id": "editor211567679",
+                "maxSize": 0,
+                "name": "textarea_name_field",
+                "presentable": false,
+                "required": false,
+                "system": false,
+                "type": "editor"
+            },
+            {
+                "hidden": false,
+                "id": "number3407899886",
+                "max": null,
+                "min": null,
+                "name": "number_name_field",
+                "onlyInt": false,
+                "presentable": false,
+                "required": false,
+                "system": false,
+                "type": "number"
+            },
+            {
+                "hidden": false,
+                "id": "bool2129048609",
+                "name": "bool_name_field",
+                "presentable": false,
+                "required": false,
+                "system": false,
+                "type": "bool"
+            },
+            {
+                "exceptDomains": null,
+                "hidden": false,
+                "id": "email1091632609",
+                "name": "mail_name_field",
+                "onlyDomains": null,
+                "presentable": false,
+                "required": false,
+                "system": false,
+                "type": "email"
+            },
+            {
+                "exceptDomains": null,
+                "hidden": false,
+                "id": "url3583515168",
+                "name": "url_name_field",
+                "onlyDomains": null,
+                "presentable": false,
+                "required": false,
+                "system": false,
+                "type": "url"
+            },
+            {
+                "hidden": false,
+                "id": "file742116523",
+                "maxSelect": 1,
+                "maxSize": 0,
+                "mimeTypes": [],
+                "name": "file_name_field",
+                "presentable": false,
+                "protected": false,
+                "required": false,
+                "system": false,
+                "thumbs": [],
+                "type": "file"
+            },
+            {
+                "hidden": false,
+                "id": "select3137757962",
+                "maxSelect": 1,
+                "name": "select_name_field",
+                "presentable": false,
+                "required": false,
+                "system": false,
+                "type": "select",
+                "values": [
+                    "optiona",
+                    "optionb"
+                ]
+            },
+            {
+                "hidden": false,
+                "id": "json286477176",
+                "maxSize": 0,
+                "name": "json_name_field",
+                "presentable": false,
+                "required": false,
+                "system": false,
+                "type": "json"
+            },
+            {
+                "hidden": false,
+                "id": "geoPoint2897151491",
+                "name": "geo_point_name_field",
+                "presentable": false,
+                "required": false,
+                "system": false,
+                "type": "geoPoint"
+            },
+            {
+                "hidden": false,
+                "id": "date3461062970",
+                "max": "",
+                "min": "",
+                "name": "datetime_name_field",
+                "presentable": false,
+                "required": false,
+                "system": false,
+                "type": "date"
+            },
+            {
+                "hidden": false,
+                "id": "autodate2990389176",
+                "name": "created",
+                "onCreate": true,
+                "onUpdate": false,
+                "presentable": false,
+                "system": false,
+                "type": "autodate"
+            },
+            {
+                "hidden": false,
+                "id": "autodate3332085495",
+                "name": "updated",
+                "onCreate": true,
+                "onUpdate": true,
+                "presentable": false,
+                "system": false,
+                "type": "autodate"
+            },
+            {
+                "hidden": false,
+                "id": "autodate1708142841",
+                "name": "autodate_name_field",
+                "onCreate": true,
+                "onUpdate": false,
+                "presentable": false,
+                "system": false,
+                "type": "autodate"
+            }
+        ],
+        "indexes": [],
+        "system": false
+    }
+]
+```
