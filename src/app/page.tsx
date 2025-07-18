@@ -42,9 +42,8 @@ export async function generateMetadata(): Promise<Metadata> {
 
 	if (!metadata) {
 		return {
-			description:
-				"Découvrez l'univers sombre et passionné d'Espérance Masson.",
-			title: 'Accueil - Espérance Masson | Autrice de Cœurs Sombres',
+			description: '...',
+			title: '...',
 		}
 	}
 
@@ -88,7 +87,7 @@ function WattpadReadsText({ stats }: WattpadReadsTextProps) {
 	const formattedReads =
 		stats?.success && stats.stats?.reads
 			? formatWattpadStat(stats.stats.reads)
-			: '85k+'
+			: '...'
 	return (
 		<span className='font-semibold text-zinc-200'>
 			{formattedReads} lectures
@@ -134,25 +133,22 @@ function DarkHeartsBook({
 		<div className='flex flex-col gap-y-6 rounded-2xl border border-zinc-700/40 p-6'>
 			<div>
 				<h2 className='text-lg font-semibold text-zinc-100'>
-					{bookContent.book_title || 'Cœurs Sombres - Dark Romance Wattpad'}
+					{bookContent.book_title || 'Cœurs Sombres'}
 				</h2>
 				<p className='mt-2 text-sm text-zinc-400'>
-					{bookContent.book_description ||
-						"Fuyant un passé qui la hante, Angèle rêve de reprendre le contrôle de sa vie et part avec sa meilleure amie aux États-Unis pour tout recommencer. Mais sa quête de liberté vire au cauchemar lorsqu'elle tombe sous l'emprise de Lucas Ferrari, un chef de mafia aussi froid qu'impitoyable, prêt à tout pour assouvir une vengeance qui le consume."}
+					{bookContent.book_description || '...'}
 				</p>
 				<p className='mt-4 text-sm text-zinc-400'>
-					{bookContent.book_description_2 ||
-						"Cette dark romance française explore les thèmes de l'enemies to lovers et de la mafia romance. Pris dans un jeu de pouvoir et de manipulation, Angèle et Lucas découvrent qu'ils sont liés par des secrets capables de tout détruire."}
+					{bookContent.book_description_2 || '...'}
 				</p>
 				<p className='mt-4 text-sm text-zinc-400'>
-					{bookContent.book_description_3 ||
-						'Entre haine et attirance, leur lutte pour survivre pourrait bien les mener à leur perte. Cette romance française intense captive les lecteurs Wattpad avec ses personnages complexes et son intrigue haletante. Succomberont-ils aux ténèbres du désir ou trouveront-ils enfin la paix au prix de leur âme ?'}
+					{bookContent.book_description_3 || '...'}
 				</p>
 			</div>
 
 			<div>
 				<h3 className='text-md font-semibold text-zinc-100'>
-					{bookContent.rankings_title || 'Succès Wattpad - Classements #1'}
+					{bookContent.rankings_title || '...'}
 				</h3>
 				<div className='mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm font-medium text-zinc-400'>
 					{rankings.map(ranking => (
@@ -175,8 +171,7 @@ function DarkHeartsBook({
 				variant='secondary'
 				className='group mt-4 w-full'
 			>
-				{bookContent.wattpad_button ||
-					'Lire Cœurs Sombres gratuitement sur Wattpad'}
+				{bookContent.wattpad_button || '...'}
 			</Button>
 		</div>
 	)
@@ -195,10 +190,9 @@ export default async function Home() {
 
 	// Fallback to original content if PocketBase data is not available
 	const title =
-		mainTitle || 'Espérance Masson, autrice française de dark romance'
+		mainTitle || '...'
 	const description =
-		mainDescription ||
-		"Bienvenue dans l'univers sombre et passionné d'Espérance Masson. Autrice française spécialisée dans la dark romance, j'écris des histoires d'âmes tourmentées, d'amours impossibles et de la part d'ombre qui sommeille en chacun de nous."
+		mainDescription || '...'
 
 	// Use Server Action for stats
 	const stats = await getWattpadStats()

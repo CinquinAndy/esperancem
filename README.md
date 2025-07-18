@@ -29,14 +29,22 @@ npm run build
 npm start
 ```
 
-### Automatic Revalidation
+### Automatic Updates
 
-Wattpad stats are automatically updated every 24h via ISR.
+Wattpad stats are automatically updated every 6 hours via Coolify cron jobs.
 
-To trigger manual revalidation:
+To trigger manual updates:
 
 ```bash
-node scripts/revalidate-stats.js
+# Using the cron endpoint (requires REVALIDATE_SECRET)
+curl -X GET http://localhost:3000/api/cron/update-wattpad-stats \
+  -H "Authorization: Bearer H9HKyb3wgxvuikh2lKOcazP3neH214H2YCmBPqTA3t2nbyQjlSVXKjYcwsatNjS"
+
+# Using the script directly
+node scripts/update-wattpad-stats.mjs
+
+# Using the cron runner (for Coolify)
+node scripts/cron-runner.mjs
 ```
 
 ### Environment Variables
@@ -48,3 +56,34 @@ SITE_URL=https://your-domain.com
 REVALIDATE_SECRET=your_secret_key
 GOOGLE_SITE_VERIFICATION=your_verification_code
 ```
+
+### Deployment
+
+#### Coolify (Recommended)
+
+```bash
+# Using Docker Compose with cron service
+docker-compose up -d
+
+# Or using the Node.js cron runner
+docker-compose --profile cron-node up -d
+```
+
+#### Manual Setup
+
+```bash
+# Setup system cron job
+chmod +x scripts/setup-cron.sh
+./scripts/setup-cron.sh
+
+# Or run the cron runner manually
+node scripts/cron-runner.mjs
+```
+
+#### Vercel
+
+```bash
+vercel --prod
+```
+
+Cron jobs run automatically on Vercel.
