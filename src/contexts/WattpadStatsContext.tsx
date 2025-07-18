@@ -8,6 +8,8 @@ import {
 	useState,
 } from 'react'
 
+import { WattpadStatsService } from '@/services/pocketbase'
+
 interface WattpadStats {
 	reads: string
 	readsComplete: string

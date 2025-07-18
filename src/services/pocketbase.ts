@@ -257,6 +257,54 @@ export class WattpadStatsService {
 			return []
 		}
 	}
+
+	/**
+	 * Update or create Wattpad stats
+	 */
+	static async updateStats(stats: {
+		reads: string
+		readsComplete: string
+		votes: string
+		parts: string
+	}): Promise<WattpadStats | null> {
+		const pb = createPocketBase()
+
+		try {
+			// Check if we already have stats in PocketBase
+			const existingStats = await pb
+				.collection(COLLECTIONS.WATTPAD_STATS)
+				.getList<WattpadStats>(1, 1, {
+					filter: 'is_active = true',
+					sort: '-created',
+				})
+
+			const statsData = {
+				is_active: true,
+				parts: stats.parts,
+				reads: stats.reads,
+				readsComplete: stats.readsComplete,
+				votes: stats.votes,
+			}
+
+			if (existingStats.items.length > 0) {
+				// Update existing record
+				const existingRecord = existingStats.items[0]
+				const updatedRecord = await pb
+					.collection(COLLECTIONS.WATTPAD_STATS)
+					.update<WattpadStats>(existingRecord.id, statsData)
+				return updatedRecord
+			} else {
+				// Create new record
+				const newRecord = await pb
+					.collection(COLLECTIONS.WATTPAD_STATS)
+					.create<WattpadStats>(statsData)
+				return newRecord
+			}
+		} catch (error) {
+			console.error('Error updating Wattpad stats:', error)
+			return null
+		}
+	}
 }
 
 /**

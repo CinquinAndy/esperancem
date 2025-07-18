@@ -20,9 +20,39 @@ async function revalidateStats() {
 			throw new Error('REVALIDATE_SECRET environment variable is required')
 		}
 
-		console.info('🔄 Starting Wattpad stats revalidation...')
+		console.info('🔄 Starting Wattpad stats update and revalidation...')
 
-		const response = await fetch(`${SITE_URL}/api/revalidate-stats`, {
+		// Step 1: Update stats in PocketBase
+		console.info('📝 Step 1: Updating stats in PocketBase...')
+		const updateResponse = await fetch(
+			`${SITE_URL}/api/pocketbase/update-wattpad-stats`,
+			{
+				headers: {
+					Authorization: `Bearer ${REVALIDATE_SECRET}`,
+					'Content-Type': 'application/json',
+				},
+				method: 'POST',
+			}
+		)
+
+		if (!updateResponse.ok) {
+			throw new Error(`Stats update failed! status: ${updateResponse.status}`)
+		}
+
+		const updateResult = await updateResponse.json()
+
+		if (updateResult.success) {
+			console.info('✅ Stats updated in PocketBase successfully!')
+			console.info(
+				`📊 New stats: ${updateResult.stats.reads} reads, ${updateResult.stats.votes} votes, ${updateResult.stats.parts} parts`
+			)
+		} else {
+			console.warn('❌ Stats update failed:', updateResult.error)
+		}
+
+		// Step 2: Trigger Next.js revalidation
+		console.info('🔄 Step 2: Triggering Next.js revalidation...')
+		const revalidateResponse = await fetch(`${SITE_URL}/api/revalidate-stats`, {
 			headers: {
 				Authorization: `Bearer ${REVALIDATE_SECRET}`,
 				'Content-Type': 'application/json',
@@ -30,22 +60,28 @@ async function revalidateStats() {
 			method: 'POST',
 		})
 
-		if (!response.ok) {
-			throw new Error(`HTTP error! status: ${response.status}`)
+		if (!revalidateResponse.ok) {
+			throw new Error(
+				`Revalidation failed! status: ${revalidateResponse.status}`
+			)
 		}
 
-		const result = await response.json()
+		const revalidateResult = await revalidateResponse.json()
 
-		if (result.revalidated) {
-			console.info('✅ Stats revalidated successfully!')
-			console.info(`⏰ Timestamp: ${result.timestamp}`)
+		if (revalidateResult.revalidated) {
+			console.info('✅ Pages revalidated successfully!')
+			console.info(`⏰ Timestamp: ${revalidateResult.timestamp}`)
 		} else {
-			console.warn('❌ Revalidation failed:', result.message)
+			console.warn('❌ Revalidation failed:', revalidateResult.message)
 		}
 
-		return result
+		return {
+			statsUpdated: updateResult.success,
+			pagesRevalidated: revalidateResult.revalidated,
+			timestamp: new Date().toISOString(),
+		}
 	} catch (error) {
-		console.error('🚨 Error during revalidation:', error.message)
+		console.error('🚨 Error during update and revalidation:', error.message)
 		process.exit(1)
 	}
 }
