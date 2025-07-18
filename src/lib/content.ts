@@ -2,7 +2,6 @@ import type {
 	SiteContent,
 	SeoMetadata,
 	SocialLink,
-	WattpadStats,
 	WattpadRanking,
 	SiteSetting,
 } from '@/lib/pocketbase'
@@ -66,9 +65,9 @@ export async function getPageContent(
 }
 
 /**
- * Get SEO metadata for a page
+ * Get SEO metadata for a specific page
  */
-export async function getPageMetadata(
+export async function getSeoMetadata(
 	page: string
 ): Promise<SeoMetadata | null> {
 	try {
@@ -92,19 +91,7 @@ export async function getSocialLinks(): Promise<SocialLink[]> {
 }
 
 /**
- * Get current Wattpad stats
- */
-export async function getWattpadStats(): Promise<WattpadStats | null> {
-	try {
-		return await PocketBaseService.wattpadStats.getCurrentStats()
-	} catch (error) {
-		console.error('Error fetching Wattpad stats:', error)
-		return null
-	}
-}
-
-/**
- * Get all Wattpad rankings
+ * Get Wattpad rankings
  */
 export async function getWattpadRankings(): Promise<WattpadRanking[]> {
 	try {
@@ -116,26 +103,27 @@ export async function getWattpadRankings(): Promise<WattpadRanking[]> {
 }
 
 /**
- * Get a site setting by key
+ * Get site settings
  */
-export async function getSetting(key: string): Promise<string | null> {
-	try {
-		return await PocketBaseService.siteSettings.getSettingValue(key)
-	} catch (error) {
-		console.error(`Error fetching setting ${key}:`, error)
-		return null
-	}
-}
-
-/**
- * Get all site settings
- */
-export async function getAllSettings(): Promise<Record<string, SiteSetting>> {
+export async function getSiteSettings(): Promise<Record<string, SiteSetting>> {
 	try {
 		return await PocketBaseService.siteSettings.getAllSettings()
 	} catch (error) {
 		console.error('Error fetching site settings:', error)
 		return {}
+	}
+}
+
+/**
+ * Get specific site setting by key
+ */
+export async function getSiteSetting(key: string): Promise<string> {
+	try {
+		const setting = await PocketBaseService.siteSettings.getSettingValue(key)
+		return setting || ''
+	} catch (error) {
+		console.error(`Error fetching site setting ${key}:`, error)
+		return ''
 	}
 }
 
@@ -171,4 +159,61 @@ export async function getMultipleContent(
 	}
 
 	return results
+}
+
+/**
+ * Get 404 page content
+ */
+export async function get404Content(): Promise<{
+	buttonText: string
+	description: string
+	title: string
+}> {
+	const [buttonText, description, title] = await Promise.all([
+		getContentWithFallback('404', 'error', 'button_text', "Retour à l'accueil"),
+		getContentWithFallback(
+			'404',
+			'error',
+			'description',
+			"Désolé, nous n'avons pas trouvé la page que vous recherchez."
+		),
+		getContentWithFallback('404', 'error', 'title', 'Page non trouvée'),
+	])
+
+	return {
+		buttonText,
+		description,
+		title,
+	}
+}
+
+/**
+ * Get layout content (header, footer, etc.)
+ */
+export async function getLayoutContent(): Promise<{
+	copyright: string
+	siteDescription: string
+	siteName: string
+}> {
+	const [copyright, siteDescription, siteName] = await Promise.all([
+		getContentWithFallback(
+			'layout',
+			'footer',
+			'copyright',
+			`© ${new Date().getFullYear()} Espérance Masson - Tous droits réservés.`
+		),
+		getContentWithFallback(
+			'layout',
+			'site',
+			'site_description',
+			'Autrice de dark romance'
+		),
+		getContentWithFallback('layout', 'site', 'site_name', 'Espérance Masson'),
+	])
+
+	return {
+		copyright,
+		siteDescription,
+		siteName,
+	}
 }

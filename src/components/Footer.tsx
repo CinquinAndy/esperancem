@@ -7,7 +7,7 @@ import {
 	WattpadIcon,
 	EmailIcon,
 } from '@/components/SocialIcons'
-import { getSocialLinks } from '@/lib/content'
+import { getSocialLinks, getLayoutContent } from '@/lib/content'
 
 function SocialLink({
 	children,
@@ -46,8 +46,11 @@ function getIconComponent(iconName: string | undefined) {
 }
 
 export async function Footer() {
-	// Fetch social links from PocketBase
-	const socialLinks = await getSocialLinks()
+	// Fetch social links and layout content from PocketBase
+	const [socialLinks, layoutContent] = await Promise.all([
+		getSocialLinks(),
+		getLayoutContent(),
+	])
 
 	return (
 		<footer className='mt-32 flex-none'>
@@ -66,7 +69,11 @@ export async function Footer() {
 												href={link.url}
 												icon={Icon}
 											>
-												{link.display_name}
+												<span
+													dangerouslySetInnerHTML={{
+														__html: link.display_name,
+													}}
+												/>
 											</SocialLink>
 										)
 									})}
@@ -85,23 +92,7 @@ export async function Footer() {
 							{/* Copyright */}
 							<div
 								className='flex flex-col items-center gap-2 text-center text-sm text-zinc-500 md:items-end md:text-right'
-								dangerouslySetInnerHTML={{
-									__html: `
-										<p>&copy; ${new Date().getFullYear()} Espérance masson</p>
-										<p>
-											All rights reserved.
-											<span class="text-red-400">Made with ♡</span> by
-											<a
-												href="https://andy-cinquin.fr"
-												target="_blank"
-												rel="noopener noreferrer"
-												class="font-medium text-zinc-400 underline transition hover:text-teal-400"
-											>
-												Cinquin Andy
-											</a>
-										</p>
-									`,
-								}}
+								dangerouslySetInnerHTML={{ __html: layoutContent.copyright }}
 							/>
 						</div>
 					</ContainerInner>
