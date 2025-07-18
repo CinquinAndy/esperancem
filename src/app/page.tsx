@@ -2,6 +2,7 @@ import { type Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
 
+import { getWattpadStats } from '@/app/actions/wattpad-stats'
 import { Button } from '@/components/Button'
 import { Container } from '@/components/Container'
 import {
@@ -18,7 +19,7 @@ import {
 	getSocialLinks,
 	getWattpadRankings,
 } from '@/lib/content'
-import { fetchWattpadStats, formatWattpadStat } from '@/lib/wattpad'
+import { formatWattpadStat } from '@/lib/wattpad'
 
 // Helper function to get icon component by name
 function getIconComponent(iconName: string | undefined) {
@@ -80,11 +81,14 @@ function SocialLink({
 }
 
 interface WattpadReadsTextProps {
-	stats: Awaited<ReturnType<typeof fetchWattpadStats>>
+	stats: Awaited<ReturnType<typeof getWattpadStats>>
 }
 
 function WattpadReadsText({ stats }: WattpadReadsTextProps) {
-	const formattedReads = stats?.reads ? formatWattpadStat(stats.reads) : '85k+'
+	const formattedReads =
+		stats?.success && stats.stats?.reads
+			? formatWattpadStat(stats.stats.reads)
+			: '85k+'
 	return (
 		<span className='font-semibold text-zinc-200'>
 			{formattedReads} lectures
@@ -118,7 +122,7 @@ function BookCover() {
 }
 
 interface DarkHeartsBookProps {
-	stats: Awaited<ReturnType<typeof fetchWattpadStats>>
+	stats: Awaited<ReturnType<typeof getWattpadStats>>
 }
 
 function DarkHeartsBook({
@@ -196,8 +200,8 @@ export default async function Home() {
 		mainDescription ||
 		"Bienvenue dans l'univers sombre et passionné d'Espérance Masson. Autrice française spécialisée dans la dark romance, j'écris des histoires d'âmes tourmentées, d'amours impossibles et de la part d'ombre qui sommeille en chacun de nous."
 
-	// Use original API for stats for now (we'll update this later)
-	const stats = await fetchWattpadStats()
+	// Use Server Action for stats
+	const stats = await getWattpadStats()
 
 	return (
 		<>

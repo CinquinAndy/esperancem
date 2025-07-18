@@ -8,7 +8,7 @@ import {
 	useState,
 } from 'react'
 
-import { WattpadStatsService } from '@/services/pocketbase'
+import { getWattpadStats } from '@/app/actions/wattpad-stats'
 
 interface WattpadStats {
 	reads: string
@@ -67,19 +67,17 @@ export function WattpadStatsProvider({
 					}
 				}
 
-				// Fetch directly from PocketBase service
-				const result = await WattpadStatsService.getCurrentStats()
+				// Fetch using Server Action
+				const result = await getWattpadStats()
 
-				if (result && result.reads) {
-					// Transform PocketBase data to match expected format
+				if (result.success && result.stats) {
+					// Transform Server Action data to match expected format
 					const transformedStats = {
-						lastUpdated: result.updated
-							? new Date(result.updated).getTime()
-							: Date.now(),
-						parts: result.parts || '0',
-						reads: result.reads || '0',
-						readsComplete: result.reads_complete || result.reads || '0',
-						votes: result.votes || '0',
+						lastUpdated: result.stats.lastUpdated,
+						parts: result.stats.parts,
+						reads: result.stats.reads,
+						readsComplete: result.stats.readsComplete,
+						votes: result.stats.votes,
 					}
 
 					// Update local cache
