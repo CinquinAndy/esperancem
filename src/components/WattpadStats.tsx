@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react'
 import {
 	useWattpadStats,
 	WattpadStatsProvider,
+	type StatsType,
 } from '@/contexts/WattpadStatsContext'
 
 interface StatItemProps {
@@ -122,10 +123,27 @@ function WattpadStatsContent() {
 	)
 }
 
-export function WattpadStats() {
+interface WattpadStatsProps {
+	className?: string
+	statsType: StatsType
+	title?: string
+}
+
+export function WattpadStats({
+	className = '',
+	statsType,
+	title,
+}: WattpadStatsProps) {
 	return (
-		<WattpadStatsProvider>
-			<WattpadStatsContent />
-		</WattpadStatsProvider>
+		<div className={className}>
+			{title && (
+				<div className='mb-6 text-center'>
+					<h2 className='text-2xl font-bold text-zinc-100'>{title}</h2>
+				</div>
+			)}
+			<WattpadStatsProvider statsType={statsType}>
+				<WattpadStatsContent />
+			</WattpadStatsProvider>
+		</div>
 	)
 }

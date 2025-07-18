@@ -8,132 +8,87 @@ import {
 	useState,
 } from 'react'
 
-import { getWattpadStats } from '@/app/actions/wattpad-stats'
+import type { BookType } from '@/lib/pocketbase'
+
+export type StatsType = 'total' | BookType
 
 interface WattpadStats {
+	lastUpdated: number
+	parts: string
 	reads: string
 	readsComplete: string
 	votes: string
-	parts: string
-	lastUpdated: number
 }
 
 interface WattpadStatsContextType {
-	stats: WattpadStats | null
-	loading: boolean
 	error: string | null
-	refreshStats: () => Promise<void>
-	lastUpdated: Date | null
+	loading: boolean
+	refresh: () => void
+	stats: WattpadStats | null
 }
 
-const WattpadStatsContext = createContext<WattpadStatsContextType | undefined>(
-	undefined
-)
+const WattpadStatsContext = createContext<WattpadStatsContextType | null>(null)
 
 interface WattpadStatsProviderProps {
 	children: React.ReactNode
 	initialStats?: WattpadStats | null
+	statsType: StatsType
 }
-
-const CACHE_KEY = 'wattpad-stats-cache'
-const CACHE_DURATION = 6 * 60 * 60 * 1000 // 6 hours
 
 export function WattpadStatsProvider({
 	children,
-	initialStats = null,
+	initialStats,
+	statsType,
 }: WattpadStatsProviderProps) {
-	const [stats, setStats] = useState<WattpadStats | null>(initialStats)
-	const [loading, setLoading] = useState(!initialStats)
+	const [stats, setStats] = useState<WattpadStats | null>(initialStats || null)
+	const [loading, setLoading] = useState(false)
 	const [error, setError] = useState<string | null>(null)
 
-	const fetchStats = useCallback(
-		async (force = false) => {
-			try {
-				setLoading(true)
-				setError(null)
+	const fetchStats = useCallback(async () => {
+		setLoading(true)
+		setError(null)
 
-				// Check local cache first (only if not forced and no initial stats)
-				if (!force && !initialStats) {
-					const cachedData = localStorage.getItem(CACHE_KEY)
-					if (cachedData) {
-						const parsed: WattpadStats = JSON.parse(cachedData)
-						const now = Date.now()
-
-						if (now - parsed.lastUpdated < CACHE_DURATION) {
-							setStats(parsed)
-							setLoading(false)
-							return
-						}
-					}
-				}
-
-				// Fetch using Server Action
-				const result = await getWattpadStats()
-
-				if (result.success && result.stats) {
-					// Transform Server Action data to match expected format
-					const transformedStats = {
-						lastUpdated: result.stats.lastUpdated,
-						parts: result.stats.parts,
-						reads: result.stats.reads,
-						readsComplete: result.stats.readsComplete,
-						votes: result.stats.votes,
-					}
-
-					// Update local cache
-					if (typeof window !== 'undefined') {
-						localStorage.setItem(CACHE_KEY, JSON.stringify(transformedStats))
-					}
-					setStats(transformedStats)
-				} else {
-					throw new Error('Failed to fetch stats from PocketBase')
-				}
-			} catch (err) {
-				const errorMessage =
-					err instanceof Error ? err.message : 'Unknown error'
-				setError(errorMessage)
-
-				// Try to use cached data as fallback
-				if (typeof window !== 'undefined') {
-					const cachedData = localStorage.getItem(CACHE_KEY)
-					if (cachedData) {
-						const parsed: WattpadStats = JSON.parse(cachedData)
-						setStats(parsed)
-					}
-				}
-			} finally {
-				setLoading(false)
+		try {
+			let url: string
+			if (statsType === 'total') {
+				url = '/api/wattpad-stats/total'
+			} else {
+				url = `/api/wattpad-stats/${statsType}`
 			}
-		},
-		[initialStats]
-	)
 
-	const refreshStats = () => fetchStats(true)
+			const response = await fetch(url)
+			const data = await response.json()
+
+			if (data.success && data.data) {
+				setStats(data.data)
+			} else {
+				setError(data.error || 'Failed to fetch stats')
+			}
+		} catch (err) {
+			setError(err instanceof Error ? err.message : 'Unknown error')
+		} finally {
+			setLoading(false)
+		}
+	}, [statsType])
+
+	const refresh = () => {
+		fetchStats()
+	}
 
 	useEffect(() => {
-		// Only fetch if we don't have initial stats
 		if (!initialStats) {
 			fetchStats()
 		}
+	}, [fetchStats, initialStats])
 
-		// Set up automatic refresh every 6 hours
-		const interval = setInterval(() => {
-			fetchStats()
-		}, CACHE_DURATION)
-
+	useEffect(() => {
+		// Refresh stats every 5 minutes
+		const interval = setInterval(fetchStats, 5 * 60 * 1000)
 		return () => clearInterval(interval)
-	}, [initialStats, fetchStats])
+	}, [fetchStats])
 
 	return (
-		<WattpadStatsContext.Provider
-			value={{
-				error,
-				lastUpdated: stats?.lastUpdated ? new Date(stats.lastUpdated) : null,
-				loading,
-				refreshStats,
-				stats,
-			}}
-		>
+		<WattpadStatsContext.Provider value={{ error, loading, refresh, stats }}>
 			{children}
 		</WattpadStatsContext.Provider>
 	)
@@ -141,7 +96,7 @@ export function WattpadStatsProvider({
 
 export function useWattpadStats() {
 	const context = useContext(WattpadStatsContext)
-	if (context === undefined) {
+	if (!context) {
 		throw new Error(
 			'useWattpadStats must be used within a WattpadStatsProvider'
 		)
