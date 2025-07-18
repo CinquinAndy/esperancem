@@ -4,6 +4,7 @@ import {
 	updateWattpadStats,
 	getWattpadStats,
 } from '@/app/actions/wattpad-stats'
+import { verifyAdminAuth } from '@/lib/auth'
 
 /**
  * Admin-only endpoint for Wattpad stats management
@@ -11,10 +12,10 @@ import {
  */
 export async function GET(request: NextRequest) {
 	try {
-		// Check admin authentication
-		const authHeader = request.headers.get('authorization')
-		if (authHeader !== `Bearer ${process.env.ADMIN_SECRET}`) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+		// Check admin authentication using centralized utility
+		const authResult = verifyAdminAuth(request)
+		if (!authResult.authorized) {
+			return NextResponse.json({ error: authResult.error }, { status: 401 })
 		}
 
 		const stats = await getWattpadStats()
@@ -34,10 +35,10 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
 	try {
-		// Check admin authentication
-		const authHeader = request.headers.get('authorization')
-		if (authHeader !== `Bearer ${process.env.ADMIN_SECRET}`) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+		// Check admin authentication using centralized utility
+		const authResult = verifyAdminAuth(request)
+		if (!authResult.authorized) {
+			return NextResponse.json({ error: authResult.error }, { status: 401 })
 		}
 
 		const result = await updateWattpadStats()

@@ -7,6 +7,44 @@ import { WattpadStatsService } from './pocketbase'
  * This service can be used in server-side functions, cron jobs, etc.
  */
 export class WattpadStatsUpdater {
+	// Cache for in-memory storage (shared across all instances)
+	private static cache: {
+		lastUpdated: number
+		stats: any
+	} | null = null
+
+	private static readonly CACHE_DURATION = 6 * 60 * 60 * 1000 // 6 hours
+
+	/**
+	 * Get cached stats if still valid
+	 */
+	static getCachedStats() {
+		if (
+			this.cache &&
+			Date.now() - this.cache.lastUpdated < this.CACHE_DURATION
+		) {
+			return this.cache.stats
+		}
+		return null
+	}
+
+	/**
+	 * Update cache with new stats
+	 */
+	static updateCache(stats: any) {
+		this.cache = {
+			lastUpdated: Date.now(),
+			stats,
+		}
+	}
+
+	/**
+	 * Clear cache (useful for testing or manual refresh)
+	 */
+	static clearCache() {
+		this.cache = null
+	}
+
 	/**
 	 * Fetch fresh stats from Wattpad website
 	 */
@@ -161,6 +199,60 @@ export class WattpadStatsUpdater {
 	}
 
 	/**
+	 * Get stats with caching support
+	 */
+	static async getStats(forceRefresh = false) {
+		// Check cache first (unless forced refresh)
+		if (!forceRefresh) {
+			const cachedStats = this.getCachedStats()
+			if (cachedStats) {
+				console.info('📋 Using cached stats')
+				return {
+					cached: true,
+					data: cachedStats,
+					success: true,
+				}
+			}
+		}
+
+		try {
+			// Fetch fresh stats
+			const stats = await this.fetchWattpadStats()
+			const statsWithTimestamp = {
+				...stats,
+				lastUpdated: Date.now(),
+			}
+
+			// Update cache
+			this.updateCache(statsWithTimestamp)
+
+			return {
+				cached: false,
+				data: statsWithTimestamp,
+				success: true,
+			}
+		} catch (error) {
+			console.error('❌ Error getting stats:', error)
+
+			// Return cached data if available, even if stale
+			const cachedStats = this.getCachedStats()
+			if (cachedStats) {
+				return {
+					cached: true,
+					data: cachedStats,
+					error: 'Failed to fetch fresh data, returning cached data',
+					success: true,
+				}
+			}
+
+			return {
+				error: error instanceof Error ? error.message : 'Unknown error',
+				success: false,
+			}
+		}
+	}
+
+	/**
 	 * Update stats in PocketBase
 	 */
 	static async updateStats(stats: {
@@ -198,6 +290,12 @@ export class WattpadStatsUpdater {
 
 			// Step 2: Update PocketBase
 			const updatedStats = await this.updateStats(stats)
+
+			// Step 3: Update cache
+			this.updateCache({
+				...stats,
+				lastUpdated: Date.now(),
+			})
 
 			console.info('🎉 Wattpad stats update completed successfully!')
 			console.info('\n📊 Final Stats:')

@@ -11,30 +11,42 @@ import { WattpadStatsUpdater } from '@/services/wattpad-stats-updater'
  */
 export async function getWattpadStats() {
 	try {
+		// First try to get from PocketBase (preferred for SSG)
 		const stats = await WattpadStatsService.getCurrentStats()
 
-		if (!stats) {
+		if (stats) {
+			// Transform to match frontend expectations
+			const transformedStats = {
+				lastUpdated: stats.updated
+					? new Date(stats.updated).getTime()
+					: Date.now(),
+				parts: stats.parts || '0',
+				reads: stats.reads || '0',
+				readsComplete: stats.reads_complete || stats.reads || '0',
+				votes: stats.votes || '0',
+			}
+
 			return {
-				error: 'No stats found',
-				stats: null,
-				success: false,
+				stats: transformedStats,
+				success: true,
 			}
 		}
 
-		// Transform to match frontend expectations
-		const transformedStats = {
-			lastUpdated: stats.updated
-				? new Date(stats.updated).getTime()
-				: Date.now(),
-			parts: stats.parts || '0',
-			reads: stats.reads || '0',
-			readsComplete: stats.reads_complete || stats.reads || '0',
-			votes: stats.votes || '0',
+		// Fallback to fetching from Wattpad if no PocketBase data
+		console.info('No PocketBase stats found, fetching from Wattpad...')
+		const result = await WattpadStatsUpdater.getStats()
+
+		if (result.success && result.data) {
+			return {
+				stats: result.data,
+				success: true,
+			}
 		}
 
 		return {
-			stats: transformedStats,
-			success: true,
+			error: 'No stats found',
+			stats: null,
+			success: false,
 		}
 	} catch (error) {
 		console.error('Error getting Wattpad stats:', error)
@@ -52,7 +64,7 @@ export async function getWattpadStats() {
  */
 export async function updateWattpadStats() {
 	try {
-		// Perform the complete update
+		// Perform the complete update using unified service
 		const result = await WattpadStatsUpdater.performUpdate()
 
 		if (result.success) {

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 import { updateWattpadStats } from '@/app/actions/wattpad-stats'
+import { verifyCronAuth } from '@/lib/auth'
 
 /**
  * Cron job endpoint for updating Wattpad stats
@@ -8,15 +9,10 @@ import { updateWattpadStats } from '@/app/actions/wattpad-stats'
  */
 export async function GET(request: NextRequest) {
 	try {
-		// Verify this is a legitimate cron job request
-		const authHeader = request.headers.get('authorization')
-		const isVercelCron = request.headers.get('x-vercel-cron') === '1'
-
-		if (
-			!isVercelCron &&
-			authHeader !== `Bearer ${process.env.REVALIDATE_SECRET}`
-		) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+		// Verify authentication using centralized utility
+		const authResult = verifyCronAuth(request)
+		if (!authResult.authorized) {
+			return NextResponse.json({ error: authResult.error }, { status: 401 })
 		}
 
 		console.info('🔄 Cron job: Starting Wattpad stats update...')
