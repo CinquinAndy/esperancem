@@ -111,7 +111,7 @@ function BookCover({
 			<div className='aspect-[2/3] w-full overflow-hidden rounded-xl bg-zinc-900 shadow-2xl ring-1 ring-zinc-700/50'>
 				<Image
 					alt={alt}
-					blurDataURL='data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGBkbHB0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyLli2A4Haw6gZEYGTrHWJ2PNgHr3nz8CBAw+lFhpX2HaH9bcfaSXWGaRmknyLli2A4Haw6gZEYGTrHWJ2PNgHr3nz8CBAw+lFhpX2HaH9bcfaSXWGaRmknyLli2A4Haw6gZEYGTrHWJ2PNgHr3nz8CBAw+lFhpX2HaH9bcfaSXWGaRmknyLli2A4Haw6gZ'
+					blurDataURL='data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGBkbHB0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyLli2A4Haw6gZEYGTrHWJ2PNgHr3nz8CBAw+lFhpX2HaH9bcfaSXWGaRmknyLli2A4Haw6gZEYGTrHWJ2PNgHr3nz8CBAw+lFhpX2HaH9bcfaSXWGaRmknyLli2A4Haw6gZ'
 					className='h-full w-full object-cover transition duration-300 group-hover:scale-105'
 					height={1500}
 					placeholder='blur'
@@ -156,40 +156,46 @@ function Book({
 				/>
 			</div>
 
-			<div>
-				<h3
-					className='text-md font-semibold text-zinc-100'
-					dangerouslySetInnerHTML={{
-						__html: bookContent.rankings_title || '...',
-					}}
-				/>
-				<div className='mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm font-medium text-zinc-400'>
-					{rankings.map(ranking => (
-						<p key={ranking.category} className='w-full'>
-							#{ranking.position}{' '}
-							<span className='font-semibold text-zinc-200'>
-								{ranking.category}
-							</span>{' '}
-							({new Date(ranking.date).toLocaleDateString('fr-FR')})
-						</p>
-					))}
-					<p className='w-full text-zinc-300'>
-						Plus de <WattpadReadsText stats={stats} /> sur Wattpad
-					</p>
+			{bookContent.rankings_title && rankings.length > 0 && (
+				<div>
+					<h3
+						className='text-md font-semibold text-zinc-100'
+						dangerouslySetInnerHTML={{
+							__html: bookContent.rankings_title || '...',
+						}}
+					/>
+					{rankings.length > 0 && (
+						<div className='mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm font-medium text-zinc-400'>
+							{rankings.map(ranking => (
+								<p key={ranking.category} className='w-full'>
+									#{ranking.position}{' '}
+									<span className='font-semibold text-zinc-200'>
+										{ranking.category}
+									</span>{' '}
+									({new Date(ranking.date).toLocaleDateString('fr-FR')})
+								</p>
+							))}
+							<p className='w-full text-zinc-300'>
+								Plus de <WattpadReadsText stats={stats} /> sur Wattpad
+							</p>
+						</div>
+					)}
 				</div>
-			</div>
+			)}
 
-			<Button
-				href={bookContent.wattpad_url.replace(/<[^>]*>?/g, '')}
-				variant='secondary'
-				className='group mt-4 w-full'
-			>
-				<span
-					dangerouslySetInnerHTML={{
-						__html: bookContent.wattpad_button || '...',
-					}}
-				/>
-			</Button>
+			{bookContent.wattpad_button && (
+				<Button
+					href={bookContent.wattpad_url.replace(/<[^>]*>?/g, '')}
+					variant='secondary'
+					className='group mt-4 w-full'
+				>
+					<span
+						dangerouslySetInnerHTML={{
+							__html: bookContent.wattpad_button || '...',
+						}}
+					/>
+				</Button>
+			)}
 		</div>
 	)
 }
@@ -304,11 +310,11 @@ export default async function Home() {
 										'book_description_2'
 									),
 									book_title: await getContent('home', 'book', 'book_title_2'),
-									rankings_title: await getContent(
-										'home',
-										'book',
-										'rankings_title_2'
-									),
+									// rankings_title: await getContent(
+									// 	'home',
+									// 	'book',
+									// 	'rankings_title_2'
+									// ),
 									wattpad_button: await getContent(
 										'home',
 										'book',
@@ -320,7 +326,7 @@ export default async function Home() {
 										'wattpad_url_2'
 									),
 								}}
-								rankings={rankings}
+								rankings={[]}
 							/>
 						</div>
 					</div>
