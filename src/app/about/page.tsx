@@ -11,6 +11,7 @@ import {
 import { WattpadStatsProvider } from '@/contexts/WattpadStatsContext'
 import portraitImage from '@/images/avatar.jpeg'
 import bookCover from '@/images/photos/cover_on_book.jpg'
+import { getContentWithFallback, getSocialLinks } from '@/lib/content'
 import { generateAboutMetadata } from '@/lib/metadata'
 import { fetchWattpadStats } from '@/lib/wattpad'
 
@@ -54,7 +55,24 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function About() {
-	const initialStats = await fetchWattpadStats()
+	// Fetch content and social links from PocketBase
+	const [
+		initialStats,
+		socialLinks,
+		mainTitle,
+		mainContent,
+		bookTitle,
+		bookContent,
+		email,
+	] = await Promise.all([
+		fetchWattpadStats(),
+		getSocialLinks(),
+		getContentWithFallback('about', 'hero', 'main_title', '...'),
+		getContentWithFallback('about', 'hero', 'biography', '...'),
+		getContentWithFallback('about', 'book', 'book_title', '...'),
+		getContentWithFallback('about', 'book', 'book_description', `...`),
+		getContentWithFallback('about', 'contact', 'email', '...'),
+	])
 
 	return (
 		<WattpadStatsProvider initialStats={initialStats}>
@@ -73,71 +91,40 @@ export default async function About() {
 					<div className='lg:order-first lg:row-span-2'>
 						<h1
 							className='text-4xl font-bold tracking-tight text-zinc-100 sm:text-5xl'
-							dangerouslySetInnerHTML={{
-								__html:
-									'Je suis Espérance Masson, autrice française de dark romance',
-							}}
+							dangerouslySetInnerHTML={{ __html: mainTitle }}
 						/>
 						<div
 							className='mt-6 space-y-7 text-base text-zinc-400'
-							dangerouslySetInnerHTML={{
-								__html: `
-									<p>Salut tout le monde ! J'espère que vous allez bien.</p>
-									<p>
-										Bienvenue dans mon univers où j'explore les profondeurs de
-										l'âme humaine à travers des dark romances françaises,
-										intenses et captivantes. En tant qu'autrice française
-										spécialisée dans la romance sombre, je crée des histoires qui
-										questionnent les limites entre l'amour et l'obsession.
-									</p>
-									<p>
-										Mon roman "Cœurs Sombres" a conquis plus de lecteurs sur Wattpad
-										et atteint la première place dans plusieurs catégories. Cette
-										enemies to lovers mafia romance suit l'histoire troublante
-										d'Angèle et Lucas Ferrari, deux âmes brisées liées par des
-										secrets destructeurs.
-									</p>
-									<p>
-										N'hésitez pas à venir me retrouver sur mes réseaux sociaux
-										(@esp_masson sur Instagram, @_esperance_masson sur TikTok) pour
-										découvrir les coulisses de l'écriture de mes romans et
-										échanger avec d'autres passionnés de dark romance
-										française.
-									</p>
-								`,
-							}}
+							dangerouslySetInnerHTML={{ __html: mainContent }}
 						/>
 					</div>
 					<div className='lg:pl-20'>
 						<ul role='list'>
-							<SocialLink
-								href='https://www.instagram.com/esp_masson/'
-								icon={InstagramIcon}
-								className='mt-4'
-							>
-								Suivez-moi sur Instagram
-							</SocialLink>
-							<SocialLink
-								href='https://www.tiktok.com/@_esperance_masson'
-								icon={TikTokIcon}
-								className='mt-4'
-							>
-								Suivez-moi sur TikTok
-							</SocialLink>
-							<SocialLink
-								href='https://www.wattpad.com/user/Esperancem'
-								icon={WattpadIcon}
-								className='mt-4'
-							>
-								Découvrez mes écrits sur Wattpad
-							</SocialLink>
+							{socialLinks.map(link => (
+								<SocialLink
+									key={link.platform}
+									href={link.url}
+									icon={
+										link.platform === 'instagram'
+											? InstagramIcon
+											: link.platform === 'tiktok'
+												? TikTokIcon
+												: WattpadIcon
+									}
+									className='mt-4'
+								>
+									<span
+										dangerouslySetInnerHTML={{ __html: link.display_name }}
+									/>
+								</SocialLink>
+							))}
 							<div className='mt-8 border-t border-zinc-700/40 pt-8'>
 								<SocialLink
-									href='mailto:esperance.masson@gmail.com'
+									href={`mailto:${email.replace(/<[^>]*>?/g, '')}`}
 									icon={MailIcon}
 									className='items-center'
 								>
-									esperance.masson@gmail.com
+									{email.replace(/<[^>]*>?/g, '')}
 								</SocialLink>
 							</div>
 						</ul>
@@ -170,40 +157,11 @@ export default async function About() {
 						<div className='lg:pl-8'>
 							<h2
 								className='text-3xl font-bold tracking-tight text-zinc-100 sm:text-4xl'
-								dangerouslySetInnerHTML={{
-									__html: 'Cœurs Sombres - Mon premier roman Wattpad',
-								}}
+								dangerouslySetInnerHTML={{ __html: bookTitle }}
 							/>
 							<div
 								className='mt-6 space-y-6 text-base text-zinc-400'
-								dangerouslySetInnerHTML={{
-									__html: `
-										<p>
-											<span class="text-zinc-200 italic">Cœurs Sombres</span>
-											est né d'une passion pour les histoires complexes où
-											l'amour et la violence s'entremêlent dans une dark
-											romance française captivante.
-										</p>
-										<p>
-											Cette dark romance explore les zones grises de l'âme
-											humaine, là où la rédemption et la destruction se côtoient
-											dans un équilibre fragile. L'histoire d'Angèle et
-											Lucas Ferrari plonge les lecteurs dans un univers de mafia
-											romance où l'enemies to lovers prend une dimension
-											particulièrement intense.
-										</p>
-										<p>
-											Disponible gratuitement sur Wattpad, ce livre a déjà conquis
-											plus de lecteurs et obtenu plusieurs classements #1 dans les catégories enemies
-											to lovers, trahisons, meurtres et amitiés.
-										</p>
-										<p>
-											<strong>Suivez-moi :</strong> @esp_masson sur Instagram et
-											@_esperance_masson sur TikTok pour découvrir les coulisses de
-											l'écriture et mes prochains projets de dark romance.
-										</p>
-									`,
-								}}
+								dangerouslySetInnerHTML={{ __html: bookContent }}
 							/>
 						</div>
 					</div>
