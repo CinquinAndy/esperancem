@@ -8,18 +8,6 @@ const nextConfig = {
 			dynamic: 0,
 			static: 180, // 3 minutes cache for static content
 		},
-		// Enable Work Jobs for background processing
-		workJobs: {
-			// Configure the Wattpad stats update job
-			'wattpad-stats-update': {
-				cron: '0 */6 * * *', // Every 6 hours
-				timeout: 30000, // 30 seconds
-				retry: {
-					attempts: 3,
-					delay: 5000,
-				},
-			},
-		},
 		// Secure Server Actions configuration
 		serverActions: {
 			// Only allow same-origin requests for security

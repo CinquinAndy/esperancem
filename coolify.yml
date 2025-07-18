@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - '3000:3000'
+    environment:
+      - NODE_ENV=production
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:3000/api/health']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Cron job service for Wattpad stats updates
+  cron:
+    build: .
+    command: ['node', 'scripts/cron-runner.mjs']
+    environment:
+      - NODE_ENV=production
+      - CRON_INTERVAL=21600000 # 6 hours in milliseconds
+    depends_on:
+      - app
+    restart: unless-stopped
