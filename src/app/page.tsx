@@ -13,6 +13,8 @@ import {
 } from '@/components/SocialIcons'
 import { WattpadStats } from '@/components/WattpadStats'
 import bookCover from '@/images/photos/cover_on_book.jpg'
+// Import for the new book cover
+const newBookCover = '/au_prix_du_silence_cover.png'
 import {
 	getContent,
 	getSeoMetadata,
@@ -95,21 +97,29 @@ function WattpadReadsText({ stats }: WattpadReadsTextProps) {
 	)
 }
 
-function BookCover() {
+function BookCover({
+	src,
+	alt,
+	priority = false,
+}: {
+	src: any
+	alt: string
+	priority?: boolean
+}) {
 	return (
 		<div className='group relative'>
 			<div className='aspect-[2/3] w-full overflow-hidden rounded-xl bg-zinc-900 shadow-2xl ring-1 ring-zinc-700/50'>
 				<Image
-					src={bookCover}
-					alt="Couverture du livre Cœurs Sombres d'Espérance masson"
-					className='h-full w-full object-cover transition duration-300 group-hover:scale-105'
-					quality={100}
-					width={1000}
-					height={1500}
-					priority
-					placeholder='blur'
+					alt={alt}
 					blurDataURL='data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGBkbHB0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyLli2A4Haw6gZEYGTrHWJ2PNgHr3nz8CBAw+lFhpX2HaH9bcfaSXWGaRmknyLli2A4Haw6gZEYGTrHWJ2PNgHr3nz8CBAw+lFhpX2HaH9bcfaSXWGaRmknyLli2A4Haw6gZEYGTrHWJ2PNgHr3nz8CBAw+lFhpX2HaH9bcfaSXWGaRmknyLli2A4Haw6gZ'
+					className='h-full w-full object-cover transition duration-300 group-hover:scale-105'
+					height={1500}
+					placeholder='blur'
+					priority={priority}
+					quality={100}
+					src={src}
 					unoptimized={false}
+					width={1000}
 				/>
 				{/* Elegant hover effect */}
 				<div className='absolute inset-0 bg-gradient-to-t from-zinc-900/20 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100' />
@@ -120,15 +130,15 @@ function BookCover() {
 	)
 }
 
-interface DarkHeartsBookProps {
+interface BookProps {
 	stats: Awaited<ReturnType<typeof getWattpadStats>>
 }
 
-function DarkHeartsBook({
+function Book({
 	bookContent,
 	rankings,
 	stats,
-}: DarkHeartsBookProps & { bookContent: any; rankings: any[] }) {
+}: BookProps & { bookContent: any; rankings: any[] }) {
 	return (
 		<div className='flex flex-col gap-y-6 rounded-2xl border border-zinc-700/40 p-6'>
 			<div>
@@ -236,35 +246,83 @@ export default async function Home() {
 				<WattpadStats />
 			</Container>
 
+			{/* Books Section */}
 			<Container className='mt-24 md:mt-28'>
-				<div className='mx-auto grid max-w-xl grid-cols-1 items-start gap-y-20 lg:max-w-none lg:grid-cols-2'>
-					<div className='flex flex-col gap-16'>
-						<BookCover />
+				<div className='space-y-20'>
+					{/* First Book - Cœurs Sombres */}
+					<div className='mx-auto grid max-w-xl grid-cols-1 items-start gap-y-20 lg:max-w-none lg:grid-cols-2'>
+						<div className='flex flex-col gap-16'>
+							<BookCover
+								src={bookCover}
+								alt="Couverture du livre Cœurs Sombres d'Espérance masson"
+								priority={true}
+							/>
+						</div>
+						<div className='space-y-10 lg:pl-16 xl:pl-24'>
+							<Book
+								stats={stats}
+								bookContent={{
+									book_description: await getContent(
+										'home',
+										'book',
+										'book_description'
+									),
+									book_title: await getContent('home', 'book', 'book_title'),
+									rankings_title: await getContent(
+										'home',
+										'book',
+										'rankings_title'
+									),
+									wattpad_button: await getContent(
+										'home',
+										'book',
+										'wattpad_button'
+									),
+									wattpad_url: await getContent('home', 'book', 'wattpad_url'),
+								}}
+								rankings={rankings}
+							/>
+						</div>
 					</div>
-					<div className='space-y-10 lg:pl-16 xl:pl-24'>
-						<DarkHeartsBook
-							stats={stats}
-							bookContent={{
-								book_description: await getContent(
-									'home',
-									'book',
-									'book_description'
-								),
-								book_title: await getContent('home', 'book', 'book_title'),
-								rankings_title: await getContent(
-									'home',
-									'book',
-									'rankings_title'
-								),
-								wattpad_button: await getContent(
-									'home',
-									'book',
-									'wattpad_button'
-								),
-								wattpad_url: await getContent('home', 'book', 'wattpad_url'),
-							}}
-							rankings={rankings}
-						/>
+
+					{/* Second Book - Au Prix du Silence */}
+					<div className='mx-auto grid max-w-xl grid-cols-1 items-start gap-y-20 lg:max-w-none lg:grid-cols-2'>
+						<div className='flex flex-col gap-16 lg:order-2'>
+							<BookCover
+								src={newBookCover}
+								alt="Couverture du livre Au Prix du Silence d'Espérance masson"
+								priority={false}
+							/>
+						</div>
+						<div className='space-y-10 lg:order-1 lg:pr-16 xl:pr-24'>
+							<Book
+								stats={stats}
+								bookContent={{
+									book_description: await getContent(
+										'home',
+										'book',
+										'book_description_2'
+									),
+									book_title: await getContent('home', 'book', 'book_title_2'),
+									rankings_title: await getContent(
+										'home',
+										'book',
+										'rankings_title_2'
+									),
+									wattpad_button: await getContent(
+										'home',
+										'book',
+										'wattpad_button_2'
+									),
+									wattpad_url: await getContent(
+										'home',
+										'book',
+										'wattpad_url_2'
+									),
+								}}
+								rankings={rankings}
+							/>
+						</div>
 					</div>
 				</div>
 			</Container>
