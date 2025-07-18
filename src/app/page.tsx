@@ -139,21 +139,9 @@ function DarkHeartsBook({
 					}}
 				/>
 				<div
-					className='mt-2 text-sm text-zinc-400'
+					className='mt-2 text-sm text-zinc-400 [&>p]:mt-4'
 					dangerouslySetInnerHTML={{
 						__html: bookContent.book_description || '...',
-					}}
-				/>
-				<div
-					className='mt-4 text-sm text-zinc-400'
-					dangerouslySetInnerHTML={{
-						__html: bookContent.book_description_2 || '...',
-					}}
-				/>
-				<div
-					className='mt-4 text-sm text-zinc-400'
-					dangerouslySetInnerHTML={{
-						__html: bookContent.book_description_3 || '...',
 					}}
 				/>
 			</div>
@@ -261,16 +249,6 @@ export default async function Home() {
 									'home',
 									'book',
 									'book_description'
-								),
-								book_description_2: await getContent(
-									'home',
-									'book',
-									'book_description_2'
-								),
-								book_description_3: await getContent(
-									'home',
-									'book',
-									'book_description_3'
 								),
 								book_title: await getContent('home', 'book', 'book_title'),
 								rankings_title: await getContent(
