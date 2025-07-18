@@ -1,7 +1,7 @@
 import PocketBase from 'pocketbase'
 
 // PocketBase server URL - should be in environment variables
-const POCKETBASE_URL = process.env.POCKETBASE_URL || 'http://127.0.0.1:8090'
+const POCKETBASE_URL = process.env.PB_URL || 'http://127.0.0.1:8090'
 const PB_TOKEN = process.env.PB_TOKEN
 
 // Create PocketBase instance for server-side operations

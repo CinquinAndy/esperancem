@@ -11,11 +11,57 @@ import {
 } from '@/components/SocialIcons'
 import { WattpadStats } from '@/components/WattpadStats'
 import bookCover from '@/images/photos/cover_on_book.jpg'
-import { generateHomeMetadata } from '@/lib/metadata'
+import {
+	getPageMetadata,
+	getContent,
+	getSocialLinks,
+	getWattpadStats,
+	getWattpadRankings,
+} from '@/lib/content'
 import { fetchWattpadStats, formatWattpadStat } from '@/lib/wattpad'
 
+// Helper function to get icon component by name
+function getIconComponent(iconName: string | undefined) {
+	switch (iconName) {
+		case 'InstagramIcon':
+			return InstagramIcon
+		case 'TikTokIcon':
+			return TikTokIcon
+		case 'WattpadIcon':
+			return WattpadIcon
+		default:
+			return InstagramIcon
+	}
+}
+
 export async function generateMetadata(): Promise<Metadata> {
-	return await generateHomeMetadata()
+	const metadata = await getPageMetadata('home')
+
+	if (!metadata) {
+		return {
+			title: 'Accueil - Espérance Masson | Autrice de Cœurs Sombres',
+			description:
+				"Découvrez l'univers sombre et passionné d'Espérance Masson.",
+		}
+	}
+
+	return {
+		title: metadata.title,
+		description: metadata.description,
+		keywords: metadata.keywords,
+		openGraph: {
+			title: metadata.og_title,
+			description: metadata.og_description,
+			url: metadata.og_url,
+		},
+		twitter: {
+			card: 'summary_large_image',
+			title: metadata.twitter_title,
+			description: metadata.twitter_description,
+			creator: metadata.twitter_creator,
+			site: metadata.twitter_site,
+		},
+	}
 }
 
 function SocialLink({
@@ -154,40 +200,44 @@ function DarkHeartsBook({ stats }: DarkHeartsBookProps) {
 }
 
 export default async function Home() {
-	// Fetch Wattpad stats server-side for SSG with ISR
-	const stats = await fetchWattpadStats()
+	// Fetch data from PocketBase
+	const [mainTitle, mainDescription, socialLinks, stats, rankings] =
+		await Promise.all([
+			getContent('home', 'hero', 'main_title'),
+			getContent('home', 'hero', 'main_description'),
+			getSocialLinks(),
+			getWattpadStats(),
+			getWattpadRankings(),
+		])
+
+	// Fallback to original content if PocketBase data is not available
+	const title =
+		mainTitle || 'Espérance Masson, autrice française de dark romance'
+	const description =
+		mainDescription ||
+		"Bienvenue dans l'univers sombre et passionné d'Espérance Masson. Autrice française spécialisée dans la dark romance, j'écris des histoires d'âmes tourmentées, d'amours impossibles et de la part d'ombre qui sommeille en chacun de nous."
 
 	return (
 		<>
 			<Container className='mt-9'>
 				<div className='max-w-2xl'>
 					<h1 className='text-4xl font-bold tracking-tight text-zinc-100 sm:text-5xl'>
-						Espérance Masson, autrice française de dark romance
+						{title}
 					</h1>
-					<p className='mt-6 text-base text-zinc-400'>
-						Bienvenue dans l&apos;univers sombre et passionné d&apos;Espérance
-						Masson. Autrice française spécialisée dans la dark romance,
-						j&apos;écris des histoires d&apos;âmes tourmentées, d&apos;amours
-						impossibles et de la part d&apos;ombre qui sommeille en chacun de
-						nous.
-					</p>
+					<p className='mt-6 text-base text-zinc-400'>{description}</p>
 					<div className='mt-6 flex gap-6'>
-						<SocialLink
-							href='https://www.instagram.com/esp_masson/'
-							aria-label='Suivez Espérance Masson sur Instagram esp_masson'
-							icon={InstagramIcon}
-						/>
-						<SocialLink
-							href='https://www.tiktok.com/@_esperance_masson'
-							aria-label='Suivez Espérance Masson sur TikTok _esperance_masson'
-							icon={TikTokIcon}
-						/>
-						<SocialLink
-							href='https://www.wattpad.com/user/Esperancem'
-							aria-label='Lisez les romans d Espérance Masson sur Wattpad'
-							className='scale-150'
-							icon={WattpadIcon}
-						/>
+						{socialLinks.map(link => {
+							const Icon = getIconComponent(link.icon)
+							return (
+								<SocialLink
+									key={link.platform}
+									href={link.url}
+									aria-label={`Suivez Espérance Masson sur ${link.display_name}`}
+									icon={Icon}
+									className={link.platform === 'wattpad' ? 'scale-150' : ''}
+								/>
+							)
+						})}
 					</div>
 				</div>
 			</Container>
