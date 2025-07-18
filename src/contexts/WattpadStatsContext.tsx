@@ -65,18 +65,29 @@ export function WattpadStatsProvider({
 					}
 				}
 
-				// Fetch from API
-				const response = await fetch('/api/wattpad-stats')
+				// Fetch from PocketBase API
+				const response = await fetch('/api/pocketbase/wattpad-stats')
 				const result = await response.json()
 
-				if (result.success && result.data) {
+				if (result && result.reads) {
+					// Transform PocketBase data to match expected format
+					const transformedStats = {
+						reads: result.reads || '0',
+						readsComplete: result.reads || '0',
+						votes: result.votes || '0',
+						parts: result.parts || '0',
+						lastUpdated: result.updated
+							? new Date(result.updated).getTime()
+							: Date.now(),
+					}
+
 					// Update local cache
 					if (typeof window !== 'undefined') {
-						localStorage.setItem(CACHE_KEY, JSON.stringify(result.data))
+						localStorage.setItem(CACHE_KEY, JSON.stringify(transformedStats))
 					}
-					setStats(result.data)
+					setStats(transformedStats)
 				} else {
-					throw new Error(result.error || 'Failed to fetch stats')
+					throw new Error('Failed to fetch stats from PocketBase')
 				}
 			} catch (err) {
 				const errorMessage =

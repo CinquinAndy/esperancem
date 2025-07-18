@@ -8,6 +8,7 @@ import {
 	InstagramIcon,
 	TikTokIcon,
 	WattpadIcon,
+	EmailIcon,
 } from '@/components/SocialIcons'
 import { WattpadStats } from '@/components/WattpadStats'
 import bookCover from '@/images/photos/cover_on_book.jpg'

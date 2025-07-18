@@ -5,7 +5,9 @@ import {
 	InstagramIcon,
 	TikTokIcon,
 	WattpadIcon,
+	EmailIcon,
 } from '@/components/SocialIcons'
+import { getSocialLinks } from '@/lib/content'
 
 function SocialLink({
 	children,
@@ -27,18 +29,26 @@ function SocialLink({
 	)
 }
 
-function MailIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
-	return (
-		<svg viewBox='0 0 24 24' aria-hidden='true' {...props}>
-			<path
-				fillRule='evenodd'
-				d='M6 5a3 3 0 0 0-3 3v8a3 3 0 0 0 3 3h12a3 3 0 0 0 3-3V8a3 3 0 0 0-3-3H6Zm.245 2.187a.75.75 0 0 0-.99 1.126l6.25 5.5a.75.75 0 0 0 .99 0l6.25-5.5a.75.75 0 0 0-.99-1.126L12 12.251 6.245 7.187Z'
-			/>
-		</svg>
-	)
+// Helper function to get icon component by name
+function getIconComponent(iconName: string | undefined) {
+	switch (iconName) {
+		case 'InstagramIcon':
+			return InstagramIcon
+		case 'TikTokIcon':
+			return TikTokIcon
+		case 'WattpadIcon':
+			return WattpadIcon
+		case 'EmailIcon':
+			return EmailIcon
+		default:
+			return InstagramIcon
+	}
 }
 
-export function Footer() {
+export async function Footer() {
+	// Fetch social links from PocketBase
+	const socialLinks = await getSocialLinks()
+
 	return (
 		<footer className='mt-32 flex-none'>
 			<ContainerOuter>
@@ -48,24 +58,18 @@ export function Footer() {
 							{/* Social Links */}
 							<div className='flex flex-col items-center gap-4 md:items-start'>
 								<div className='flex flex-wrap justify-center gap-6 md:justify-start'>
-									<SocialLink
-										href='https://www.instagram.com/esp_masson/'
-										icon={InstagramIcon}
-									>
-										Instagram
-									</SocialLink>
-									<SocialLink
-										href='https://www.tiktok.com/@_esperance_masson'
-										icon={TikTokIcon}
-									>
-										TikTok
-									</SocialLink>
-									<SocialLink
-										href='https://www.wattpad.com/user/Esperancem'
-										icon={WattpadIcon}
-									>
-										Wattpad
-									</SocialLink>
+									{socialLinks.map(link => {
+										const Icon = getIconComponent(link.icon)
+										return (
+											<SocialLink
+												key={link.platform}
+												href={link.url}
+												icon={Icon}
+											>
+												{link.display_name}
+											</SocialLink>
+										)
+									})}
 								</div>
 
 								{/* Email Contact */}
@@ -73,7 +77,7 @@ export function Footer() {
 									href='mailto:esperance.masson@gmail.com'
 									className='group flex items-center text-sm font-medium text-zinc-400 transition hover:text-teal-400'
 								>
-									<MailIcon className='h-4 w-4 flex-none fill-zinc-500 transition group-hover:fill-teal-400' />
+									<EmailIcon className='h-4 w-4 flex-none fill-zinc-500 transition group-hover:fill-teal-400' />
 									<span className='ml-2'>esperance.masson@gmail.com</span>
 								</Link>
 							</div>
