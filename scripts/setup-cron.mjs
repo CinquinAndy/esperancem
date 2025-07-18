@@ -104,10 +104,13 @@ WantedBy=timers.target`
 
 	console.log('🎯 Recommended Setup Options:')
 	console.log('============================')
-	console.log('1. 🐧 Linux/Unix with cron: Use the cron command above')
-	console.log('2. 🐧 Linux with systemd: Use the .service and .timer files')
-	console.log('3. 🐳 Docker: Use the docker-cron file')
-	console.log('4. ☁️  Cloud platforms: Use their built-in cron/scheduler')
+	console.log(
+		'1. 🚀 Next.js 15 Work Jobs: Use built-in work jobs (recommended)'
+	)
+	console.log('2. 🐧 Linux/Unix with cron: Use the cron command above')
+	console.log('3. 🐧 Linux with systemd: Use the .service and .timer files')
+	console.log('4. 🐳 Docker: Use the docker-cron file')
+	console.log('5. ☁️  Cloud platforms: Use their built-in cron/scheduler')
 	console.log('')
 	console.log('📊 The script will:')
 	console.log('   - Fetch fresh stats from Wattpad')
