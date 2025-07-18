@@ -8,7 +8,6 @@ import {
 	TikTokIcon,
 	WattpadIcon,
 } from '@/components/SocialIcons'
-import { WattpadStatsText } from '@/components/WattpadStatsText'
 import { WattpadStatsProvider } from '@/contexts/WattpadStatsContext'
 import portraitImage from '@/images/avatar.jpeg'
 import bookCover from '@/images/photos/cover_on_book.jpg'
@@ -72,34 +71,42 @@ export default async function About() {
 						</div>
 					</div>
 					<div className='lg:order-first lg:row-span-2'>
-						<h1 className='text-4xl font-bold tracking-tight text-zinc-100 sm:text-5xl'>
-							Je suis Espérance Masson, autrice française de dark romance
-						</h1>
-						<div className='mt-6 space-y-7 text-base text-zinc-400'>
-							<p>Salut tout le monde ! J&apos;espère que vous allez bien.</p>
-							<p>
-								Bienvenue dans mon univers où j&apos;explore les profondeurs de
-								l&apos;âme humaine à travers des dark romances françaises,
-								intenses et captivantes. En tant qu&apos;autrice française
-								spécialisée dans la romance sombre, je crée des histoires qui
-								questionnent les limites entre l&apos;amour et l&apos;obsession.
-							</p>
-							<p>
-								Mon roman &quot;Cœurs Sombres&quot; a conquis plus de{' '}
-								<WattpadStatsText type='reads' suffix=' lecteurs' /> sur Wattpad
-								et atteint la première place dans plusieurs catégories. Cette
-								enemies to lovers mafia romance suit l&apos;histoire troublante
-								d&apos;Angèle et Lucas Ferrari, deux âmes brisées liées par des
-								secrets destructeurs.
-							</p>
-							<p>
-								N&apos;hésitez pas à venir me retrouver sur mes réseaux sociaux
-								(@esp_masson sur Instagram, @_esperance_masson sur TikTok) pour
-								découvrir les coulisses de l&apos;écriture de mes romans et
-								échanger avec d&apos;autres passionnés de dark romance
-								française.
-							</p>
-						</div>
+						<h1
+							className='text-4xl font-bold tracking-tight text-zinc-100 sm:text-5xl'
+							dangerouslySetInnerHTML={{
+								__html:
+									'Je suis Espérance Masson, autrice française de dark romance',
+							}}
+						/>
+						<div
+							className='mt-6 space-y-7 text-base text-zinc-400'
+							dangerouslySetInnerHTML={{
+								__html: `
+									<p>Salut tout le monde ! J'espère que vous allez bien.</p>
+									<p>
+										Bienvenue dans mon univers où j'explore les profondeurs de
+										l'âme humaine à travers des dark romances françaises,
+										intenses et captivantes. En tant qu'autrice française
+										spécialisée dans la romance sombre, je crée des histoires qui
+										questionnent les limites entre l'amour et l'obsession.
+									</p>
+									<p>
+										Mon roman "Cœurs Sombres" a conquis plus de lecteurs sur Wattpad
+										et atteint la première place dans plusieurs catégories. Cette
+										enemies to lovers mafia romance suit l'histoire troublante
+										d'Angèle et Lucas Ferrari, deux âmes brisées liées par des
+										secrets destructeurs.
+									</p>
+									<p>
+										N'hésitez pas à venir me retrouver sur mes réseaux sociaux
+										(@esp_masson sur Instagram, @_esperance_masson sur TikTok) pour
+										découvrir les coulisses de l'écriture de mes romans et
+										échanger avec d'autres passionnés de dark romance
+										française.
+									</p>
+								`,
+							}}
+						/>
 					</div>
 					<div className='lg:pl-20'>
 						<ul role='list'>
@@ -161,36 +168,43 @@ export default async function About() {
 							</div>
 						</div>
 						<div className='lg:pl-8'>
-							<h2 className='text-3xl font-bold tracking-tight text-zinc-100 sm:text-4xl'>
-								Cœurs Sombres - Mon premier roman Wattpad
-							</h2>
-							<div className='mt-6 space-y-6 text-base text-zinc-400'>
-								<p>
-									<span className='text-zinc-200 italic'>Cœurs Sombres</span>{' '}
-									est né d&apos;une passion pour les histoires complexes où
-									l&apos;amour et la violence s&apos;entremêlent dans une dark
-									romance française captivante.
-								</p>
-								<p>
-									Cette dark romance explore les zones grises de l&apos;âme
-									humaine, là où la rédemption et la destruction se côtoient
-									dans un équilibre fragile. L&apos;histoire d&apos;Angèle et
-									Lucas Ferrari plonge les lecteurs dans un univers de mafia
-									romance où l&apos;enemies to lovers prend une dimension
-									particulièrement intense.
-								</p>
-								<p>
-									Disponible gratuitement sur Wattpad, ce livre a déjà conquis
-									plus de <WattpadStatsText type='reads' suffix=' lecteurs' />{' '}
-									et obtenu plusieurs classements #1 dans les catégories enemies
-									to lovers, trahisons, meurtres et amitiés.
-								</p>
-								<p>
-									<strong>Suivez-moi :</strong> @esp_masson sur Instagram et
-									@_esperance_masson sur TikTok pour découvrir les coulisses de
-									l&apos;écriture et mes prochains projets de dark romance.
-								</p>
-							</div>
+							<h2
+								className='text-3xl font-bold tracking-tight text-zinc-100 sm:text-4xl'
+								dangerouslySetInnerHTML={{
+									__html: 'Cœurs Sombres - Mon premier roman Wattpad',
+								}}
+							/>
+							<div
+								className='mt-6 space-y-6 text-base text-zinc-400'
+								dangerouslySetInnerHTML={{
+									__html: `
+										<p>
+											<span class="text-zinc-200 italic">Cœurs Sombres</span>
+											est né d'une passion pour les histoires complexes où
+											l'amour et la violence s'entremêlent dans une dark
+											romance française captivante.
+										</p>
+										<p>
+											Cette dark romance explore les zones grises de l'âme
+											humaine, là où la rédemption et la destruction se côtoient
+											dans un équilibre fragile. L'histoire d'Angèle et
+											Lucas Ferrari plonge les lecteurs dans un univers de mafia
+											romance où l'enemies to lovers prend une dimension
+											particulièrement intense.
+										</p>
+										<p>
+											Disponible gratuitement sur Wattpad, ce livre a déjà conquis
+											plus de lecteurs et obtenu plusieurs classements #1 dans les catégories enemies
+											to lovers, trahisons, meurtres et amitiés.
+										</p>
+										<p>
+											<strong>Suivez-moi :</strong> @esp_masson sur Instagram et
+											@_esperance_masson sur TikTok pour découvrir les coulisses de
+											l'écriture et mes prochains projets de dark romance.
+										</p>
+									`,
+								}}
+							/>
 						</div>
 					</div>
 				</div>

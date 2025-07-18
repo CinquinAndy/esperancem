@@ -132,24 +132,39 @@ function DarkHeartsBook({
 	return (
 		<div className='flex flex-col gap-y-6 rounded-2xl border border-zinc-700/40 p-6'>
 			<div>
-				<h2 className='text-lg font-semibold text-zinc-100'>
-					{bookContent.book_title || 'Cœurs Sombres'}
-				</h2>
-				<p className='mt-2 text-sm text-zinc-400'>
-					{bookContent.book_description || '...'}
-				</p>
-				<p className='mt-4 text-sm text-zinc-400'>
-					{bookContent.book_description_2 || '...'}
-				</p>
-				<p className='mt-4 text-sm text-zinc-400'>
-					{bookContent.book_description_3 || '...'}
-				</p>
+				<h2
+					className='text-lg font-semibold text-zinc-100'
+					dangerouslySetInnerHTML={{
+						__html: bookContent.book_title || '...',
+					}}
+				/>
+				<div
+					className='mt-2 text-sm text-zinc-400'
+					dangerouslySetInnerHTML={{
+						__html: bookContent.book_description || '...',
+					}}
+				/>
+				<div
+					className='mt-4 text-sm text-zinc-400'
+					dangerouslySetInnerHTML={{
+						__html: bookContent.book_description_2 || '...',
+					}}
+				/>
+				<div
+					className='mt-4 text-sm text-zinc-400'
+					dangerouslySetInnerHTML={{
+						__html: bookContent.book_description_3 || '...',
+					}}
+				/>
 			</div>
 
 			<div>
-				<h3 className='text-md font-semibold text-zinc-100'>
-					{bookContent.rankings_title || '...'}
-				</h3>
+				<h3
+					className='text-md font-semibold text-zinc-100'
+					dangerouslySetInnerHTML={{
+						__html: bookContent.rankings_title || '...',
+					}}
+				/>
 				<div className='mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm font-medium text-zinc-400'>
 					{rankings.map(ranking => (
 						<p key={ranking.category} className='w-full'>
@@ -171,7 +186,11 @@ function DarkHeartsBook({
 				variant='secondary'
 				className='group mt-4 w-full'
 			>
-				{bookContent.wattpad_button || '...'}
+				<span
+					dangerouslySetInnerHTML={{
+						__html: bookContent.wattpad_button || '...',
+					}}
+				/>
 			</Button>
 		</div>
 	)
@@ -189,10 +208,8 @@ export default async function Home() {
 	)
 
 	// Fallback to original content if PocketBase data is not available
-	const title =
-		mainTitle || '...'
-	const description =
-		mainDescription || '...'
+	const title = mainTitle || '...'
+	const description = mainDescription || '...'
 
 	// Use Server Action for stats
 	const stats = await getWattpadStats()
@@ -201,10 +218,14 @@ export default async function Home() {
 		<>
 			<Container className='mt-9'>
 				<div className='max-w-2xl'>
-					<h1 className='text-4xl font-bold tracking-tight text-zinc-100 sm:text-5xl'>
-						{title}
-					</h1>
-					<p className='mt-6 text-base text-zinc-400'>{description}</p>
+					<h1
+						className='text-4xl font-bold tracking-tight text-zinc-100 sm:text-5xl'
+						dangerouslySetInnerHTML={{ __html: title }}
+					/>
+					<div
+						className='mt-6 text-base text-zinc-400'
+						dangerouslySetInnerHTML={{ __html: description }}
+					/>
 					<div className='mt-6 flex gap-6'>
 						{socialLinks.map(link => {
 							const Icon = getIconComponent(link.icon)
