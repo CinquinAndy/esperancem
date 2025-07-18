@@ -98,9 +98,9 @@ function WattpadReadsText({ stats }: WattpadReadsTextProps) {
 }
 
 function BookCover({
-	src,
 	alt,
 	priority = false,
+	src,
 }: {
 	src: any
 	alt: string
@@ -136,7 +136,7 @@ interface BookProps {
 
 function Book({
 	bookContent,
-	rankings,
+	rankings = [],
 	stats,
 }: BookProps & { bookContent: any; rankings: any[] }) {
 	return (
