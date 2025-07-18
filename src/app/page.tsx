@@ -170,7 +170,7 @@ function DarkHeartsBook({
 			</div>
 
 			<Button
-				href='https://www.wattpad.com/story/368278312-c%C5%93urs-sombres'
+				href={bookContent.wattpad_url.replace(/<[^>]*>?/g, '')}
 				variant='secondary'
 				className='group mt-4 w-full'
 			>
@@ -261,6 +261,7 @@ export default async function Home() {
 									'book',
 									'wattpad_button'
 								),
+								wattpad_url: await getContent('home', 'book', 'wattpad_url'),
 							}}
 							rankings={rankings}
 						/>
