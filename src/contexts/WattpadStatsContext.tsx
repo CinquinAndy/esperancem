@@ -72,13 +72,13 @@ export function WattpadStatsProvider({
 				if (result && result.reads) {
 					// Transform PocketBase data to match expected format
 					const transformedStats = {
-						reads: result.reads || '0',
-						readsComplete: result.reads || '0',
-						votes: result.votes || '0',
-						parts: result.parts || '0',
 						lastUpdated: result.updated
 							? new Date(result.updated).getTime()
 							: Date.now(),
+						parts: result.parts || '0',
+						reads: result.reads || '0',
+						readsComplete: result.reads || '0',
+						votes: result.votes || '0',
 					}
 
 					// Update local cache
