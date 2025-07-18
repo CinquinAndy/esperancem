@@ -178,8 +178,62 @@ export class WattpadStatsUpdater {
 		console.info('🔍 Fetching fresh Wattpad stats for all books...')
 
 		try {
-			// Fetch fresh data from Wattpad
-			const response = await fetch('https://www.wattpad.com/user/Esperancem', {
+			const allStats: AllBooksStats = {
+				'au-prix-du-silence': {
+					book: 'au-prix-du-silence',
+					parts: '0',
+					reads: '0',
+					readsComplete: '0',
+					votes: '0',
+				},
+				'coeurs-sombres': {
+					book: 'coeurs-sombres',
+					parts: '0',
+					reads: '0',
+					readsComplete: '0',
+					votes: '0',
+				},
+				lastUpdated: Date.now(),
+			}
+
+			// Fetch stats for each book individually
+			for (const bookConfig of this.BOOKS) {
+				console.info(`📖 Fetching stats for ${bookConfig.title}...`)
+
+				try {
+					const bookStats = await this.fetchBookStats(bookConfig)
+					allStats[bookConfig.type] = bookStats
+					console.info(`✅ Stats for ${bookConfig.title}:`, bookStats)
+				} catch (error) {
+					console.error(
+						`❌ Error fetching stats for ${bookConfig.title}:`,
+						error
+					)
+				}
+			}
+
+			return allStats
+		} catch (error) {
+			console.error('❌ Error fetching Wattpad stats:', error)
+			throw error
+		}
+	}
+
+	/**
+	 * Fetch stats for a single book from its story page
+	 */
+	static async fetchBookStats(bookConfig: BookConfig): Promise<BookStats> {
+		const stats: BookStats = {
+			book: bookConfig.type,
+			parts: '0',
+			reads: '0',
+			readsComplete: '0',
+			votes: '0',
+		}
+
+		try {
+			// Fetch the story page directly
+			const response = await fetch(`https://www.wattpad.com${bookConfig.url}`, {
 				headers: {
 					Accept:
 						'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
@@ -193,24 +247,122 @@ export class WattpadStatsUpdater {
 			})
 
 			if (!response.ok) {
-				throw new Error(`Failed to fetch Wattpad page: ${response.status}`)
+				throw new Error(`Failed to fetch story page: ${response.status}`)
 			}
 
 			const html = await response.text()
 			const $ = cheerio.load(html)
 
-			// Parse stats for each book
-			const allStats: AllBooksStats = {
-				'au-prix-du-silence': this.parseBookStatsFromHTML($, this.BOOKS[1]),
-				'coeurs-sombres': this.parseBookStatsFromHTML($, this.BOOKS[0]),
-				lastUpdated: Date.now(),
+			// Parse stats from the story page
+			return this.parseBookStatsFromStoryPage($, bookConfig)
+		} catch (error) {
+			console.error(`❌ Error fetching stats for ${bookConfig.title}:`, error)
+			return stats
+		}
+	}
+
+	/**
+	 * Parse stats from a story page HTML
+	 */
+	static parseBookStatsFromStoryPage(
+		$: cheerio.CheerioAPI,
+		bookConfig: BookConfig
+	): BookStats {
+		const stats: BookStats = {
+			book: bookConfig.type,
+			parts: '0',
+			reads: '0',
+			readsComplete: '0',
+			votes: '0',
+		}
+
+		try {
+			// Look for stats in the story details section
+			// The stats are displayed in spans with data-tip attributes
+
+			// Extract reads from the reads stat
+			const readsElement = $('[data-testid="stats-value"]')
+				.filter((_, el) => {
+					const parent = $(el).closest('li')
+					return (
+						parent.find('.uG9U1 svg').length > 0 &&
+						parent.find('.sr-only').text().includes('Reads')
+					)
+				})
+				.first()
+
+			if (readsElement.length > 0) {
+				const readsText = readsElement.text().trim()
+				// Extract the displayed value (e.g., "146K")
+				const readsMatch = readsText.match(/[\d.]+[KMB]?/)
+				if (readsMatch) {
+					stats.reads = readsMatch[0]
+				}
+
+				// Get the exact value from data-tip attribute
+				const dataTip = readsElement.closest('[data-tip]').attr('data-tip')
+				if (dataTip) {
+					const exactMatch = dataTip.match(/^([\d,]+)/)
+					if (exactMatch) {
+						stats.readsComplete = exactMatch[1].replace(/,/g, '')
+					}
+				}
 			}
 
-			console.info('✅ All books stats fetched from Wattpad:', allStats)
-			return allStats
+			// Extract votes from the votes stat
+			const votesElement = $('[data-testid="stats-value"]')
+				.filter((_, el) => {
+					const parent = $(el).closest('li')
+					return (
+						parent.find('.uG9U1 svg').length > 0 &&
+						parent.find('.sr-only').text().includes('Votes')
+					)
+				})
+				.first()
+
+			if (votesElement.length > 0) {
+				const votesText = votesElement.text().trim()
+				// Extract the displayed value (e.g., "4.7K")
+				const votesMatch = votesText.match(/[\d.]+[KMB]?/)
+				if (votesMatch) {
+					stats.votes = votesMatch[0]
+				}
+
+				// Get the exact value from data-tip attribute
+				const dataTip = votesElement.closest('[data-tip]').attr('data-tip')
+				if (dataTip) {
+					const exactMatch = dataTip.match(/^([\d,]+)/)
+					if (exactMatch) {
+						stats.votes = exactMatch[1].replace(/,/g, '')
+					}
+				}
+			}
+
+			// Extract parts from the parts stat
+			const partsElement = $('[data-testid="stats-value"]')
+				.filter((_, el) => {
+					const parent = $(el).closest('li')
+					return (
+						parent.find('.uG9U1 svg').length > 0 &&
+						parent.find('.sr-only').text().includes('Parts')
+					)
+				})
+				.first()
+
+			if (partsElement.length > 0) {
+				const partsText = partsElement.text().trim()
+				// Parts are usually exact numbers
+				const partsMatch = partsText.match(/\d+/)
+				if (partsMatch) {
+					stats.parts = partsMatch[0]
+				}
+			}
+
+			console.info(`📊 Parsed stats for ${bookConfig.title}:`, stats)
+			return stats
 		} catch (error) {
-			console.error('❌ Error fetching Wattpad stats:', error)
-			throw error
+			console.error(`❌ Error parsing stats for ${bookConfig.title}:`, error)
+			return stats
 		}
 	}
 

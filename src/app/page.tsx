@@ -111,7 +111,7 @@ function BookCover({
 			<div className='aspect-[2/3] w-full overflow-hidden rounded-xl bg-zinc-900 shadow-2xl ring-1 ring-zinc-700/50'>
 				<Image
 					alt={alt}
-					blurDataURL='data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGBkbHB0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyLli2A4Haw6gZEYGTrHWJ2PNgHr3nz8CBAw+lFhpX2HaH9bcfaSXWGaRmknyLli2A4Haw6gZEYGTrHWJ2PNgHr3nz8CBAw+lFhpX2HaH9bcfaSXWGaRmknyLli2A4Haw6gZ'
+					blurDataURL='data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGBkbHB0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyLli2A4Haw6gZEYGTrHWJ2PNgHr3nz8CBAw+lFhpX2HaH9bcfaSXWGaRmknyLli2A4Haw6gZ'
 					className='h-full w-full object-cover transition duration-300 group-hover:scale-105'
 					height={1500}
 					placeholder='blur'
@@ -215,7 +215,7 @@ export default async function Home() {
 	const title = mainTitle || '...'
 	const description = mainDescription || '...'
 
-	// Use Server Action for stats
+	// Use Server Action for stats (for Book components)
 	const stats = await getWattpadStats()
 
 	return (
@@ -247,10 +247,10 @@ export default async function Home() {
 				</div>
 			</Container>
 
-			{/* Wattpad Stats */}
-			<Container className='mt-16 md:mt-20'>
-				<WattpadStats />
-			</Container>
+			{/* Bloc Total */}
+			<div className='my-10 flex justify-center'>
+				<WattpadStats statsType='total' title='Total (tous livres Wattpad)' />
+			</div>
 
 			{/* Books Section */}
 			<Container className='mt-24 md:mt-28'>
@@ -288,6 +288,14 @@ export default async function Home() {
 								}}
 								rankings={rankings}
 							/>
+
+							{/* Stats pour Cœurs sombres */}
+							<div className='flex justify-center'>
+								<WattpadStats
+									statsType='coeurs-sombres'
+									title='Cœurs sombres'
+								/>
+							</div>
 						</div>
 					</div>
 
@@ -328,6 +336,14 @@ export default async function Home() {
 								}}
 								rankings={[]}
 							/>
+
+							{/* Stats pour Au prix du silence */}
+							<div className='flex justify-center'>
+								<WattpadStats
+									statsType='au-prix-du-silence'
+									title='Au prix du silence'
+								/>
+							</div>
 						</div>
 					</div>
 				</div>
