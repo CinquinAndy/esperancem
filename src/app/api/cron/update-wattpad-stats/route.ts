@@ -4,7 +4,7 @@ import { updateWattpadStats } from '@/app/actions/wattpad-stats'
 import { verifyCronAuth } from '@/lib/auth'
 
 /**
- * Cron job endpoint for updating Wattpad stats
+ * Cron job endpoint for updating Wattpad stats for all books
  * Called automatically by Vercel every 6 hours
  */
 export async function GET(request: NextRequest) {
@@ -15,24 +15,29 @@ export async function GET(request: NextRequest) {
 			return NextResponse.json({ error: authResult.error }, { status: 401 })
 		}
 
-		console.info('🔄 Cron job: Starting Wattpad stats update...')
+		console.info('🔄 Cron job: Starting Wattpad stats update for all books...')
 
 		const result = await updateWattpadStats()
 
 		if (result.success) {
-			console.info('✅ Cron job: Wattpad stats updated successfully')
+			console.info('✅ Cron job: All books stats updated successfully')
 			return NextResponse.json({
-				message: 'Stats updated successfully',
+				message: 'All books stats updated successfully',
+				results: result.results,
 				success: true,
 				timestamp: result.timestamp,
 			})
 		} else {
-			console.error('❌ Cron job: Failed to update stats:', result.error)
+			console.error(
+				'❌ Cron job: Failed to update some books stats:',
+				result.results
+			)
 			return NextResponse.json(
 				{
-					error: result.error,
+					error: 'Some books failed to update',
+					results: result.results,
 					success: false,
-					timestamp: new Date().toISOString(),
+					timestamp: result.timestamp,
 				},
 				{ status: 500 }
 			)

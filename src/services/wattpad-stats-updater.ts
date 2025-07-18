@@ -1,24 +1,66 @@
 import * as cheerio from 'cheerio'
 
+import type { BookType } from '@/lib/pocketbase'
+
 import { WattpadStatsService } from './pocketbase'
 
+// Book configuration
+export interface BookConfig {
+	id: string
+	title: string
+	type: BookType
+	url: string
+}
+
+// Stats for a single book
+export interface BookStats {
+	book: BookType
+	parts: string
+	reads: string
+	readsComplete: string
+	votes: string
+}
+
+// All books stats
+export interface AllBooksStats {
+	'au-prix-du-silence': BookStats
+	'coeurs-sombres': BookStats
+	lastUpdated: number
+}
+
 /**
- * Service for updating Wattpad stats directly without API routes
+ * Service for updating Wattpad stats for multiple books
  * This service can be used in server-side functions, cron jobs, etc.
  */
 export class WattpadStatsUpdater {
 	// Cache for in-memory storage (shared across all instances)
 	private static cache: {
 		lastUpdated: number
-		stats: any
+		stats: AllBooksStats
 	} | null = null
 
 	private static readonly CACHE_DURATION = 6 * 60 * 60 * 1000 // 6 hours
 
+	// Book configurations
+	private static readonly BOOKS: BookConfig[] = [
+		{
+			id: '368278312',
+			title: 'Cœurs sombres',
+			type: 'coeurs-sombres',
+			url: '/story/368278312-c%C5%93urs-sombres',
+		},
+		{
+			id: '395344686',
+			title: 'Au prix du silence',
+			type: 'au-prix-du-silence',
+			url: '/story/395344686-au-prix-du-silence',
+		},
+	]
+
 	/**
 	 * Get cached stats if still valid
 	 */
-	static getCachedStats() {
+	static getCachedStats(): AllBooksStats | null {
 		if (
 			this.cache &&
 			Date.now() - this.cache.lastUpdated < this.CACHE_DURATION
@@ -31,7 +73,7 @@ export class WattpadStatsUpdater {
 	/**
 	 * Update cache with new stats
 	 */
-	static updateCache(stats: any) {
+	static updateCache(stats: AllBooksStats) {
 		this.cache = {
 			lastUpdated: Date.now(),
 			stats,
@@ -46,13 +88,97 @@ export class WattpadStatsUpdater {
 	}
 
 	/**
-	 * Fetch fresh stats from Wattpad website
+	 * Parse stats from HTML for a specific book
 	 */
-	static async fetchWattpadStats() {
-		console.info('🔍 Fetching fresh Wattpad stats...')
+	static parseBookStatsFromHTML(
+		$: cheerio.CheerioAPI,
+		bookConfig: BookConfig
+	): BookStats {
+		const stats: BookStats = {
+			book: bookConfig.type,
+			parts: '0',
+			reads: '0',
+			readsComplete: '0',
+			votes: '0',
+		}
+
+		// Find the book by its story ID
+		const bookElement = $(`[data-story-id="${bookConfig.id}"]`)
+		if (bookElement.length === 0) {
+			console.warn(`⚠️ Book ${bookConfig.title} not found in HTML`)
+			return stats
+		}
+
+		// Find the social-meta div within this book's content
+		const socialMeta = bookElement.find('.meta.social-meta')
+		if (socialMeta.length === 0) {
+			console.warn(`⚠️ Social meta not found for ${bookConfig.title}`)
+			return stats
+		}
+
+		// Extract reads: both displayed text and complete value from title attribute
+		const readsSpan = socialMeta.find('.read-count')
+		if (readsSpan.length > 0) {
+			// Get displayed text (like "145K")
+			const readsText = readsSpan.text().trim()
+			const readsMatch = readsText.match(/[\d.]+[KMB]?/)
+			if (readsMatch) {
+				stats.reads = readsMatch[0]
+			}
+
+			// Get complete value from title attribute
+			const titleAttr = readsSpan.attr('title')
+			if (titleAttr) {
+				// Extract number from "145,922 Lectures" format
+				const readsCompleteMatch = titleAttr.match(/^([\d,]+)/)
+				if (readsCompleteMatch) {
+					stats.readsComplete = readsCompleteMatch[1].replace(/,/g, '') // Remove commas: "145922"
+				}
+			}
+		}
+
+		// Extract exact votes from data-original-title attribute
+		const votesSpan = socialMeta.find('.vote-count')
+		if (votesSpan.length > 0) {
+			const originalTitle = votesSpan.attr('data-original-title')
+			if (originalTitle) {
+				// Extract number from "4,716 Votes" format
+				const votesMatch = originalTitle.match(/^([\d,]+)/)
+				if (votesMatch) {
+					stats.votes = votesMatch[1].replace(/,/g, '') // Remove commas: "4716"
+				}
+			} else {
+				// Fallback to displayed text if no data-original-title
+				const votesText = votesSpan.text().trim()
+				const votesMatch = votesText.match(/[\d.]+[KMB]?/)
+				if (votesMatch) {
+					stats.votes = votesMatch[0]
+				}
+			}
+		}
+
+		// Extract parts (no tooltip needed, displayed number is exact)
+		const partsSpan = socialMeta.find('.part-count')
+		if (partsSpan.length > 0) {
+			const partsText = partsSpan.text().trim()
+			const partsMatch = partsText.match(/\d+/)
+			if (partsMatch) {
+				stats.parts = partsMatch[0]
+			}
+		}
+
+		console.info(`📊 Parsed stats for ${bookConfig.title}:`, stats)
+		return stats
+	}
+
+	/**
+	 * Fetch fresh stats from Wattpad website for all books
+	 */
+	static async fetchWattpadStats(): Promise<AllBooksStats> {
+		console.info('🔍 Fetching fresh Wattpad stats for all books...')
 
 		try {
-			// Fetch fresh data from Wattpad using the same logic as the original API
+			// Fetch fresh data from Wattpad
 			const response = await fetch('https://www.wattpad.com/user/Esperancem', {
 				headers: {
 					Accept:
@@ -73,125 +199,15 @@ export class WattpadStatsUpdater {
 			const html = await response.text()
 			const $ = cheerio.load(html)
 
-			// Extract stats from the HTML structure (same logic as original API)
-			let reads = '0'
-			let readsComplete = '0'
-			let votes = '0'
-			let parts = '0'
-
-			// Find the meta social-meta div and extract values
-			$('.meta.social-meta').each((index, element) => {
-				const $element = $(element)
-
-				// Extract reads: both displayed text and complete value from title attribute
-				const readsSpan = $element.find('.read-count')
-				if (readsSpan.length > 0) {
-					// Get displayed text (like "84.7K")
-					const readsText = readsSpan.text().trim()
-					const readsMatch = readsText.match(/[\d.]+[KMB]?/)
-					if (readsMatch) {
-						reads = readsMatch[0]
-					}
-
-					// Get complete value from title attribute
-					const titleAttr = readsSpan.attr('title')
-					if (titleAttr) {
-						// Extract number from "84,794 Reads" format
-						const readsCompleteMatch = titleAttr.match(/^([\d,]+)/)
-						if (readsCompleteMatch) {
-							readsComplete = readsCompleteMatch[1].replace(/,/g, '') // Remove commas: "84794"
-						}
-					}
-				}
-
-				// Extract exact votes from data-original-title attribute
-				const votesSpan = $element.find('.vote-count')
-				if (votesSpan.length > 0) {
-					const originalTitle = votesSpan.attr('data-original-title')
-					if (originalTitle) {
-						// Extract number from "2,650 Votes" format
-						const votesMatch = originalTitle.match(/^([\d,]+)/)
-						if (votesMatch) {
-							votes = votesMatch[1].replace(/,/g, '') // Remove commas: "2650"
-						}
-					} else {
-						// Fallback to displayed text if no data-original-title
-						const votesText = votesSpan.text().trim()
-						const votesMatch = votesText.match(/[\d.]+[KMB]?/)
-						if (votesMatch) {
-							votes = votesMatch[0]
-						}
-					}
-				}
-
-				// Extract parts (no tooltip needed, displayed number is exact)
-				const partsSpan = $element.find('.part-count')
-				if (partsSpan.length > 0) {
-					const partsText = partsSpan.text().trim()
-					const partsMatch = partsText.match(/\d+/)
-					if (partsMatch) {
-						parts = partsMatch[0]
-					}
-				}
-			})
-
-			// Alternative parsing if the above doesn't work
-			if (
-				reads === '0' ||
-				votes === '0' ||
-				parts === '0' ||
-				readsComplete === '0'
-			) {
-				$('span').each((index, element) => {
-					const $span = $(element)
-					const text = $span.text().trim()
-
-					// Check for read count pattern (like "84.2K")
-					if (
-						text.match(/^\d+\.?\d*[KMB]?$/) &&
-						$span.parent().text().includes('Reads')
-					) {
-						if (reads === '0') reads = text
-
-						// Try to get complete reads from title attribute if not already found
-						if (readsComplete === '0') {
-							const titleAttr = $span.attr('title')
-							if (titleAttr) {
-								const completeMatch = titleAttr.match(/^([\d,]+)/)
-								if (completeMatch) {
-									readsComplete = completeMatch[1].replace(/,/g, '')
-								}
-							}
-						}
-					}
-
-					// Check for vote count pattern
-					if (
-						text.match(/^\d+\.?\d*[KMB]?$/) &&
-						$span.parent().text().includes('Votes')
-					) {
-						votes = text
-					}
-
-					// Check for parts count pattern (just numbers)
-					if (
-						text.match(/^\d+$/) &&
-						$span.siblings().find('.fa-list').length > 0
-					) {
-						parts = text
-					}
-				})
+			// Parse stats for each book
+			const allStats: AllBooksStats = {
+				'au-prix-du-silence': this.parseBookStatsFromHTML($, this.BOOKS[1]),
+				'coeurs-sombres': this.parseBookStatsFromHTML($, this.BOOKS[0]),
+				lastUpdated: Date.now(),
 			}
 
-			const fetchedStats = {
-				parts,
-				reads,
-				readsComplete,
-				votes,
-			}
-
-			console.info('✅ Stats fetched from Wattpad:', fetchedStats)
-			return fetchedStats
+			console.info('✅ All books stats fetched from Wattpad:', allStats)
+			return allStats
 		} catch (error) {
 			console.error('❌ Error fetching Wattpad stats:', error)
 			throw error
@@ -201,7 +217,12 @@ export class WattpadStatsUpdater {
 	/**
 	 * Get stats with caching support
 	 */
-	static async getStats(forceRefresh = false) {
+	static async getStats(forceRefresh = false): Promise<{
+		cached: boolean
+		data: AllBooksStats
+		error?: string
+		success: boolean
+	}> {
 		// Check cache first (unless forced refresh)
 		if (!forceRefresh) {
 			const cachedStats = this.getCachedStats()
@@ -218,17 +239,13 @@ export class WattpadStatsUpdater {
 		try {
 			// Fetch fresh stats
 			const stats = await this.fetchWattpadStats()
-			const statsWithTimestamp = {
-				...stats,
-				lastUpdated: Date.now(),
-			}
 
 			// Update cache
-			this.updateCache(statsWithTimestamp)
+			this.updateCache(stats)
 
 			return {
 				cached: false,
-				data: statsWithTimestamp,
+				data: stats,
 				success: true,
 			}
 		} catch (error) {
@@ -246,6 +263,24 @@ export class WattpadStatsUpdater {
 			}
 
 			return {
+				cached: false,
+				data: {
+					'au-prix-du-silence': {
+						book: 'au-prix-du-silence',
+						parts: '0',
+						reads: '0',
+						readsComplete: '0',
+						votes: '0',
+					},
+					'coeurs-sombres': {
+						book: 'coeurs-sombres',
+						parts: '0',
+						reads: '0',
+						readsComplete: '0',
+						votes: '0',
+					},
+					lastUpdated: Date.now(),
+				},
 				error: error instanceof Error ? error.message : 'Unknown error',
 				success: false,
 			}
@@ -253,61 +288,112 @@ export class WattpadStatsUpdater {
 	}
 
 	/**
-	 * Update stats in PocketBase
+	 * Update stats in PocketBase for a specific book
 	 */
-	static async updateStats(stats: {
-		reads: string
-		readsComplete: string
-		votes: string
-		parts: string
-	}) {
-		console.info('📝 Updating PocketBase with new stats...')
+	static async updateBookStats(stats: BookStats): Promise<boolean> {
+		console.info(`📝 Updating PocketBase with stats for ${stats.book}...`)
 
 		try {
-			const updatedStats = await WattpadStatsService.updateStats(stats)
+			const updatedStats = await WattpadStatsService.updateBookStats(stats)
 
 			if (!updatedStats) {
-				throw new Error('Failed to update stats in PocketBase')
+				throw new Error(
+					`Failed to update stats for ${stats.book} in PocketBase`
+				)
 			}
 
-			console.info('✅ Stats updated in PocketBase successfully')
-			return updatedStats
+			console.info(
+				`✅ Stats updated in PocketBase for ${stats.book} successfully`
+			)
+			return true
 		} catch (error) {
-			console.error('❌ Error updating PocketBase stats:', error)
-			throw error
+			console.error(
+				`❌ Error updating PocketBase stats for ${stats.book}:`,
+				error
+			)
+			return false
+		}
+	}
+
+	/**
+	 * Update stats in PocketBase for all books
+	 */
+	static async updateAllBooksStats(stats: AllBooksStats): Promise<{
+		results: Record<BookType, boolean>
+		success: boolean
+	}> {
+		console.info('📝 Updating PocketBase with stats for all books...')
+
+		const results: Record<BookType, boolean> = {
+			'au-prix-du-silence': false,
+			'coeurs-sombres': false,
+		}
+
+		try {
+			// Update each book's stats
+			results['coeurs-sombres'] = await this.updateBookStats(
+				stats['coeurs-sombres']
+			)
+			results['au-prix-du-silence'] = await this.updateBookStats(
+				stats['au-prix-du-silence']
+			)
+
+			const allSuccess = Object.values(results).every(result => result)
+
+			if (allSuccess) {
+				console.info('✅ All books stats updated in PocketBase successfully')
+			} else {
+				console.warn('⚠️ Some books failed to update:', results)
+			}
+
+			return {
+				results,
+				success: allSuccess,
+			}
+		} catch (error) {
+			console.error('❌ Error updating all books stats:', error)
+			return {
+				results,
+				success: false,
+			}
 		}
 	}
 
 	/**
 	 * Complete update process: fetch from Wattpad and update PocketBase
 	 */
-	static async performUpdate() {
-		console.info('🚀 Starting Wattpad stats update process...')
+	static async performUpdate(): Promise<{
+		results: Record<BookType, boolean>
+		stats: AllBooksStats
+		success: boolean
+		timestamp: string
+	}> {
+		console.info('🚀 Starting Wattpad stats update process for all books...')
 
 		try {
 			// Step 1: Fetch stats from Wattpad
 			const stats = await this.fetchWattpadStats()
 
-			// Step 2: Update PocketBase
-			const updatedStats = await this.updateStats(stats)
+			// Step 2: Update PocketBase for all books
+			const updateResults = await this.updateAllBooksStats(stats)
 
 			// Step 3: Update cache
-			this.updateCache({
-				...stats,
-				lastUpdated: Date.now(),
-			})
+			this.updateCache(stats)
 
-			console.info('🎉 Wattpad stats update completed successfully!')
+			console.info('🎉 Wattpad stats update completed!')
 			console.info('\n📊 Final Stats:')
-			console.info(`- Reads: ${stats.reads}`)
-			console.info(`- Reads Complete: ${stats.readsComplete}`)
-			console.info(`- Votes: ${stats.votes}`)
-			console.info(`- Parts: ${stats.parts}`)
+			console.info(
+				`- Cœurs Sombres: ${stats['coeurs-sombres'].reads} reads, ${stats['coeurs-sombres'].votes} votes, ${stats['coeurs-sombres'].parts} parts`
+			)
+			console.info(
+				`- Au Prix du Silence: ${stats['au-prix-du-silence'].reads} reads, ${stats['au-prix-du-silence'].votes} votes, ${stats['au-prix-du-silence'].parts} parts`
+			)
 			console.info(`- Updated: ${new Date().toLocaleString()}`)
 
 			return {
-				stats: updatedStats,
-				success: true,
+				results: updateResults.results,
+				stats,
+				success: updateResults.success,
 				timestamp: new Date().toISOString(),
 			}
 		} catch (error) {
@@ -317,9 +403,25 @@ export class WattpadStatsUpdater {
 	}
 
 	/**
+	 * Get stats for a specific book
+	 */
+	static async getBookStats(
+		bookType: BookType,
+		forceRefresh = false
+	): Promise<BookStats | null> {
+		const allStats = await this.getStats(forceRefresh)
+
+		if (allStats.success) {
+			return allStats.data[bookType]
+		}
+
+		return null
+	}
+
+	/**
 	 * Trigger Next.js revalidation (if REVALIDATE_SECRET is available)
 	 */
-	static async triggerRevalidation() {
+	static async triggerRevalidation(): Promise<boolean> {
 		console.info('🔄 Triggering Next.js revalidation...')
 
 		try {

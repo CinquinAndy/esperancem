@@ -70,8 +70,12 @@ export interface SocialLink {
 	updated: string
 }
 
+// Book types for Wattpad stats
+export type BookType = 'coeurs-sombres' | 'au-prix-du-silence'
+
 export interface WattpadStats {
 	id: string
+	book: BookType
 	reads?: string
 	reads_complete?: string
 	votes?: string

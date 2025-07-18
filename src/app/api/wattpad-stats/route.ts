@@ -8,7 +8,7 @@ import {
 import { WattpadStatsUpdater } from '@/services/wattpad-stats-updater'
 
 export async function GET() {
-	console.info('Fetching Wattpad stats')
+	console.info('Fetching Wattpad stats for all books')
 
 	try {
 		// Use the unified service with caching
