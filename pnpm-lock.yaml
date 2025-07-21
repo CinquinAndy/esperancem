@@ -39,8 +39,8 @@ importers:
         specifier: 10.4.21
         version: 10.4.21(postcss@8.5.6)
       cheerio:
-        specifier: 1.1.0
-        version: 1.1.0
+        specifier: 1.1.1
+        version: 1.1.1
       clsx:
         specifier: 2.1.1
         version: 2.1.1
@@ -1071,9 +1071,9 @@ packages:
   cheerio-select@2.1.0:
     resolution: {integrity: sha512-9v9kG0LvzrlcungtnJtpGNxY+fzECQKhK4EGJX2vByejiMX84MFNQw4UxPJl3bFbTMw+Dfs37XaIkCwTZfLh4g==}
 
-  cheerio@1.1.0:
-    resolution: {integrity: sha512-+0hMx9eYhJvWbgpKV9hN7jg0JcwydpopZE4hgi+KvQtByZXPp04NiCWU0LzcAbP63abZckIHkTQaXVF52mX3xQ==}
-    engines: {node: '>=18.17'}
+  cheerio@1.1.1:
+    resolution: {integrity: sha512-bTXxVZeOfc3I97S4CSYVjcYvaTp92YOlwEUrVRtYrkuVn7S8/QKnnozVlztPcXlU039S2UxtsjAMyFRbX3V9gQ==}
+    engines: {node: '>=20.18.1'}
 
   chownr@3.0.0:
     resolution: {integrity: sha512-+IxzY9BZOQd/XuYPRmrvEVjF/nqj5kgT4kEq7VofrDoM1MxoRjEWkrCC3EtLi59TVawxTAn+orJwFQcrqEN1+g==}
@@ -2705,8 +2705,8 @@ packages:
   undici-types@7.8.0:
     resolution: {integrity: sha512-9UJ2xGDvQ43tYyVMpuHlsgApydB8ZKfVYTsLDhXkFL/6gfkp+U8xTGdh8pMJv1SpZna0zxG1DwsKZsreLbXBxw==}
 
-  undici@7.10.0:
-    resolution: {integrity: sha512-u5otvFBOBZvmdjWLVW+5DAc9Nkq8f24g0O9oY7qw2JVIF1VocIFoyz9JFkuVOS2j41AufeO0xnlweJ2RLT8nGw==}
+  undici@7.12.0:
+    resolution: {integrity: sha512-GrKEsc3ughskmGA9jevVlIOPMiiAHJ4OFUtaAH+NhfTUSiZ1wMPIQqQvAJUrJspFXJt3EBWgpAeoHEDVT1IBug==}
     engines: {node: '>=20.18.1'}
 
   unified@11.0.5:
@@ -3761,7 +3761,7 @@ snapshots:
       domhandler: 5.0.3
       domutils: 3.2.2
 
-  cheerio@1.1.0:
+  cheerio@1.1.1:
     dependencies:
       cheerio-select: 2.1.0
       dom-serializer: 2.0.0
@@ -3772,7 +3772,7 @@ snapshots:
       parse5: 7.3.0
       parse5-htmlparser2-tree-adapter: 7.1.0
       parse5-parser-stream: 7.1.2
-      undici: 7.10.0
+      undici: 7.12.0
       whatwg-mimetype: 4.0.0
 
   chownr@3.0.0: {}
@@ -5930,7 +5930,7 @@ snapshots:
 
   undici-types@7.8.0: {}
 
-  undici@7.10.0: {}
+  undici@7.12.0: {}
 
   unified@11.0.5:
     dependencies:
