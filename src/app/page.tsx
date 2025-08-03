@@ -2,7 +2,10 @@ import { type Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
 
-import { getWattpadStats } from '@/app/actions/wattpad-stats'
+import {
+	getWattpadStats,
+	type WattpadStatsResult,
+} from '@/app/actions/wattpad-stats'
 import { Button } from '@/components/Button'
 import { Container } from '@/components/Container'
 import {
@@ -23,7 +26,6 @@ import {
 } from '@/lib/content'
 import { formatWattpadStat } from '@/lib/wattpad'
 
-// Helper function to get icon component by name
 // Optimisation ISR : revalidate toutes les 6 heures
 export const revalidate = 21600
 
@@ -86,7 +88,7 @@ function SocialLink({
 }
 
 interface WattpadReadsTextProps {
-	stats: Awaited<ReturnType<typeof getWattpadStats>>
+	stats: WattpadStatsResult | null
 }
 
 function WattpadReadsText({ stats }: WattpadReadsTextProps) {
@@ -115,7 +117,7 @@ function BookCover({
 			<div className='aspect-[2/3] w-full overflow-hidden rounded-xl bg-zinc-900 shadow-2xl ring-1 ring-zinc-700/50'>
 				<Image
 					alt={alt}
-					blurDataURL='data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGBkbHB0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyLli2A4Haw6gZEYGTrHWJ2PNgHr3nz8CBAw+lFhpX2HaH9bcfaSXWGaRmknyLli2A4Haw6gZ'
+					blurDataURL='data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGBkbHB0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyLli2A4Haw6gZEYGTrHWJ2PNgHr3nz8CBAw+lFhpX2HaH9bcfaSXWGaRmknyLli2A4Haw6gZEYGTrHWJ2PNgHr3nz8CBAw+lFhpX2HaH9bcfaSXWGaRmknyLli2A4Haw6gZ'
 					className='h-full w-full object-cover transition duration-300 group-hover:scale-105'
 					height={1500}
 					placeholder='blur'
@@ -135,7 +137,7 @@ function BookCover({
 }
 
 interface BookProps {
-	stats: Awaited<ReturnType<typeof getWattpadStats>>
+	stats: WattpadStatsResult | null
 }
 
 function Book({
@@ -205,22 +207,45 @@ function Book({
 }
 
 export default async function Home() {
-	// Fetch data from PocketBase
-	const [mainTitle, mainDescription, socialLinks, rankings] = await Promise.all(
-		[
+	// Optimisation : Récupérer toutes les données en parallèle avec cache
+	const [stats, pageData] = await Promise.all([
+		// Stats avec cache côté serveur
+		getWattpadStats(),
+		// Toutes les données de contenu en une seule fois
+		Promise.all([
 			getContent('home', 'hero', 'main_title'),
 			getContent('home', 'hero', 'main_description'),
 			getSocialLinks(),
 			getWattpadRankings(),
-		]
-	)
+			// Contenu du livre en parallèle
+			Promise.all([
+				getContent('home', 'book', 'book_description'),
+				getContent('home', 'book', 'book_title'),
+				getContent('home', 'book', 'rankings_title'),
+				getContent('home', 'book', 'wattpad_button'),
+				getContent('home', 'book', 'wattpad_url'),
+			]),
+		]),
+	])
+
+	// Destructurer les données
+	const [mainTitle, mainDescription, socialLinks, rankings, bookContent] =
+		pageData
+	const [bookDescription, bookTitle, rankingsTitle, wattpadButton, wattpadUrl] =
+		bookContent
 
 	// Fallback to original content if PocketBase data is not available
 	const title = mainTitle || '...'
 	const description = mainDescription || '...'
 
-	// Use Server Action for stats (for Book components)
-	const stats = await getWattpadStats()
+	// Préparer les données du livre
+	const bookData = {
+		book_description: bookDescription,
+		book_title: bookTitle,
+		rankings_title: rankingsTitle,
+		wattpad_button: wattpadButton,
+		wattpad_url: wattpadUrl,
+	}
 
 	return (
 		<>
@@ -269,29 +294,7 @@ export default async function Home() {
 							/>
 						</div>
 						<div className='space-y-10 lg:pl-16 xl:pl-24'>
-							<Book
-								stats={stats}
-								bookContent={{
-									book_description: await getContent(
-										'home',
-										'book',
-										'book_description'
-									),
-									book_title: await getContent('home', 'book', 'book_title'),
-									rankings_title: await getContent(
-										'home',
-										'book',
-										'rankings_title'
-									),
-									wattpad_button: await getContent(
-										'home',
-										'book',
-										'wattpad_button'
-									),
-									wattpad_url: await getContent('home', 'book', 'wattpad_url'),
-								}}
-								rankings={rankings}
-							/>
+							<Book stats={stats} bookContent={bookData} rankings={rankings} />
 						</div>
 						{/* Stats pour Cœurs sombres */}
 						<div className='col-span-1 flex justify-center md:col-span-2'>
