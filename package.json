@@ -12,7 +12,11 @@
 		"format:check": "prettier --check .",
 		"prettier": "prettier --write .",
 		"prettier:check": "prettier --check .",
-		"prepare": "husky"
+		"prepare": "husky",
+		"test:cron": "node scripts/test-cron.js",
+		"debug:cron": "node scripts/debug-cron.js",
+		"test:pb-update": "node scripts/test-pocketbase-update.js",
+		"test:full-cron": "node scripts/test-full-cron.js"
 	},
 	"dependencies": {
 		"@eslint/js": "9.32.0",
@@ -31,7 +35,7 @@
 		"feed": "5.1.0",
 		"framer-motion": "12.23.12",
 		"next": "15.4.5",
-		"pocketbase": "^0.26.1",
+		"pocketbase": "0.26.2",
 		"postcss": "8.5.6",
 		"react": "19.1.1",
 		"react-dom": "19.1.1",

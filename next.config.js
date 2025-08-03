@@ -3,17 +3,17 @@ const nextConfig = {
 	// Enable compression
 	compress: true,
 	experimental: {
-		// Enable static regeneration for better performance
-		staleTimes: {
-			dynamic: 0,
-			static: 180, // 3 minutes cache for static content
-		},
 		// Secure Server Actions configuration
 		serverActions: {
 			// Only allow same-origin requests for security
 			allowedOrigins: [],
 			// Limit body size to prevent abuse
 			bodySizeLimit: '1mb',
+		},
+		// Enable static regeneration for better performance
+		staleTimes: {
+			dynamic: 0,
+			static: 180, // 3 minutes cache for static content
 		},
 	},
 	// Generate static exports for better SEO

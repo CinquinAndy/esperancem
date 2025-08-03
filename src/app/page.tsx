@@ -247,10 +247,10 @@ export default async function Home() {
 				</div>
 			</Container>
 
-			{/* Bloc Total */}
+			{/* Bloc Total
 			<div className='my-10 flex justify-center'>
 				<WattpadStats statsType='total' title='Total (tous livres Wattpad)' />
-			</div>
+			</div> */}
 
 			{/* Books Section */}
 			<Container className='mt-24 md:mt-28'>

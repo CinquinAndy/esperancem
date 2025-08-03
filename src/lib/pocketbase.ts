@@ -10,10 +10,29 @@ export const createPocketBase = () => {
 
 	// Authenticate with admin token if available
 	if (PB_TOKEN) {
+		// Try to authenticate as admin first
 		pb.authStore.save(PB_TOKEN, null)
 	}
 
 	return pb
+}
+
+// Authenticate PocketBase instance with admin token
+export const authenticatePocketBase = async (pb: PocketBase) => {
+	if (PB_TOKEN) {
+		try {
+			// Use token authentication
+			pb.authStore.save(PB_TOKEN, null)
+			return true
+		} catch (tokenError) {
+			console.error(
+				'PocketBase authentication failed:',
+				(tokenError as Error).message
+			)
+			return false
+		}
+	}
+	return false
 }
 
 // Types for PocketBase collections

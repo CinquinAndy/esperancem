@@ -57,8 +57,8 @@ importers:
         specifier: 15.4.5
         version: 15.4.5(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
       pocketbase:
-        specifier: ^0.26.1
-        version: 0.26.1
+        specifier: 0.26.2
+        version: 0.26.2
       postcss:
         specifier: 8.5.6
         version: 8.5.6
@@ -2276,8 +2276,8 @@ packages:
     resolution: {integrity: sha512-M7BAV6Rlcy5u+m6oPhAPFgJTzAioX/6B0DxyvDlo9l8+T3nLKbrczg2WLUyzd45L8RqfUMyGPzekbMvX2Ldkwg==}
     engines: {node: '>=12'}
 
-  pocketbase@0.26.1:
-    resolution: {integrity: sha512-fjcPDpxyqTZCwqGUTPUV7vssIsNMqHxk9GxbhxYHPEf18RqX2d9cpSqbbHk7aas30jqkgptuKfG7aY/Mytjj3g==}
+  pocketbase@0.26.2:
+    resolution: {integrity: sha512-WA8EOBc3QnSJh8rJ3iYoi9DmmPOMFIgVfAmIGux7wwruUEIzXgvrO4u0W2htfQjGIcyezJkdZOy5Xmh7SxAftw==}
 
   possible-typed-array-names@1.1.0:
     resolution: {integrity: sha512-/+5VFTchJDoVj3bhoqi6UeymcD00DAwb1nJwamzPvHEszJ4FpF6SNNbUbOS8yI56qHzdV8eK0qEfOSiodkTdxg==}
@@ -5432,7 +5432,7 @@ snapshots:
 
   picomatch@4.0.2: {}
 
-  pocketbase@0.26.1: {}
+  pocketbase@0.26.2: {}
 
   possible-typed-array-names@1.1.0: {}
 

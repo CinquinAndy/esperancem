@@ -1,5 +1,6 @@
 import {
 	createPocketBase,
+	authenticatePocketBase,
 	COLLECTIONS,
 	type SiteContent,
 	type SeoMetadata,
@@ -332,6 +333,13 @@ export class WattpadStatsService {
 		const pb = createPocketBase()
 
 		try {
+			// Ensure authentication
+			const isAuthenticated = await authenticatePocketBase(pb)
+			if (!isAuthenticated) {
+				console.error('Failed to authenticate with PocketBase')
+				return null
+			}
+
 			// Check if we already have stats for this book in PocketBase
 			const existingStats = await pb
 				.collection(COLLECTIONS.WATTPAD_STATS)
@@ -352,12 +360,16 @@ export class WattpadStatsService {
 			if (existingStats.items.length > 0) {
 				// Update existing record
 				const existingRecord = existingStats.items[0]
+				console.info(
+					`📝 Updating existing record ${existingRecord.id} for ${stats.book}`
+				)
 				const updatedRecord = await pb
 					.collection(COLLECTIONS.WATTPAD_STATS)
 					.update<WattpadStats>(existingRecord.id, statsData)
 				return updatedRecord
 			} else {
 				// Create new record
+				console.info(`📝 Creating new record for ${stats.book}`)
 				const newRecord = await pb
 					.collection(COLLECTIONS.WATTPAD_STATS)
 					.create<WattpadStats>(statsData)
