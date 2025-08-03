@@ -24,6 +24,10 @@ import {
 import { formatWattpadStat } from '@/lib/wattpad'
 
 // Helper function to get icon component by name
+// Optimisation ISR : revalidate toutes les 6 heures
+export const revalidate = 21600
+
+// Helper function to get icon component by name
 function getIconComponent(iconName: string | undefined) {
 	switch (iconName) {
 		case 'InstagramIcon':
