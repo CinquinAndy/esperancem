@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 
 import { updateWattpadStats } from '@/app/actions/wattpad-stats'
 
@@ -9,21 +9,8 @@ import { updateWattpadStats } from '@/app/actions/wattpad-stats'
  * For local development/testing, you can call this endpoint manually:
  * curl -X GET http://localhost:3000/api/cron/update-wattpad-stats
  */
-export async function GET(request: NextRequest) {
+export async function GET() {
 	try {
-		// Verify this is a Vercel cron job
-		const isVercelCron = request.headers.get('x-vercel-cron') === '1'
-
-		if (!isVercelCron) {
-			console.warn('⚠️ Non-Vercel cron request detected')
-			// For local development, allow manual calls
-			if (process.env.NODE_ENV === 'development') {
-				console.info('🔄 Development mode: Allowing manual cron execution')
-			} else {
-				return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-			}
-		}
-
 		console.info('🔄 Cron job: Starting Wattpad stats update for all books...')
 
 		const result = await updateWattpadStats()
