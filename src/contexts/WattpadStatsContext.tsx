@@ -67,9 +67,8 @@ export function WattpadStatsProvider({
 					}
 				}
 
-				// Fetch from PocketBase API
-				const response = await fetch('/api/pocketbase/wattpad-stats')
-				const result = await response.json()
+				// Fetch directly from PocketBase service
+				const result = await WattpadStatsService.getCurrentStats()
 
 				if (result && result.reads) {
 					// Transform PocketBase data to match expected format
@@ -79,7 +78,7 @@ export function WattpadStatsProvider({
 							: Date.now(),
 						parts: result.parts || '0',
 						reads: result.reads || '0',
-						readsComplete: result.reads || '0',
+						readsComplete: result.reads_complete || result.reads || '0',
 						votes: result.votes || '0',
 					}
 
