@@ -12,6 +12,7 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+    restart: unless-stopped
 
   # Simple cron service for Coolify
   cron:
@@ -19,7 +20,7 @@ services:
     command: ['node', 'scripts/simple-cron.js']
     environment:
       - NODE_ENV=production
-      - SITE_URL=http://app:3000
+      - SITE_URL=https://esperancem.fr
     depends_on:
       - app
     restart: unless-stopped 
