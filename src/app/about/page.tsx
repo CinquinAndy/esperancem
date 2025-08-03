@@ -17,6 +17,9 @@ import { getContentWithFallback, getSocialLinks } from '@/lib/content'
 import { generateAboutMetadata } from '@/lib/metadata'
 import { fetchWattpadStats } from '@/lib/wattpad'
 
+// Optimisation ISR : revalidate toutes les 6 heures
+export const revalidate = 21600
+
 function SocialLink({
 	children,
 	className,
@@ -57,24 +60,37 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function About() {
-	// Fetch content and social links from PocketBase
+	// Optimisation : Récupérer toutes les données en parallèle
+	const [initialStats, socialLinks, aboutContent] = await Promise.all([
+		fetchWattpadStats(),
+		getSocialLinks(),
+		// Récupérer tout le contenu About en une seule fois
+		Promise.all([
+			getContentWithFallback('about', 'hero', 'main_title', '...'),
+			getContentWithFallback('about', 'hero', 'biography', '...'),
+			getContentWithFallback('about', 'book', 'book_title', '...'),
+			getContentWithFallback('about', 'book', 'book_description', `...`),
+			getContentWithFallback('about', 'contact', 'email', '...'),
+			getContentWithFallback(
+				'about',
+				'book',
+				'book_title_2',
+				'Au Prix du Silence'
+			),
+			getContentWithFallback('about', 'book', 'book_description_2', '...'),
+		]),
+	])
+
+	// Destructurer le contenu
 	const [
-		initialStats,
-		socialLinks,
 		mainTitle,
 		mainContent,
 		bookTitle,
 		bookContent,
 		email,
-	] = await Promise.all([
-		fetchWattpadStats(),
-		getSocialLinks(),
-		getContentWithFallback('about', 'hero', 'main_title', '...'),
-		getContentWithFallback('about', 'hero', 'biography', '...'),
-		getContentWithFallback('about', 'book', 'book_title', '...'),
-		getContentWithFallback('about', 'book', 'book_description', `...`),
-		getContentWithFallback('about', 'contact', 'email', '...'),
-	])
+		bookTitle2,
+		bookContent2,
+	] = aboutContent
 
 	return (
 		<WattpadStatsProvider
@@ -196,25 +212,11 @@ export default async function About() {
 							<div className='lg:order-1 lg:pr-8'>
 								<h2
 									className='text-3xl font-bold tracking-tight text-zinc-100 sm:text-4xl'
-									dangerouslySetInnerHTML={{
-										__html: await getContentWithFallback(
-											'about',
-											'book',
-											'book_title_2',
-											'Au Prix du Silence'
-										),
-									}}
+									dangerouslySetInnerHTML={{ __html: bookTitle2 }}
 								/>
 								<div
 									className='mt-6 space-y-6 text-base text-zinc-400'
-									dangerouslySetInnerHTML={{
-										__html: await getContentWithFallback(
-											'about',
-											'book',
-											'book_description_2',
-											'...'
-										),
-									}}
+									dangerouslySetInnerHTML={{ __html: bookContent2 }}
 								/>
 							</div>
 						</div>
