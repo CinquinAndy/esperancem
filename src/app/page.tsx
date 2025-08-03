@@ -290,7 +290,7 @@ export default async function Home() {
 							/>
 						</div>
 						{/* Stats pour Cœurs sombres */}
-						<div className='col-span-2 flex justify-center'>
+						<div className='col-span-1 flex justify-center md:col-span-2'>
 							<WattpadStats statsType='coeurs-sombres' title='Cœurs sombres' />
 						</div>
 					</div>
@@ -334,7 +334,7 @@ export default async function Home() {
 							/>
 						</div>
 						{/* Stats pour Au prix du silence */}
-						<div className='col-span-2 flex justify-center'>
+						<div className='col-span-1 flex justify-center md:col-span-2'>
 							<WattpadStats
 								statsType='au-prix-du-silence'
 								title='Au prix du silence'
