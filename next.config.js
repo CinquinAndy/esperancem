@@ -3,8 +3,6 @@ const nextConfig = {
 	// Enable compression
 	compress: true,
 	experimental: {
-		// Enable optimized fetch caching
-		optimizePackageImports: ['@/lib', '@/services'],
 		// Secure Server Actions configuration
 		serverActions: {
 			// Only allow same-origin requests for security
@@ -12,10 +10,10 @@ const nextConfig = {
 			// Limit body size to prevent abuse
 			bodySizeLimit: '1mb',
 		},
-		// Optimize ISR performance
+		// Enable static regeneration for better performance
 		staleTimes: {
 			dynamic: 0,
-			static: 3600, // 1 hour cache for static content (was 3 minutes)
+			static: 180, // 3 minutes cache for static content
 		},
 	},
 	// Generate static exports for better SEO
@@ -49,34 +47,14 @@ const nextConfig = {
 				],
 				source: '/api/wattpad-stats',
 			},
-			{
-				headers: [
-					{
-						key: 'Cache-Control',
-						value: 's-maxage=3600, stale-while-revalidate=7200', // 1h cache, 2h stale
-					},
-				],
-				source: '/api/health',
-			},
-			{
-				headers: [
-					{
-						key: 'Cache-Control',
-						value: 'public, max-age=3600, s-maxage=3600', // 1h cache
-					},
-				],
-				source: '/api/revalidate-stats',
-			},
 		]
 	},
 	// Optimize images for better performance
 	images: {
 		deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
-		formats: ['image/webp', 'image/avif'],
+		formats: ['image/webp'],
 		imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
 		minimumCacheTTL: 86400, // 24 hours cache for images
-		// Optimize image loading
-		unoptimized: false,
 	},
 	// Output static files for better CDN caching
 	output: 'standalone',
@@ -95,8 +73,6 @@ const nextConfig = {
 			},
 		]
 	},
-	// Server external packages (moved from experimental)
-	serverExternalPackages: ['@pocketbase/js'],
 }
 
 module.exports = nextConfig

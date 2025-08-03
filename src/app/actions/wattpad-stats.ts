@@ -5,55 +5,10 @@ import type { BookType } from '@/lib/pocketbase'
 import { WattpadStatsService } from '@/services/pocketbase'
 import { WattpadStatsUpdater } from '@/services/wattpad-stats-updater'
 
-// Cache en mémoire pour les Server Actions
-const statsCache = new Map<string, { data: any; timestamp: number }>()
-const CACHE_DURATION = 5 * 60 * 1000 // 5 minutes
-
-// Type pour le retour de getWattpadStats
-export interface WattpadStatsResult {
-	success: boolean
-	stats?: {
-		lastUpdated: number
-		parts: string
-		reads: string
-		readsComplete: string
-		votes: string
-	} | null
-	error?: string
-}
-
-function getCacheKey(operation: string, bookType?: string): string {
-	return bookType ? `${operation}:${bookType}` : operation
-}
-
-function isCacheValid(timestamp: number): boolean {
-	return Date.now() - timestamp < CACHE_DURATION
-}
-
-function getCachedStats<T>(key: string): T | null {
-	const cached = statsCache.get(key)
-	if (cached && isCacheValid(cached.timestamp)) {
-		return cached.data as T
-	}
-	return null
-}
-
-function setCachedStats<T>(key: string, data: T): void {
-	statsCache.set(key, { data, timestamp: Date.now() })
-}
-
 /**
- * Get Wattpad stats for a specific book with caching
+ * Get Wattpad stats for a specific book
  */
-export async function getWattpadStats(
-	bookType: BookType = 'coeurs-sombres'
-): Promise<WattpadStatsResult> {
-	const cacheKey = getCacheKey('stats', bookType)
-	const cached = getCachedStats<WattpadStatsResult>(cacheKey)
-	if (cached !== null) {
-		return cached
-	}
-
+export async function getWattpadStats(bookType: BookType = 'coeurs-sombres') {
 	try {
 		// First try to get from PocketBase (preferred for SSG)
 		const stats = await WattpadStatsService.getCurrentStats(bookType)
@@ -70,13 +25,10 @@ export async function getWattpadStats(
 				votes: stats.votes || '0',
 			}
 
-			const result: WattpadStatsResult = {
+			return {
 				stats: transformedStats,
 				success: true,
 			}
-
-			setCachedStats(cacheKey, result)
-			return result
 		}
 
 		// Fallback to fetching from Wattpad if no PocketBase data
@@ -94,45 +46,31 @@ export async function getWattpadStats(
 				votes: result.votes,
 			}
 
-			const response: WattpadStatsResult = {
+			return {
 				stats: transformedStats,
 				success: true,
 			}
-
-			setCachedStats(cacheKey, response)
-			return response
 		}
 
-		const errorResult: WattpadStatsResult = {
+		return {
 			error: 'No stats found',
 			stats: null,
 			success: false,
 		}
-
-		setCachedStats(cacheKey, errorResult)
-		return errorResult
 	} catch (error) {
 		console.error('Error getting Wattpad stats:', error)
-		const errorResult: WattpadStatsResult = {
+		return {
 			error: error instanceof Error ? error.message : 'Unknown error',
 			stats: null,
 			success: false,
 		}
-		setCachedStats(cacheKey, errorResult)
-		return errorResult
 	}
 }
 
 /**
- * Get stats for all books with caching
+ * Get stats for all books
  */
 export async function getAllWattpadStats() {
-	const cacheKey = getCacheKey('all-stats')
-	const cached = getCachedStats(cacheKey)
-	if (cached !== null) {
-		return cached
-	}
-
 	try {
 		// First try to get from PocketBase
 		const pocketbaseStats = await WattpadStatsService.getAllBooksStats()
@@ -162,12 +100,10 @@ export async function getAllWattpadStats() {
 		})
 
 		if (hasPocketbaseData) {
-			const result = {
+			return {
 				stats: transformedStats,
 				success: true,
 			}
-			setCachedStats(cacheKey, result)
-			return result
 		}
 
 		// Fallback to fetching from Wattpad
@@ -192,30 +128,24 @@ export async function getAllWattpadStats() {
 				},
 			}
 
-			const response = {
+			return {
 				stats: transformedStats,
 				success: true,
 			}
-			setCachedStats(cacheKey, response)
-			return response
 		}
 
-		const errorResult = {
+		return {
 			error: 'No stats found',
 			stats: null,
 			success: false,
 		}
-		setCachedStats(cacheKey, errorResult)
-		return errorResult
 	} catch (error) {
 		console.error('Error getting all Wattpad stats:', error)
-		const errorResult = {
+		return {
 			error: error instanceof Error ? error.message : 'Unknown error',
 			stats: null,
 			success: false,
 		}
-		setCachedStats(cacheKey, errorResult)
-		return errorResult
 	}
 }
 
@@ -226,7 +156,6 @@ export async function updateWattpadStats() {
 	try {
 		// Clear cache before updating to force fresh data
 		WattpadStatsUpdater.clearCache()
-		statsCache.clear() // Clear our cache too
 
 		const result = await WattpadStatsUpdater.performUpdate()
 		return result
@@ -249,10 +178,6 @@ export async function updateWattpadStats() {
  */
 export async function refreshWattpadStats() {
 	try {
-		// Clear all caches
-		WattpadStatsUpdater.clearCache()
-		statsCache.clear()
-
 		const result = await WattpadStatsUpdater.performUpdate()
 		return result
 	} catch (error) {
@@ -267,11 +192,4 @@ export async function refreshWattpadStats() {
 			timestamp: new Date().toISOString(),
 		}
 	}
-}
-
-/**
- * Clear all caches (useful for testing or manual refresh)
- */
-export async function clearStatsCache(): Promise<void> {
-	statsCache.clear()
 }
