@@ -6,17 +6,14 @@
 		"dev": "next dev --turbopack",
 		"build": "next build",
 		"start": "next start",
+		"start:standalone": "node .next/standalone/server.js",
 		"lint": "next lint",
 		"lint:fix": "next lint --fix",
 		"format": "prettier --write .",
 		"format:check": "prettier --check .",
 		"prettier": "prettier --write .",
 		"prettier:check": "prettier --check .",
-		"prepare": "husky",
-		"test:cron": "node scripts/test-cron.js",
-		"debug:cron": "node scripts/debug-cron.js",
-		"test:pb-update": "node scripts/test-pocketbase-update.js",
-		"test:full-cron": "node scripts/test-full-cron.js"
+		"prepare": "husky"
 	},
 	"dependencies": {
 		"@eslint/js": "9.32.0",

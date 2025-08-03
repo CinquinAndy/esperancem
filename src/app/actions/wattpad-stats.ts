@@ -154,6 +154,9 @@ export async function getAllWattpadStats() {
  */
 export async function updateWattpadStats() {
 	try {
+		// Clear cache before updating to force fresh data
+		WattpadStatsUpdater.clearCache()
+
 		const result = await WattpadStatsUpdater.performUpdate()
 		return result
 	} catch (error) {
