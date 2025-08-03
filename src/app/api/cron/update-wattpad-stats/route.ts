@@ -5,7 +5,7 @@ import { updateWattpadStats } from '@/app/actions/wattpad-stats'
 /**
  * Cron job endpoint for updating Wattpad stats for all books
  * Called automatically by Vercel every 6 hours
- * 
+ *
  * For local development/testing, you can call this endpoint manually:
  * curl -X GET http://localhost:3000/api/cron/update-wattpad-stats
  */
@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
 	try {
 		// Verify this is a Vercel cron job
 		const isVercelCron = request.headers.get('x-vercel-cron') === '1'
-		
+
 		if (!isVercelCron) {
 			console.warn('⚠️ Non-Vercel cron request detected')
 			// For local development, allow manual calls
