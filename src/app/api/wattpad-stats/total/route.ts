@@ -5,22 +5,70 @@ import {
 	createErrorResponse,
 	handleError,
 } from '@/lib/utils'
+import { WattpadStatsService } from '@/services/pocketbase'
 import { WattpadStatsUpdater } from '@/services/wattpad-stats-updater'
 
 export async function GET() {
 	console.info('Fetching total Wattpad stats (sum of all books)')
 
 	try {
-		// Get stats for all books
-		const result = await WattpadStatsUpdater.getStats()
+		// First try to get from PocketBase
+		const pocketbaseStats = await WattpadStatsService.getAllBooksStats()
 
-		if (result.success && result.data) {
-			// Calculate totals
-			const coeursSombres = result.data['coeurs-sombres']
-			const auPrixDuSilence = result.data['au-prix-du-silence']
+		// Check if we have valid data in PocketBase
+		const hasValidData = Object.values(pocketbaseStats).some(
+			stats =>
+				stats &&
+				(parseInt(stats.reads || '0') > 0 || parseInt(stats.votes || '0') > 0)
+		)
+
+		if (hasValidData) {
+			console.info('📋 Using PocketBase stats for totals')
+			const coeursSombres = pocketbaseStats['coeurs-sombres']
+			const auPrixDuSilence = pocketbaseStats['au-prix-du-silence']
 
 			const totalStats = {
-				lastUpdated: result.data.lastUpdated,
+				lastUpdated: Date.now(),
+				parts: (
+					parseInt(coeursSombres?.parts || '0') +
+					parseInt(auPrixDuSilence?.parts || '0')
+				).toString(),
+				reads: (
+					parseInt(coeursSombres?.reads || '0') +
+					parseInt(auPrixDuSilence?.reads || '0')
+				).toString(),
+				readsComplete: (
+					parseInt(
+						coeursSombres?.reads_complete || coeursSombres?.reads || '0'
+					) +
+					parseInt(
+						auPrixDuSilence?.reads_complete || auPrixDuSilence?.reads || '0'
+					)
+				).toString(),
+				votes: (
+					parseInt(coeursSombres?.votes || '0') +
+					parseInt(auPrixDuSilence?.votes || '0')
+				).toString(),
+			}
+
+			const response = createSuccessResponse(totalStats)
+			response.cached = true
+			return NextResponse.json(response)
+		}
+
+		// Fallback: fetch from Wattpad and save to PocketBase
+		console.info(
+			'📡 No valid PocketBase data, fetching from Wattpad and saving...'
+		)
+		const result = await WattpadStatsUpdater.performUpdate()
+
+		if (result.success && result.stats) {
+			// Calculate totals
+			const coeursSombres = result.stats['coeurs-sombres']
+			const auPrixDuSilence = result.stats['au-prix-du-silence']
+
+			const totalStats = {
+				lastUpdated: result.stats.lastUpdated,
 				parts: (
 					parseInt(coeursSombres.parts || '0') +
 					parseInt(auPrixDuSilence.parts || '0')
@@ -40,12 +88,11 @@ export async function GET() {
 			}
 
 			const response = createSuccessResponse(totalStats)
-			response.cached = result.cached
-
+			response.cached = false
 			return NextResponse.json(response)
 		} else {
 			const { response, status } = createErrorResponse(
-				result.error || 'Failed to fetch total stats'
+				'Failed to fetch and save total stats'
 			)
 			return NextResponse.json(response, { status })
 		}

@@ -7,6 +7,7 @@ import {
 	createErrorResponse,
 	handleError,
 } from '@/lib/utils'
+import { WattpadStatsService } from '@/services/pocketbase'
 import { WattpadStatsUpdater } from '@/services/wattpad-stats-updater'
 
 export async function GET(
@@ -27,23 +28,51 @@ export async function GET(
 	console.info(`Fetching Wattpad stats for book: ${bookType}`)
 
 	try {
-		// Get stats for specific book
-		const result = await WattpadStatsUpdater.getBookStats(bookType)
+		// First try to get from PocketBase
+		const pocketbaseStats = await WattpadStatsService.getCurrentStats(bookType)
 
-		if (result) {
+		if (
+			pocketbaseStats &&
+			(parseInt(pocketbaseStats.reads || '0') > 0 ||
+				parseInt(pocketbaseStats.votes || '0') > 0)
+		) {
+			console.info(`📋 Using PocketBase stats for ${bookType}`)
 			const response = createSuccessResponse({
-				book: result.book,
-				lastUpdated: Date.now(),
-				parts: result.parts,
-				reads: result.reads,
-				readsComplete: result.readsComplete,
-				votes: result.votes,
+				book: bookType,
+				lastUpdated: pocketbaseStats.updated
+					? new Date(pocketbaseStats.updated).getTime()
+					: Date.now(),
+				parts: pocketbaseStats.parts || '0',
+				reads: pocketbaseStats.reads || '0',
+				readsComplete:
+					pocketbaseStats.reads_complete || pocketbaseStats.reads || '0',
+				votes: pocketbaseStats.votes || '0',
 			})
+			response.cached = true
+			return NextResponse.json(response)
+		}
 
+		// Fallback: fetch from Wattpad and save to PocketBase
+		console.info(
+			`📡 No valid PocketBase data for ${bookType}, fetching from Wattpad and saving...`
+		)
+		const result = await WattpadStatsUpdater.performUpdate()
+
+		if (result.success && result.stats && result.stats[bookType]) {
+			const bookStats = result.stats[bookType]
+			const response = createSuccessResponse({
+				book: bookStats.book,
+				lastUpdated: result.stats.lastUpdated,
+				parts: bookStats.parts,
+				reads: bookStats.reads,
+				readsComplete: bookStats.readsComplete,
+				votes: bookStats.votes,
+			})
+			response.cached = false
 			return NextResponse.json(response)
 		} else {
 			const { response, status } = createErrorResponse(
-				`Failed to fetch stats for ${bookType}`
+				`Failed to fetch and save stats for ${bookType}`
 			)
 			return NextResponse.json(response, { status })
 		}
