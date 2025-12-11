@@ -2,7 +2,10 @@
 const nextConfig = {
 	// Enable compression
 	compress: true,
+	// Enable instrumentation for cron jobs
 	experimental: {
+		// Enable instrumentation hook for server startup tasks (like cron jobs)
+		instrumentationHook: true,
 		// Enable optimized fetch caching
 		optimizePackageImports: ['@/lib', '@/services'],
 		// Secure Server Actions configuration
