@@ -30,7 +30,7 @@
 		"clsx": "2.1.1",
 		"fast-glob": "3.3.3",
 		"feed": "5.1.0",
-		"framer-motion": "12.24.0",
+		"framer-motion": "12.24.7",
 		"next": "15.5.9",
 		"pocketbase": "0.26.5",
 		"postcss": "8.5.6",
