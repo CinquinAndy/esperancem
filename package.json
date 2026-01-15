@@ -57,7 +57,7 @@
 		"eslint": "9.39.2",
 		"eslint-config-next": "15.5.9",
 		"@eslint/eslintrc": "3.3.3",
-		"prettier": "3.7.4",
+		"prettier": "3.8.0",
 		"prettier-plugin-tailwindcss": "0.7.2",
 		"husky": "9.1.7",
 		"typescript-eslint": "8.53.0"
