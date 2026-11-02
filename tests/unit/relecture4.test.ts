@@ -533,6 +533,41 @@ describe('redémarrage : l’historique de la synchro survit (cinquième relectu
 		const r = await releve(pb, both(5))
 		expect(r.out('coeurs-sombres').outcome).toBe('refuse')
 	})
+	test('historique non gardé lors d’un recompte confirmé : l’ancien, périmé, est ignoré après redémarrage', async () => {
+		const pb = makeStore()
+		await releve(pb, both(1))
+		await releve(pb, both(2))
+		const before = structuredClone(pb.history['coeurs-sombres'])
+		// Recompte de −20 000 confirmé au 3e relevé, mais l’historique ne peut plus être écrit.
+		pb.ctl.historyWriteFails = true
+		for (let step = 3; step <= 5; step++)
+			await releve(
+				pb,
+				withCs(step, { ...cs(step), reads: cs(step).reads - 20_000 })
+			)
+		expect(pb.records['coeurs-sombres'].counts!.reads).toBe(
+			cs(5).reads - 20_000
+		)
+		expect(pb.history['coeurs-sombres']).toEqual(before)
+		restart()
+		// L’historique gardé décrit la situation d’avant le recompte : un retour à l’ancienne valeur reste refusé.
+		const r = await releve(pb, both(6))
+		expect(r.out('coeurs-sombres').outcome).toBe('refuse')
+	})
+
+	test('valeur active modifiée hors de la synchro (ancien code, à la main) : l’historique gardé est ignoré', async () => {
+		const pb = makeStore()
+		await releve(pb, both(1))
+		await releve(pb, both(2))
+		pb.records['coeurs-sombres'] = {
+			counts: { ...cs(2), reads: cs(2).reads - 1830 },
+			updatedAt: new Date(clock).toISOString(),
+		}
+		restart()
+		// Sans historique repris, la vraie valeur s’écarte de plus d’une borne de la valeur modifiée.
+		const r = await releve(pb, both(3), TEN_SECONDS)
+		expect(r.out('coeurs-sombres').outcome).toBe('refuse')
+	})
 })
 
 describe('pannes', () => {

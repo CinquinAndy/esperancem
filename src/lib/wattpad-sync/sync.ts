@@ -169,14 +169,27 @@ function valueToPersist(history: AcceptedValue[]): AcceptedValue {
 	)
 }
 
-const key = (value: AcceptedValue) =>
-	`${value.checkedAt} ${value.counts.reads} ${value.counts.votes} ${value.counts.parts}`
+const key = (value: AcceptedValue, successor: BookCounts) =>
+	[
+		value.checkedAt,
+		value.counts.reads,
+		value.counts.votes,
+		value.counts.parts,
+		successor.reads,
+		successor.votes,
+		successor.parts,
+	].join(' ')
 
 /**
  * Après un redémarrage, l'historique en mémoire est vide : on le reprend de PocketBase (la valeur d'avant la
- * valeur actuelle). Un échec de lecture laisse l'historique vide, sans bloquer la synchro.
+ * valeur actuelle). Il n'est repris que si la valeur qui le suivait est encore la valeur active de PocketBase ;
+ * sinon il est périmé et ignoré. Un échec de lecture laisse l'historique vide, sans bloquer la synchro.
  */
-async function restoreHistory(store: StatsStore, books: readonly BookConfig[]) {
+async function restoreHistory(
+	store: StatsStore,
+	books: readonly BookConfig[],
+	records: Partial<Record<BookType, StoredRecord>>
+) {
 	if (!store.readHistory) return
 	if (books.every(book => (state.history[book.type]?.length ?? 0) > 0)) return
 	let stored: Awaited<ReturnType<NonNullable<StatsStore['readHistory']>>>
@@ -191,9 +204,16 @@ async function restoreHistory(store: StatsStore, books: readonly BookConfig[]) {
 	for (const book of books) {
 		const value = stored[book.type]
 		if (!value || (state.history[book.type]?.length ?? 0) > 0) continue
+		const active = records[book.type]?.counts ?? null
+		if (!same(value.successor, active)) {
+			console.warn(
+				`Wattpad : historique de ${book.type} périmé (valeur active différente), ignoré`
+			)
+			continue
+		}
 		const restored = { checkedAt: value.checkedAt, counts: { ...value.counts } }
 		state.history[book.type] = [restored]
-		state.persisted[book.type] = key(restored)
+		state.persisted[book.type] = key(restored, value.successor)
 	}
 }
 
@@ -202,13 +222,15 @@ async function persistHistory(store: StatsStore, book: BookType) {
 	const history = state.history[book]
 	if (!store.writeHistory || !history?.length) return
 	const value = valueToPersist(history)
-	if (state.persisted[book] === key(value)) return
+	const successor = history.at(-1)!.counts
+	if (state.persisted[book] === key(value, successor)) return
 	try {
 		await store.writeHistory(book, {
 			checkedAt: value.checkedAt,
 			counts: { ...value.counts },
+			successor: { ...successor },
 		})
-		state.persisted[book] = key(value)
+		state.persisted[book] = key(value, successor)
 	} catch (error) {
 		const status = (error as { status?: number })?.status
 		console.warn(
@@ -234,7 +256,7 @@ async function syncOnce(deps: SyncDeps): Promise<SyncReport> {
 		records = null
 	}
 	const snapshot = loadSnapshot()
-	if (records) await restoreHistory(store, books)
+	if (records) await restoreHistory(store, books, records)
 
 	const reports: BookReport[] = []
 	let changed = false

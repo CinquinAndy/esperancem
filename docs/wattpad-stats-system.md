@@ -28,10 +28,13 @@ Le site n'affiche jamais un chiffre lu en direct sur Wattpad. Il affiche la **de
 4. **Stockage** : la collection PocketBase existante `wattpad_stats`, mêmes champs qu'avant. Aucune migration.
    Lecture d'un enregistrement par roman (le plus récent actif), quelle que soit la taille de la collection.
    Historique de la synchro : un enregistrement **inactif** de plus par roman (`is_active = false`, champ `reads`
-   commençant par `historique-synchro ` suivi de la date de la valeur), qui garde la valeur écrite avant la valeur
-   actuelle. Le site et l'ancien code ne lisent que les enregistrements actifs ; les anciens enregistrements
-   désactivés, sans cette marque, ne servent jamais de référence. Si cet enregistrement ne peut être ni lu ni
-   écrit, la synchro écrit quand même et garde l'historique en mémoire seulement (message dans les journaux).
+   commençant par `historique-synchro ` suivi de la date de la valeur et de la valeur suivante), qui garde la
+   valeur écrite avant la valeur actuelle. Il n'est repris après un redémarrage que si sa valeur suivante est
+   encore la valeur active ; sinon (écriture de l'historique échouée, ancien code ou modification à la main
+   entre-temps) il est ignoré. Le site et l'ancien code ne lisent que les enregistrements actifs ; les anciens
+   enregistrements désactivés, sans cette marque, ne servent jamais de référence. Si cet enregistrement ne peut être
+   ni lu ni écrit, la synchro écrit quand même et garde l'historique en mémoire seulement (message dans les
+   journaux).
 5. **Affichage** (`src/lib/wattpad-sync/display.ts`) : parmi PocketBase, la mémoire du processus et le relevé
    committé `src/data/wattpad-releve.json`, la valeur la plus récemment confirmée par Wattpad (à égalité, la plus
    haute). Toutes ont été validées : un chiffre ne vaut jamais 0, ne recule au-delà des bornes que si le recul a été

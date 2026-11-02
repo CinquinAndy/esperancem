@@ -807,6 +807,7 @@ describe('historique de la synchro dans PocketBase', () => {
 	const value = {
 		checkedAt: '2026-11-02T12:00:00.000Z',
 		counts: { parts: 48, reads: 366177, votes: 11126 },
+		successor: { parts: 48, reads: 366277, votes: 11128 },
 	}
 	const row = (extra: Record<string, unknown>) =>
 		({
@@ -823,7 +824,7 @@ describe('historique de la synchro dans PocketBase', () => {
 			book: 'coeurs-sombres',
 			is_active: false,
 			parts: '48',
-			reads: 'historique-synchro 2026-11-02T12:00:00.000Z',
+			reads: 'historique-synchro 2026-11-02T12:00:00.000Z 366277,11128,48',
 			reads_complete: '366177',
 			votes: '11126',
 		})
@@ -835,7 +836,20 @@ describe('historique de la synchro dans PocketBase', () => {
 		expect(readHistoryRecord(row({ votes: '0' }))).toBeNull()
 		expect(readHistoryRecord(row({ reads_complete: '366K' }))).toBeNull()
 		expect(
-			readHistoryRecord(row({ reads: 'historique-synchro pas une date' }))
+			readHistoryRecord(
+				row({ reads: 'historique-synchro pas-une-date 366277,11128,48' })
+			)
+		).toBeNull()
+		// Sans valeur suivante, ou valeur suivante impossible : on ne peut pas vérifier qu'il est à jour.
+		expect(
+			readHistoryRecord(
+				row({ reads: 'historique-synchro 2026-11-02T12:00:00.000Z' })
+			)
+		).toBeNull()
+		expect(
+			readHistoryRecord(
+				row({ reads: 'historique-synchro 2026-11-02T12:00:00.000Z 0,0,0' })
+			)
 		).toBeNull()
 	})
 	test('écriture : met à jour l’enregistrement marqué, sinon en crée un, jamais un actif', async () => {

@@ -40,10 +40,17 @@ export interface StatsStore {
 export interface StoredHistory {
 	checkedAt: string
 	counts: BookCounts
+	/**
+	 * Valeur écrite juste après celle-ci (la valeur active au moment de l'écriture). La synchro n'utilise
+	 * l'historique que si elle est encore la valeur active : sinon il est périmé (écriture de l'historique
+	 * échouée, ancien code ou modification à la main entre-temps).
+	 */
+	successor: BookCounts
 }
 
 /**
- * Marque des enregistrements d'historique, dans le champ texte `reads` (suivie de la date de la valeur).
+ * Marque des enregistrements d'historique, dans le champ texte `reads`, suivie de la date de la valeur et de la
+ * valeur suivante (« historique-synchro 2026-11-02T12:00:00.000Z 366277,11128,48 » : lectures, votes, chapitres).
  * Ils sont inactifs (`is_active = false`) : le site et l'ancien code ne lisent que les actifs. La marque les
  * distingue des anciens enregistrements désactivés, qui ne doivent jamais servir de référence.
  */
@@ -51,9 +58,16 @@ export const HISTORY_MARK = 'historique-synchro'
 
 /** Lit un enregistrement d'historique ; null s'il n'en est pas un ou si ses chiffres sont invalides. */
 export function readHistoryRecord(record: WattpadStats): StoredHistory | null {
-	const match = record.reads?.match(new RegExp(`^${HISTORY_MARK} (.+)$`))
+	const match = record.reads?.match(
+		new RegExp(`^${HISTORY_MARK} (\\S+) (\\d+),(\\d+),(\\d+)$`)
+	)
 	if (record.is_active !== false || !match) return null
 	const at = Date.parse(match[1])
+	const successor = {
+		parts: Number(match[4]),
+		reads: Number(match[2]),
+		votes: Number(match[3]),
+	}
 	const counts = {
 		parts: parseExactCount(record.parts),
 		reads: parseExactCount(record.reads_complete),
@@ -64,10 +78,15 @@ export function readHistoryRecord(record: WattpadStats): StoredHistory | null {
 		counts.reads === null ||
 		counts.votes === null ||
 		counts.parts === null ||
-		implausibility(counts as BookCounts)
+		implausibility(counts as BookCounts) ||
+		implausibility(successor)
 	)
 		return null
-	return { checkedAt: new Date(at).toISOString(), counts: counts as BookCounts }
+	return {
+		checkedAt: new Date(at).toISOString(),
+		counts: counts as BookCounts,
+		successor,
+	}
 }
 
 export function toHistoryFields(book: BookType, value: StoredHistory) {
@@ -75,7 +94,7 @@ export function toHistoryFields(book: BookType, value: StoredHistory) {
 		book,
 		is_active: false,
 		parts: String(value.counts.parts),
-		reads: `${HISTORY_MARK} ${value.checkedAt}`,
+		reads: `${HISTORY_MARK} ${value.checkedAt} ${value.successor.reads},${value.successor.votes},${value.successor.parts}`,
 		reads_complete: String(value.counts.reads),
 		votes: String(value.counts.votes),
 	}
