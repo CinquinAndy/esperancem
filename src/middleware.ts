@@ -36,9 +36,10 @@ export function middleware(request: NextRequest) {
 	response.headers.set('X-XSS-Protection', '1; mode=block')
 
 	// Content Security Policy
+	// Umami (src/app/layout.tsx) : le script vient de umami.wadefade.fr et y envoie les visites (/api/send).
 	response.headers.set(
 		'Content-Security-Policy',
-		"default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://api.esperancem.fr;"
+		"default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://umami.wadefade.fr; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://api.esperancem.fr https://umami.wadefade.fr;"
 	)
 
 	return response
