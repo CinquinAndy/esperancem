@@ -29,22 +29,21 @@ npm run build
 npm start
 ```
 
-### Automatic Updates
+### Statistiques Wattpad
 
-Wattpad stats are automatically updated every 6 hours via Coolify cron jobs.
-
-To trigger manual updates:
+Les chiffres (lectures, votes, chapitres) sont relevés sur Wattpad toutes les 6 heures par le serveur Next.js
+lui-même (`src/instrumentation.ts`), validés, puis enregistrés dans PocketBase. Rien à installer sur la machine.
+Détails, modes de panne et procédure : `docs/wattpad-stats-system.md`.
 
 ```bash
-# Using the cron endpoint (requires REVALIDATE_SECRET)
-curl -X GET http://localhost:3000/api/cron/update-wattpad-stats \
-  -H "Authorization: Bearer H9HKyb3wgxvuikh2lKOcazP3neH214H2YCmBPqTA3t2nbyQjlSVXKjYcwsatNjS"
+# État de fraîcheur (public, sans secret)
+curl https://esperancem.fr/api/wattpad-stats/health
 
-# Using the script directly
-node scripts/update-wattpad-stats.mjs
+# Relevé immédiat (protégé)
+curl -H "Authorization: Bearer $REVALIDATE_SECRET" https://esperancem.fr/api/cron/update-wattpad-stats
 
-# Using the cron runner (for Coolify)
-node scripts/cron-runner.mjs
+# Mettre à jour le plancher committé src/data/wattpad-releve.json
+node scripts/wattpad-releve.mjs
 ```
 
 ### Environment Variables

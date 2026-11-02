@@ -1,25 +1,16 @@
 import { type Metadata } from 'next'
 
-import { fetchWattpadStats, formatWattpadStat } from './wattpad'
+import { getDisplayStats } from './wattpad-sync/display'
+import { formatThousandsPlus } from './wattpad-sync/format'
 
-let cachedStats: Awaited<ReturnType<typeof fetchWattpadStats>> | null = null
-let cacheTimestamp = 0
-
-async function getWattpadStats() {
-	const now = Date.now()
-	const CACHE_DURATION = 6 * 60 * 60 * 1000
-
-	if (!cachedStats || now - cacheTimestamp > CACHE_DURATION) {
-		cachedStats = await fetchWattpadStats()
-		cacheTimestamp = now
-	}
-
-	return cachedStats
+/** Lectures de Cœurs Sombres, « 366k+ » : dernière valeur connue bonne, jamais un chiffre inventé. */
+async function coeursSombresReads(): Promise<string> {
+	const display = await getDisplayStats()
+	return formatThousandsPlus(display.books['coeurs-sombres'].reads)
 }
 
 export async function generateHomeMetadata(): Promise<Metadata> {
-	const stats = await getWattpadStats()
-	const formattedReads = stats?.reads ? formatWattpadStat(stats.reads) : '85k+'
+	const formattedReads = await coeursSombresReads()
 
 	return {
 		description: `Découvrez l'univers sombre et passionné d'Espérance Masson. Lisez "Cœurs Sombres", son premier roman dark romance sur Wattpad qui captive plus de ${formattedReads.replace('+', '')} lecteurs. Plongez dans une histoire d'enemies to lovers avec Lucas Ferrari et Angèle.`,
@@ -46,8 +37,7 @@ export async function generateHomeMetadata(): Promise<Metadata> {
 }
 
 export async function generateLayoutMetadata(): Promise<Metadata> {
-	const stats = await getWattpadStats()
-	const formattedReads = stats?.reads ? formatWattpadStat(stats.reads) : '85k+'
+	const formattedReads = await coeursSombresReads()
 
 	return {
 		alternates: {
@@ -116,10 +106,7 @@ export async function generateLayoutMetadata(): Promise<Metadata> {
 }
 
 export async function generateAboutMetadata(): Promise<Metadata> {
-	const stats = await getWattpadStats()
-	const formattedReads = stats?.readsComplete
-		? `${Math.floor(parseInt(stats.readsComplete) / 1000)}k+`
-		: '85k+'
+	const formattedReads = await coeursSombresReads()
 
 	return {
 		description:

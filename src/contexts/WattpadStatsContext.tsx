@@ -12,7 +12,7 @@ import type { BookType } from '@/lib/pocketbase'
 
 export type StatsType = 'total' | BookType
 
-interface WattpadStats {
+export interface WattpadStatsData {
 	lastUpdated: number
 	parts: string
 	reads: string
@@ -24,14 +24,14 @@ interface WattpadStatsContextType {
 	error: string | null
 	loading: boolean
 	refresh: () => void
-	stats: WattpadStats | null
+	stats: WattpadStatsData | null
 }
 
 const WattpadStatsContext = createContext<WattpadStatsContextType | null>(null)
 
 interface WattpadStatsProviderProps {
 	children: React.ReactNode
-	initialStats?: WattpadStats | null
+	initialStats?: WattpadStatsData | null
 	statsType: StatsType
 }
 
@@ -40,7 +40,9 @@ export function WattpadStatsProvider({
 	initialStats,
 	statsType,
 }: WattpadStatsProviderProps) {
-	const [stats, setStats] = useState<WattpadStats | null>(initialStats || null)
+	const [stats, setStats] = useState<WattpadStatsData | null>(
+		initialStats || null
+	)
 	const [loading, setLoading] = useState(false)
 	const [error, setError] = useState<string | null>(null)
 

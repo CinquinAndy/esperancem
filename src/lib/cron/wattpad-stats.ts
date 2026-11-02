@@ -1,98 +1,71 @@
 /**
- * Wattpad Stats Cron Job
- * Automatically updates Wattpad stats every 6 hours
- *
- * This module is loaded by Next.js instrumentation at server startup
+ * Synchro Wattpad planifiée, dans le processus Next.js (rien à installer sur le serveur).
+ * Chargée par instrumentation.ts au démarrage : un relevé 10 s après le lancement, puis toutes les 6 h.
+ * WATTPAD_SYNC=off la coupe (builds de comparaison, tests).
  */
 
-import { WattpadStatsUpdater } from '@/services/wattpad-stats-updater'
+import { runSync, type SyncReport } from '@/lib/wattpad-sync/sync'
 
-// Cron interval: 6 hours in milliseconds
-const CRON_INTERVAL_MS = 6 * 60 * 60 * 1000
+export const CRON_INTERVAL_MS = 6 * 60 * 60 * 1000
 
-// Track if cron is already running (prevent duplicates in dev mode with hot reload)
-let cronStarted = false
-let cronIntervalId: ReturnType<typeof setInterval> | null = null
+let started = false
+let intervalId: ReturnType<typeof setInterval> | null = null
+
+export function isSyncEnabled() {
+	return process.env.WATTPAD_SYNC !== 'off'
+}
 
 /**
- * Perform the stats update
+ * Rafraîchit les pages après un changement de chiffres, via la route protégée existante sur la boucle locale.
+ * Sans REVALIDATE_SECRET, les pages se mettent à jour à leur prochaine régénération (1 h au plus).
  */
-async function updateStats() {
-	const timestamp = new Date().toISOString()
-	console.info(`\n🔄 [${timestamp}] Wattpad Stats Cron: Starting update...`)
-
-	try {
-		const result = await WattpadStatsUpdater.performUpdate()
-
-		if (result.success) {
-			console.info(`✅ [${timestamp}] Cron successful:`)
-			console.info(
-				`   - Cœurs Sombres: ${result.stats['coeurs-sombres'].reads} reads, ${result.stats['coeurs-sombres'].votes} votes`
-			)
-			console.info(
-				`   - Au Prix du Silence: ${result.stats['au-prix-du-silence'].reads} reads, ${result.stats['au-prix-du-silence'].votes} votes`
-			)
-		} else {
-			console.error(`❌ [${timestamp}] Cron failed:`, result.results)
+export async function revalidatePages() {
+	const secret = process.env.REVALIDATE_SECRET
+	if (!secret) return
+	const port = process.env.PORT || '3000'
+	const response = await fetch(
+		`http://127.0.0.1:${port}/api/revalidate-stats`,
+		{
+			cache: 'no-store',
+			headers: { Authorization: `Bearer ${secret}` },
+			method: 'POST',
+			signal: AbortSignal.timeout(10_000),
 		}
-
-		return result
-	} catch (error) {
-		console.error(
-			`💥 [${timestamp}] Cron error:`,
-			error instanceof Error ? error.message : error
+	)
+	if (!response.ok) {
+		console.warn(
+			`Wattpad : rafraîchissement des pages refusé (HTTP ${response.status})`
 		)
-		throw error
 	}
 }
 
-/**
- * Start the Wattpad stats cron job
- * Called from instrumentation.ts at server startup
- */
+export function logReport(report: SyncReport) {
+	if (report.skipped) return
+	for (const book of report.books) {
+		const counts = book.counts
+			? ` ${book.counts.reads} lectures, ${book.counts.votes} votes, ${book.counts.parts} chapitres`
+			: ''
+		const line = `Wattpad ${book.book} : ${book.outcome}${counts}${book.reason ? ` (${book.reason})` : ''}`
+		if (book.outcome === 'ecrit') console.info(line)
+		else console.warn(line)
+	}
+}
+
+async function tick() {
+	logReport(await runSync({ onChanged: revalidatePages }))
+}
+
 export function startWattpadStatsCron() {
-	// Prevent multiple cron instances (important for Next.js dev mode)
-	if (cronStarted) {
-		console.info('⚠️ Wattpad Stats Cron already running, skipping...')
-		return
-	}
-
-	cronStarted = true
-
-	console.info('🕐 Wattpad Stats Cron: Initializing...')
-	console.info(`⏰ Update interval: ${CRON_INTERVAL_MS / 1000 / 60 / 60} hours`)
-	console.info(`🌐 Environment: ${process.env.NODE_ENV || 'development'}`)
-
-	// Run immediately on startup (with a small delay to let the server fully start)
-	setTimeout(async () => {
-		console.info('🚀 Wattpad Stats Cron: Running initial update...')
-		try {
-			await updateStats()
-		} catch (error) {
-			console.error('💥 Initial cron update failed:', error)
-		}
-	}, 10000) // 10 second delay
-
-	// Then run every 6 hours
-	cronIntervalId = setInterval(async () => {
-		try {
-			await updateStats()
-		} catch {
-			// Error already logged in updateStats
-		}
-	}, CRON_INTERVAL_MS)
-
-	console.info('✅ Wattpad Stats Cron: Started successfully!')
+	if (started || !isSyncEnabled()) return
+	started = true
+	setTimeout(tick, 10_000).unref?.()
+	intervalId = setInterval(tick, CRON_INTERVAL_MS)
+	intervalId.unref?.()
+	console.info('Wattpad : synchro planifiée toutes les 6 h')
 }
 
-/**
- * Stop the cron job (useful for graceful shutdown)
- */
 export function stopWattpadStatsCron() {
-	if (cronIntervalId) {
-		clearInterval(cronIntervalId)
-		cronIntervalId = null
-		cronStarted = false
-		console.info('🛑 Wattpad Stats Cron: Stopped')
-	}
+	if (intervalId) clearInterval(intervalId)
+	intervalId = null
+	started = false
 }

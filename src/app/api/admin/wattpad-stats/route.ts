@@ -1,54 +1,35 @@
+import { revalidatePath } from 'next/cache'
 import { NextRequest, NextResponse } from 'next/server'
 
-import {
-	updateWattpadStats,
-	getWattpadStats,
-} from '@/app/actions/wattpad-stats'
+import { getWattpadStats } from '@/app/actions/wattpad-stats'
 import { verifyAdminAuth } from '@/lib/auth'
+import { runSync } from '@/lib/wattpad-sync/sync'
 
-/**
- * Admin-only endpoint for Wattpad stats management
- * Requires ADMIN_SECRET for authentication
- */
+export const dynamic = 'force-dynamic'
+
+/** Lecture des chiffres affichés (ADMIN_SECRET requis). */
 export async function GET(request: NextRequest) {
-	try {
-		// Check admin authentication using centralized utility
-		const authResult = verifyAdminAuth(request)
-		if (!authResult.authorized) {
-			return NextResponse.json({ error: authResult.error }, { status: 401 })
-		}
-
-		const stats = await getWattpadStats()
-
-		return NextResponse.json(stats)
-	} catch (error) {
-		console.error('Error in admin stats GET:', error)
-		return NextResponse.json(
-			{ error: 'Internal server error' },
-			{ status: 500 }
-		)
+	const authResult = verifyAdminAuth(request)
+	if (!authResult.authorized) {
+		return NextResponse.json({ error: authResult.error }, { status: 401 })
 	}
+	return NextResponse.json(await getWattpadStats())
 }
 
-/**
- * Admin-only endpoint to trigger manual stats update
- */
+/** Synchro immédiate, sans attendre le quart d'heure minimal (ADMIN_SECRET requis). */
 export async function POST(request: NextRequest) {
-	try {
-		// Check admin authentication using centralized utility
-		const authResult = verifyAdminAuth(request)
-		if (!authResult.authorized) {
-			return NextResponse.json({ error: authResult.error }, { status: 401 })
-		}
-
-		const result = await updateWattpadStats()
-
-		return NextResponse.json(result)
-	} catch (error) {
-		console.error('Error in admin stats POST:', error)
-		return NextResponse.json(
-			{ error: 'Internal server error' },
-			{ status: 500 }
-		)
+	const authResult = verifyAdminAuth(request)
+	if (!authResult.authorized) {
+		return NextResponse.json({ error: authResult.error }, { status: 401 })
 	}
+	const report = await runSync(
+		{
+			onChanged: async () => {
+				revalidatePath('/')
+				revalidatePath('/about')
+			},
+		},
+		{ force: true }
+	)
+	return NextResponse.json(report, { status: report.success ? 200 : 502 })
 }

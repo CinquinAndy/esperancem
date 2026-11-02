@@ -1,292 +1,69 @@
-# Système de Stats Wattpad avec PocketBase
+# Chiffres Wattpad (lectures, votes, chapitres)
 
-Ce document décrit le système intégré de récupération et de gestion des statistiques Wattpad avec PocketBase.
+## Principe
 
-## 🎯 Vue d'ensemble
+Le site n'affiche jamais un chiffre lu en direct sur Wattpad. Il affiche la **dernière valeur connue bonne** :
 
-Le système combine :
+1. **Relevé** : toutes les 6 heures (et 10 s après chaque démarrage), le serveur Next.js lui-même interroge
+   Wattpad (`src/instrumentation.ts` → `src/lib/cron/wattpad-stats.ts`). Rien à installer sur la machine.
+2. **Source** : l'API JSON publique de Wattpad (`/api/v3/stories/<id>`), non documentée mais stable ; en secours,
+   la page du roman, lue par ses libellés d'accessibilité (« Reads 366,177 »), jamais par ses classes CSS générées.
+3. **Validation avant écriture** (`src/lib/wattpad-sync/validation.ts`) : nombres exacts uniquement (pas « 366K »),
+   jamais 0, votes ≤ lectures. Un recul des lectures (ou des votes au-delà de 2 %, ou plus de 2 chapitres) et un
+   bond au-delà de ×3 sont refusés tant que 3 relevés successifs ne les confirment pas.
+4. **Stockage** : la collection PocketBase existante `wattpad_stats`, mêmes champs qu'avant. Aucune migration.
+5. **Affichage** (`src/lib/wattpad-sync/display.ts`) : la plus avancée en lectures parmi PocketBase, la mémoire du
+   processus et le relevé committé `src/data/wattpad-releve.json`. Un chiffre affiché ne recule donc pas et ne vaut
+   jamais 0, même si PocketBase est injoignable au build ou au rendu.
 
-- **Crawling automatique** des stats depuis Wattpad
-- **Stockage centralisé** dans PocketBase
-- **Mise à jour automatique** via cron jobs
-- **Intégration frontend** avec Next.js
+Les routes publiques (`/api/wattpad-stats`, `/[book]`, `/total`) sont en lecture seule : une visite ne déclenche
+jamais d'appel à Wattpad ni d'écriture.
 
-## 📁 Structure des fichiers
+## Santé (pour le QG)
 
-```
-scripts/
-├── update-wattpad-stats.mjs          # Script principal de mise à jour
-├── setup-cron.mjs                    # Configuration des cron jobs
-├── test-wattpad-stats-system.mjs     # Tests du système
-└── revalidate-stats.js               # Script de revalidation Next.js
+`GET /api/wattpad-stats/health`, publique, sans secret :
 
-src/
-├── app/api/pocketbase/
-│   ├── wattpad-stats/route.ts        # API endpoint pour récupérer les stats
-│   └── update-wattpad-stats/route.ts # API endpoint pour mettre à jour les stats
-├── services/pocketbase.ts            # Service PocketBase pour les stats
-├── contexts/WattpadStatsContext.tsx  # Context React pour les stats
-├── hooks/
-│   ├── useWattpadStats.ts            # Hook pour récupérer les stats
-│   └── useFormattedWattpadStats.ts   # Hook pour formater les stats
-└── components/
-    ├── WattpadStats.tsx              # Composant d'affichage des stats
-    └── WattpadStatsText.tsx          # Composant texte des stats
-```
+- `statut` : `ok`, `en-retard` (dernière confirmation Wattpad > 24 h) ou `degrade` (PocketBase injoignable ou sans
+  valeur valide) ;
+- `livres` : chiffres affichés, `source`, `verifieLe`, `ageHeures` ;
+- `synchro` : dernière tentative, échecs consécutifs, résultat et motif par roman (`ecrit`, `refuse`,
+  `echec-wattpad`, `echec-ecriture`, `pocketbase-injoignable`).
 
-## 🔧 Configuration
+La dernière tentative est gardée en mémoire : après un redémarrage, elle est vide jusqu'au relevé de +10 s.
 
-### Variables d'environnement requises
+## Commandes
 
 ```bash
-# PocketBase
-PB_URL=https://api.esperancem.fr
-PB_TOKEN=your_pocketbase_admin_token
+# Relevé immédiat (protégé ; au plus un par quart d'heure)
+curl -H "Authorization: Bearer $REVALIDATE_SECRET" https://esperancem.fr/api/cron/update-wattpad-stats
 
-# Site
-SITE_URL=https://esperancem.fr
-REVALIDATE_SECRET=your_revalidation_secret
+# Relevé immédiat sans attendre le quart d'heure (ADMIN_SECRET)
+curl -X POST -H "Authorization: Bearer $ADMIN_SECRET" https://esperancem.fr/api/admin/wattpad-stats
+
+# Remonter le plancher committé (à faire de temps en temps, puis committer)
+node scripts/wattpad-releve.mjs
 ```
 
-### Installation des dépendances
+`WATTPAD_SYNC=off` coupe le relevé planifié ; `WATTPAD_BASE_URL` change l'hôte interrogé (tests).
+
+## Tests
 
 ```bash
-npm install cheerio pocketbase
+bun run test                 # unitaires : chaque mode de panne
+bun run build && bun run test:integration   # vrai serveur Next + faux PocketBase/Wattpad
+PLAYWRIGHT_PATH=… E2E_BASE=http://127.0.0.1:3000 node tests/e2e/accueil.e2e.mjs   # navigateur
 ```
 
-## 🚀 Utilisation
-
-### 1. Mise à jour manuelle des stats
-
-```bash
-# Avec variables d'environnement
-PB_URL=https://api.esperancem.fr PB_TOKEN=your_token node scripts/update-wattpad-stats.mjs
-
-# Ou avec un fichier .env
-node scripts/update-wattpad-stats.mjs
-```
-
-### 2. Configuration automatique
-
-```bash
-# Générer les fichiers de configuration
-node scripts/setup-cron.mjs
-```
-
-### 3. Test du système
-
-```bash
-# Tester l'intégration complète
-node scripts/test-wattpad-stats-system.mjs
-```
-
-## 📊 API Endpoints
-
-### GET /api/pocketbase/wattpad-stats
-
-Récupère les stats actuelles depuis PocketBase.
-
-**Réponse :**
-
-```json
-{
-	"id": "1m8ljil72kpaz7a",
-	"reads": "145K",
-	"readsComplete": "145350",
-	"votes": "4.6K",
-	"parts": "48",
-	"is_active": true,
-	"created": "2025-07-18T17:22:12.648Z",
-	"updated": "2025-07-18T17:22:12.648Z"
-}
-```
-
-### POST /api/pocketbase/update-wattpad-stats
-
-Met à jour les stats en récupérant les données fraîches depuis Wattpad.
-
-**Headers requis :**
-
-```
-Authorization: Bearer YOUR_REVALIDATE_SECRET
-Content-Type: application/json
-```
-
-**Réponse :**
-
-```json
-{
-	"success": true,
-	"message": "Wattpad stats updated successfully",
-	"stats": {
-		"reads": "145K",
-		"readsComplete": "145350",
-		"votes": "4.6K",
-		"parts": "48"
-	},
-	"timestamp": "2025-07-18T17:22:12.648Z"
-}
-```
-
-## 🔄 Automatisation
-
-### Option 1: Cron Job (Linux/Unix)
-
-```bash
-# Éditer le crontab
-crontab -e
-
-# Ajouter cette ligne (mise à jour toutes les 6 heures)
-0 */6 * * * cd /path/to/project && PB_URL=https://api.esperancem.fr PB_TOKEN=your_token SITE_URL=https://esperancem.fr REVALIDATE_SECRET=your_secret node scripts/update-wattpad-stats.mjs >> logs/wattpad-stats.log 2>&1
-```
-
-### Option 2: Systemd Timer (Linux)
-
-```bash
-# Copier les fichiers générés
-sudo cp wattpad-stats-update.service /etc/systemd/system/
-sudo cp wattpad-stats-update.timer /etc/systemd/system/
-
-# Activer et démarrer
-sudo systemctl daemon-reload
-sudo systemctl enable wattpad-stats-update.timer
-sudo systemctl start wattpad-stats-update.timer
-```
-
-### Option 3: Docker
-
-```bash
-# Utiliser le fichier docker-cron généré
-docker run -v $(pwd)/docker-cron:/etc/cron.d/wattpad-stats -d your-image
-```
-
-### Option 4: Plateformes Cloud
-
-- **Vercel**: Utiliser les Cron Jobs intégrés
-- **Netlify**: Utiliser les Scheduled Functions
-- **AWS**: Utiliser EventBridge + Lambda
-- **Google Cloud**: Utiliser Cloud Scheduler + Cloud Functions
-
-## 🧪 Tests
-
-### Test manuel
-
-```bash
-# Tester la récupération des stats
-node scripts/update-wattpad-stats.mjs
-
-# Tester l'intégration complète
-node scripts/test-wattpad-stats-system.mjs
-
-# Valider le contenu PocketBase
-node scripts/validate-pocketbase-content.mjs
-```
-
-### Test des endpoints
-
-```bash
-# Tester l'endpoint de récupération
-curl http://localhost:3000/api/pocketbase/wattpad-stats
-
-# Tester l'endpoint de mise à jour (avec token)
-curl -X POST http://localhost:3000/api/pocketbase/update-wattpad-stats \
-  -H "Authorization: Bearer YOUR_REVALIDATE_SECRET" \
-  -H "Content-Type: application/json"
-```
-
-## 📈 Monitoring
-
-### Logs
-
-Les logs sont automatiquement sauvegardés dans `logs/wattpad-stats.log` :
-
-```bash
-# Voir les derniers logs
-tail -f logs/wattpad-stats.log
-
-# Voir les erreurs
-grep "ERROR\|❌" logs/wattpad-stats.log
-```
-
-### Métriques
-
-Le système enregistre :
-
-- Timestamp de chaque mise à jour
-- Nombre de lectures, votes, parties
-- Statut de succès/échec
-- Temps de réponse
-
-## 🔧 Dépannage
-
-### Problèmes courants
-
-1. **Erreur d'authentification PocketBase**
-   - Vérifier `PB_TOKEN` dans les variables d'environnement
-   - S'assurer que le token a les permissions admin
-
-2. **Erreur de crawling Wattpad**
-   - Vérifier la connectivité internet
-   - Wattpad peut avoir changé sa structure HTML
-   - Vérifier les logs pour plus de détails
-
-3. **Erreur de revalidation Next.js**
-   - Vérifier `REVALIDATE_SECRET` dans les variables d'environnement
-   - S'assurer que l'endpoint `/api/revalidate-stats` fonctionne
-
-### Debug
-
-```bash
-# Mode debug avec plus de logs
-DEBUG=* node scripts/update-wattpad-stats.mjs
-
-# Tester la connexion PocketBase
-node scripts/test-pocketbase.mjs
-
-# Vérifier les variables d'environnement
-echo "PB_URL: $PB_URL"
-echo "PB_TOKEN: $PB_TOKEN"
-echo "SITE_URL: $SITE_URL"
-echo "REVALIDATE_SECRET: $REVALIDATE_SECRET"
-```
-
-## 🔄 Migration depuis l'ancien système
-
-Si vous migrez depuis l'ancien système de stats :
-
-1. **Sauvegarder les anciennes stats**
-2. **Exécuter le script de migration**
-3. **Mettre à jour les composants frontend**
-4. **Configurer l'automatisation**
-5. **Tester l'intégration**
-
-## 📝 Maintenance
-
-### Mise à jour régulière
-
-- Vérifier les logs hebdomadairement
-- Tester le système mensuellement
-- Mettre à jour les dépendances trimestriellement
-
-### Sauvegarde
-
-- Les stats sont automatiquement sauvegardées dans PocketBase
-- Considérer une sauvegarde externe des données importantes
-
-## 🤝 Contribution
-
-Pour contribuer au système :
-
-1. Tester les modifications localement
-2. Mettre à jour la documentation
-3. Vérifier la compatibilité avec l'existant
-4. Ajouter des tests si nécessaire
-
-## 📞 Support
-
-En cas de problème :
-
-1. Vérifier les logs
-2. Consulter ce document
-3. Tester manuellement
-4. Contacter l'équipe de développement
+Les tests d'intégration régénèrent des pages dans `.next` : refaire `bun run build` avant de servir ce build.
+
+## Pannes connues et réponse
+
+| Situation                                  | Avant                                      | Maintenant                                        |
+| ------------------------------------------ | ------------------------------------------ | ------------------------------------------------- |
+| Wattpad refuse (403, 429) ou délai dépassé | zéros écrits en base, compteurs à 0        | rien écrit, dernière valeur gardée, échec visible |
+| Wattpad change sa page (classes CSS)       | zéros écrits                               | API JSON d'abord ; page lue par ses libellés      |
+| Réponse partielle ou abrégée (« 366K »)    | valeur fausse (« 0k+ » sur /about)         | refusée                                           |
+| Redémarrage pendant une panne Wattpad      | zéros écrits 10 s après le démarrage       | rien écrit                                        |
+| PocketBase injoignable au build            | « Plus de ... lectures » figé dans la page | relevé committé                                   |
+| Appel du navigateur aux routes qui échoue  | compteurs à 0                              | chiffres déjà dans la page                        |
+| Route de synchro publique                  | n'importe qui déclenchait une écriture     | protégée par `REVALIDATE_SECRET`                  |

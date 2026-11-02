@@ -1,0 +1,17 @@
+{
+	"_note": "Plancher committé : dernière valeur connue bonne si PocketBase est injoignable (build, panne). Mis à jour par scripts/wattpad-releve.mjs, jamais à la baisse.",
+	"books": {
+		"au-prix-du-silence": {
+			"checkedAt": "2026-11-02T07:16:35.000Z",
+			"parts": 50,
+			"reads": 137098,
+			"votes": 6570
+		},
+		"coeurs-sombres": {
+			"checkedAt": "2026-11-02T07:16:35.000Z",
+			"parts": 48,
+			"reads": 366177,
+			"votes": 11126
+		}
+	}
+}

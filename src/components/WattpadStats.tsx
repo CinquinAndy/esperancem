@@ -1,22 +1,28 @@
 'use client'
 
 import NumberFlow from '@number-flow/react'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import {
 	useWattpadStats,
 	WattpadStatsProvider,
 	type StatsType,
+	type WattpadStatsData,
 } from '@/contexts/WattpadStatsContext'
 
 interface StatItemProps {
 	value: string
 	label: string
-	shouldAnimate?: boolean
 }
 
-function StatItem({ label, shouldAnimate = false, value }: StatItemProps) {
+// « 366 177 » avec espaces insécables : identique côté serveur et navigateur (pas d'écart d'hydratation).
+function formatExact(value: number): string {
+	return String(value).replace(/\B(?=(\d{3})+(?!\d))/g, '\u00a0')
+}
+
+function StatItem({ label, value }: StatItemProps) {
 	const [displayValue, setDisplayValue] = useState(0)
+	const revealed = useRef(false)
 	// Convert value to number for animation (handle exact numbers and K, M suffixes)
 	const getNumericValue = (val: string): number => {
 		if (!val || val === '0') return 0
@@ -45,25 +51,26 @@ function StatItem({ label, shouldAnimate = false, value }: StatItemProps) {
 
 	const numericValue = getNumericValue(value)
 
-	// Animation effect to start from 0 and animate to the real value
+	// Même animation qu'avant : le compteur part de 0 et monte vers la vraie valeur après 300 ms.
+	// Les chiffres arrivent maintenant avec la page (plus d'attente d'un appel réseau) et ne
+	// redescendent jamais à 0 ensuite.
 	useEffect(() => {
-		if (shouldAnimate && numericValue > 0) {
-			// Start from 0
-			setDisplayValue(0)
-			// After a short delay, animate to the real value
-			const timer = setTimeout(() => {
-				setDisplayValue(numericValue)
-			}, 300) // 300ms delay before animation starts
-
-			return () => clearTimeout(timer)
-		} else {
+		if (numericValue <= 0) return
+		if (revealed.current) {
 			setDisplayValue(numericValue)
+			return
 		}
-	}, [numericValue, shouldAnimate])
+		const timer = setTimeout(() => {
+			revealed.current = true
+			setDisplayValue(numericValue)
+		}, 300) // 300ms delay before animation starts
+		return () => clearTimeout(timer)
+	}, [numericValue])
 
 	return (
 		<div className='group flex flex-col items-center rounded-lg p-2 transition-all duration-300'>
-			<div className='mb-1 text-2xl font-bold text-white'>
+			{/* Le compteur animé est décoratif ; la vraie valeur est lue dans le texte masqué ci-dessous. */}
+			<div className='mb-1 text-2xl font-bold text-white' aria-hidden='true'>
 				<NumberFlow
 					value={displayValue}
 					format={{
@@ -80,6 +87,9 @@ function StatItem({ label, shouldAnimate = false, value }: StatItemProps) {
 				/>
 			</div>
 			<div className='font-mono text-lg font-medium text-white/70 italic'>
+				{numericValue > 0 && (
+					<span className='sr-only'>{formatExact(numericValue)} </span>
+				)}
 				{label}
 			</div>
 		</div>
@@ -88,36 +98,16 @@ function StatItem({ label, shouldAnimate = false, value }: StatItemProps) {
 
 function WattpadStatsContent() {
 	const { stats } = useWattpadStats()
-	const [hasAnimated, setHasAnimated] = useState(false)
-
-	// Trigger animation on first load when stats are available
-	useEffect(() => {
-		if (stats && !hasAnimated) {
-			setHasAnimated(true)
-		}
-	}, [stats, hasAnimated])
 
 	return (
 		<div className='mx-auto w-full max-w-7xl'>
 			{/* Stats Grid */}
 			<div className='grid grid-cols-1 gap-6 md:grid-cols-3'>
-				<StatItem
-					value={stats?.readsComplete ?? '0'}
-					label='Lectures'
-					shouldAnimate={hasAnimated}
-				/>
+				<StatItem value={stats?.readsComplete ?? '0'} label='Lectures' />
 
-				<StatItem
-					value={stats?.votes ?? '0'}
-					label={`Votes`}
-					shouldAnimate={hasAnimated}
-				/>
+				<StatItem value={stats?.votes ?? '0'} label={`Votes`} />
 
-				<StatItem
-					value={stats?.parts ?? '0'}
-					label='Chapitres'
-					shouldAnimate={hasAnimated}
-				/>
+				<StatItem value={stats?.parts ?? '0'} label='Chapitres' />
 			</div>
 		</div>
 	)
@@ -125,12 +115,15 @@ function WattpadStatsContent() {
 
 interface WattpadStatsProps {
 	className?: string
+	/** Chiffres connus côté serveur : présents dès le premier rendu, sans appel réseau. */
+	initialStats?: WattpadStatsData | null
 	statsType: StatsType
 	title?: string
 }
 
 export function WattpadStats({
 	className = '',
+	initialStats,
 	statsType,
 	title,
 }: WattpadStatsProps) {
@@ -141,7 +134,7 @@ export function WattpadStats({
 					<h2 className='text-2xl font-bold text-zinc-100'>{title}</h2>
 				</div>
 			)}
-			<WattpadStatsProvider statsType={statsType}>
+			<WattpadStatsProvider statsType={statsType} initialStats={initialStats}>
 				<WattpadStatsContent />
 			</WattpadStatsProvider>
 		</div>
