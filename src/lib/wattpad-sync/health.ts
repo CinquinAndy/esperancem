@@ -22,7 +22,7 @@ const hours = (from: string, now: number) =>
 /**
  * État de fraîcheur lisible par le QG. Aucun secret : chiffres publics, dates et motifs d'échec rédigés ici.
  * - degrade : PocketBase injoignable, ou sans valeur valide pour un roman ;
- * - en-retard : la plus ancienne confirmation Wattpad dépasse 24 h ;
+ * - en-retard : la dernière synchro réussie (écriture validée en base) date de plus de 24 h pour un roman ;
  * - ok : sinon.
  */
 export function buildHealth({
@@ -35,11 +35,12 @@ export function buildHealth({
 	const books = {} as Record<
 		BookType,
 		{
-			ageHeures: number
+			ageHeures: number | null
 			chapitres: number
 			lectures: number
 			source: string
-			verifieLe: string
+			valeurDu: string
+			verifieLe: string | null
 			votes: number
 		}
 	>
@@ -47,32 +48,31 @@ export function buildHealth({
 		BookType,
 		DisplayStats['books'][BookType],
 	][]) {
-		// Une synchro réussie sans changement ne modifie pas forcément `updated` : on retient la plus récente.
-		const confirmed = [stats.checkedAt, syncState.lastSuccessAt[book]]
-			.filter((v): v is string => !!v)
-			.sort()
-			.at(-1) as string
+		// Fraîcheur de la synchro, pas de la valeur affichée : un relevé committé récent ne doit pas masquer
+		// une synchro arrêtée. Une synchro réussie sans changement ne modifie pas forcément `updated`.
+		const confirmed =
+			[display.storedAt[book], syncState.lastSuccessAt[book]]
+				.filter((v): v is string => !!v)
+				.sort()
+				.at(-1) ?? null
 		books[book] = {
-			ageHeures: hours(confirmed, now),
+			ageHeures: confirmed ? hours(confirmed, now) : null,
 			chapitres: stats.parts,
 			lectures: stats.reads,
 			source: stats.source,
+			valeurDu: stats.checkedAt,
 			verifieLe: confirmed,
 			votes: stats.votes,
 		}
 	}
-	const oldest = Object.values(books)
-		.map(b => b.verifieLe)
-		.sort()[0]
-	const age = hours(oldest, now)
+	const dates = Object.values(books).map(b => b.verifieLe)
+	const oldest = dates.includes(null) ? null : (dates as string[]).sort()[0]
+	const age = oldest ? hours(oldest, now) : null
 	// Dégradé = PocketBase ne peut pas servir de dernière valeur bonne (injoignable, vide ou écartée).
-	// Un relevé committé simplement plus récent que PocketBase n'est pas une panne : c'est l'âge qui le dira.
-	const degraded =
-		display.pocketbase !== 'ok' ||
-		Object.keys(display.books).some(book => !display.storedAt[book as BookType])
+	const degraded = display.pocketbase !== 'ok' || oldest === null
 	const status: HealthStatus = degraded
 		? 'degrade'
-		: age > STALE_AFTER_HOURS
+		: (age ?? Infinity) > STALE_AFTER_HOURS
 			? 'en-retard'
 			: 'ok'
 	const report = syncState.lastReport

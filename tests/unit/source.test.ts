@@ -48,6 +48,13 @@ describe('parseStoryPage (page réelle du 02/11/2026)', () => {
 			votes: 11126,
 		})
 	})
+	test('classes CSS renommées par Wattpad (ce qui cassait l’ancien code) : lecture intacte', () => {
+		expect(parseStoryPage(storyPage.replaceAll('uG9U1', 'aB3xY'))).toEqual({
+			parts: 48,
+			reads: 366177,
+			votes: 11126,
+		})
+	})
 	test('page sans les libellés (format changé) : rien plutôt que 0', () => {
 		expect(
 			parseStoryPage(storyPage.replace(/>Reads /g, '>Lectures '))

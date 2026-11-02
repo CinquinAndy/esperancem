@@ -5,7 +5,7 @@ import type { StatsStore, StoredRecord } from './store'
 import type { BookCounts } from './types'
 
 import { BOOKS, type BookConfig } from './books'
-import { invalidateDisplayCache, loadSnapshot } from './display'
+import { chooseKnown, invalidateDisplayCache, loadSnapshot } from './display'
 import { fetchBookCounts } from './source'
 import { createPocketBaseStore } from './store'
 import { anomaly, judge } from './validation'
@@ -112,7 +112,8 @@ async function syncOnce(deps: SyncDeps): Promise<SyncReport> {
 			continue
 		}
 		const stored = records[book.type]?.counts ?? null
-		const previous = stored ?? snapshot[book.type]
+		// Référence = ce que le site affiche (même règle de choix que l'affichage).
+		const previous = chooseKnown(book.type, records[book.type], snapshot)
 		const fetched = await fetchCounts(book)
 		if (!fetched.ok) {
 			reports.push({

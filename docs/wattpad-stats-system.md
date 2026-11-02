@@ -12,9 +12,10 @@ Le site n'affiche jamais un chiffre lu en direct sur Wattpad. Il affiche la **de
    jamais 0, votes ≤ lectures. Un recul des lectures (ou des votes au-delà de 2 %, ou plus de 2 chapitres) et un
    bond au-delà de ×3 sont refusés tant que 3 relevés successifs ne les confirment pas.
 4. **Stockage** : la collection PocketBase existante `wattpad_stats`, mêmes champs qu'avant. Aucune migration.
-5. **Affichage** (`src/lib/wattpad-sync/display.ts`) : la plus avancée en lectures parmi PocketBase, la mémoire du
-   processus et le relevé committé `src/data/wattpad-releve.json`. Un chiffre affiché ne recule donc pas et ne vaut
-   jamais 0, même si PocketBase est injoignable au build ou au rendu.
+5. **Affichage** (`src/lib/wattpad-sync/display.ts`) : parmi PocketBase, la mémoire du processus et le relevé
+   committé `src/data/wattpad-releve.json`, la valeur la plus récemment confirmée par Wattpad (à égalité, la plus
+   haute). Toutes ont été validées : un chiffre ne vaut jamais 0, ne recule que si le recul a été confirmé trois
+   fois, et reste affiché si PocketBase est injoignable au build ou au rendu.
 
 Les routes publiques (`/api/wattpad-stats`, `/[book]`, `/total`) sont en lecture seule : une visite ne déclenche
 jamais d'appel à Wattpad ni d'écriture.
@@ -25,7 +26,8 @@ jamais d'appel à Wattpad ni d'écriture.
 
 - `statut` : `ok`, `en-retard` (dernière confirmation Wattpad > 24 h) ou `degrade` (PocketBase injoignable ou sans
   valeur valide) ;
-- `livres` : chiffres affichés, `source`, `verifieLe`, `ageHeures` ;
+- `livres` : chiffres affichés, leur `source` et leur date (`valeurDu`), dernière synchro réussie (`verifieLe`,
+  `ageHeures`) ;
 - `synchro` : dernière tentative, échecs consécutifs, résultat et motif par roman (`ecrit`, `refuse`,
   `echec-wattpad`, `echec-ecriture`, `pocketbase-injoignable`).
 

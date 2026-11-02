@@ -64,14 +64,38 @@ export function resetDisplayMemory() {
 }
 
 /**
- * Choisit la valeur à afficher : la plus avancée en lectures parmi PocketBase, la mémoire du processus
- * et le relevé committé. Un chiffre affiché ne recule donc jamais, et 0 n'est jamais possible.
+ * Choisit la valeur à afficher : la plus récemment confirmée par Wattpad parmi PocketBase, la mémoire du
+ * processus et le relevé committé (à égalité de date, la plus avancée en lectures). Toutes ont été validées
+ * avant d'être retenues : 0 est impossible, et un recul n'apparaît que s'il a été confirmé par la synchro.
+ * Une base restée en arrière (plus ancienne) ne fait donc pas reculer l'affichage.
  */
 export function pickBest(candidates: KnownStats[]): KnownStats {
 	return [...candidates].sort(
 		(a, b) =>
-			b.reads - a.reads || Date.parse(b.checkedAt) - Date.parse(a.checkedAt)
+			Date.parse(b.checkedAt) - Date.parse(a.checkedAt) || b.reads - a.reads
 	)[0]
+}
+
+/** Dernière valeur connue bonne d'un roman, sans toucher à la mémoire (sert aussi de référence à la synchro). */
+export function chooseKnown(
+	book: BookType,
+	record: StoredRecord | undefined,
+	snapshot: Snapshot
+): KnownStats {
+	const candidates: KnownStats[] = [
+		{ ...snapshot[book], book, source: 'releve' },
+	]
+	if (record?.counts && record.updatedAt) {
+		candidates.push({
+			...record.counts,
+			book,
+			checkedAt: record.updatedAt,
+			source: 'pocketbase',
+		})
+	}
+	const remembered = memory[book]
+	if (remembered) candidates.push({ ...remembered, source: 'memoire' })
+	return pickBest(candidates)
 }
 
 export interface DisplayDeps {
@@ -99,26 +123,15 @@ export async function computeDisplayStats(
 	const rejected: DisplayStats['rejected'] = {}
 	const storedAt: DisplayStats['storedAt'] = {}
 	for (const book of BOOK_TYPES) {
-		const candidates: KnownStats[] = [
-			{ ...snapshot[book], book, source: 'releve' },
-		]
 		const record = records[book]
 		if (record?.counts && record.updatedAt) {
 			storedAt[book] = record.updatedAt
-			candidates.push({
-				...record.counts,
-				book,
-				checkedAt: record.updatedAt,
-				source: 'pocketbase',
-			})
 		} else if (record) {
 			rejected[book] = record.invalidReason ?? 'date absente'
 		} else if (pocketbase === 'ok') {
 			rejected[book] = 'aucun enregistrement'
 		}
-		const remembered = memory[book]
-		if (remembered) candidates.push({ ...remembered, source: 'memoire' })
-		const best = pickBest(candidates)
+		const best = chooseKnown(book, record, snapshot)
 		books[book] = best
 		memory[book] = { ...best }
 	}

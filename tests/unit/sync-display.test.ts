@@ -305,7 +305,7 @@ describe('affichage : jamais 0, jamais de recul', () => {
 			source: 'pocketbase',
 		})
 	})
-	test('PocketBase en retard sur ce qui a déjà été affiché : le chiffre ne recule pas', async () => {
+	test('PocketBase revenu à un enregistrement plus ancien : la mémoire gagne, pas de recul', async () => {
 		const pb = memoryStore({
 			'coeurs-sombres': stored(
 				fresh['coeurs-sombres'],
@@ -315,10 +315,47 @@ describe('affichage : jamais 0, jamais de recul', () => {
 		await computeDisplayStats({ store: pb.store })
 		pb.records['coeurs-sombres'] = stored(
 			{ ...CS, reads: CS.reads + 1 },
-			'2026-11-02T11:00:00.000Z'
+			'2026-11-02T08:00:00.000Z'
 		)
 		const d = await computeDisplayStats({ store: pb.store })
-		expect(d.books['coeurs-sombres'].reads).toBe(fresh['coeurs-sombres'].reads)
+		expect(d.books['coeurs-sombres']).toMatchObject({
+			reads: fresh['coeurs-sombres'].reads,
+			source: 'memoire',
+		})
+	})
+	test('PocketBase plus ancien et plus bas que le relevé committé : le relevé', async () => {
+		const pb = memoryStore({
+			'coeurs-sombres': stored(
+				{ ...CS, reads: CS.reads - 50 },
+				'2026-11-01T22:00:00.000Z'
+			),
+		})
+		const d = await computeDisplayStats({ store: pb.store })
+		expect(d.books['coeurs-sombres']).toMatchObject({
+			reads: CS.reads,
+			source: 'releve',
+		})
+	})
+	test('recul confirmé trois fois par la synchro : il est affiché (il a une raison)', async () => {
+		const pb = memoryStore({
+			'au-prix-du-silence': stored(APS),
+			'coeurs-sombres': stored(CS),
+		})
+		await computeDisplayStats({ store: pb.store }) // le site a affiché l’ancienne valeur
+		const dropped = { ...fresh['coeurs-sombres'], reads: CS.reads - 500 }
+		const drop = fromWattpad(book =>
+			book === 'coeurs-sombres'
+				? { counts: dropped, ok: true, via: 'api' }
+				: { counts: fresh[book], ok: true, via: 'api' }
+		)
+		for (let i = 0; i < 3; i++) {
+			await runSync({ fetchCounts: drop, store: pb.store }, { force: true })
+		}
+		const d = await computeDisplayStats({ store: pb.store })
+		expect(d.books['coeurs-sombres']).toMatchObject({
+			reads: dropped.reads,
+			source: 'pocketbase',
+		})
 	})
 })
 
