@@ -34,7 +34,7 @@
 		"clsx": "2.1.1",
 		"fast-glob": "3.3.3",
 		"next": "15.5.20",
-		"pocketbase": "0.26.9",
+		"pocketbase": "0.28.2",
 		"postcss": "8.5.17",
 		"react": "19.2.7",
 		"react-dom": "19.2.7",
