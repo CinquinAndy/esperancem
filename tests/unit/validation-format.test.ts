@@ -3,11 +3,13 @@ import { describe, expect, test } from 'bun:test'
 import {
 	formatThousandsPlus,
 	formatWattpadShort,
+	legacyThousands,
 } from '@/lib/wattpad-sync/format'
 import {
 	CONFIRMATIONS_REQUIRED,
 	implausibility,
 	judge,
+	nextPending,
 	parseExactCount,
 } from '@/lib/wattpad-sync/validation'
 
@@ -109,7 +111,68 @@ describe('judge', () => {
 	})
 })
 
+describe('nextPending', () => {
+	const previous = { parts: 48, reads: 366186, votes: 11130 }
+	const at = (reads: number, votes = 11130, parts = 48) => ({
+		parts,
+		reads,
+		votes,
+	})
+	test('relevé normal ou invraisemblable : rien en attente', () => {
+		expect(nextPending(null, at(366300), previous)).toBeNull()
+		expect(
+			nextPending(
+				{ count: 2, field: 'reads', kind: 'recul', value: 300000 },
+				at(0, 0, 0),
+				previous
+			)
+		).toBeNull()
+	})
+	test('même anomalie, valeur proche : le compte avance', () => {
+		const one = nextPending(null, at(300000), previous)
+		expect(one).toEqual({
+			count: 1,
+			field: 'reads',
+			kind: 'recul',
+			value: 300000,
+		})
+		const two = nextPending(one, at(305000), previous)
+		expect(two?.count).toBe(2)
+	})
+	test('valeur éloignée de plus de 2 % : le compte repart à 1', () => {
+		const one = nextPending(null, at(300000), previous)
+		expect(nextPending(one, at(307000), previous)?.count).toBe(1)
+	})
+	test('autre nature (bond) ou autre champ (votes) : le compte repart à 1', () => {
+		const one = nextPending(null, at(300000), previous)
+		expect(nextPending(one, at(1_500_000), previous)).toMatchObject({
+			count: 1,
+			kind: 'bond',
+		})
+		expect(nextPending(one, at(366300, 5000), previous)).toMatchObject({
+			count: 1,
+			field: 'votes',
+		})
+	})
+	test('chapitres : un chapitre d’écart reste la même anomalie', () => {
+		const one = nextPending(null, at(366300, 11130, 40), previous)
+		expect(one).toMatchObject({ count: 1, field: 'parts' })
+		expect(nextPending(one, at(366400, 11130, 41), previous)?.count).toBe(2)
+		expect(nextPending(one, at(366400, 11130, 30), previous)?.count).toBe(1)
+	})
+})
+
 describe('mise en forme', () => {
+	test('ancien champ « reads » du total : milliers entiers, y compris au-delà du million', () => {
+		expect(legacyThousands(366177)).toBe(366)
+		expect(legacyThousands(11126)).toBe(11)
+		expect(legacyThousands(999)).toBe(999)
+		expect(legacyThousands(1_250_000)).toBe(1250)
+		// Identique à l'ancien calcul (parseInt de l'abréviation) sous le million.
+		for (const n of [999, 1000, 6571, 99_999, 137_099, 366_177, 999_999]) {
+			expect(legacyThousands(n)).toBe(parseInt(formatWattpadShort(n), 10))
+		}
+	})
 	test('« 503k+ » : même gabarit que « 365k+ »', () => {
 		expect(formatThousandsPlus(503275)).toBe('503k+')
 		expect(formatThousandsPlus(366177)).toBe('366k+')

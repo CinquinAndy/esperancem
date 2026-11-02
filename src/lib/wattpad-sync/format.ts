@@ -27,3 +27,13 @@ export function formatWattpadShort(value: number): string {
 	}
 	return String(Math.floor(value))
 }
+
+/**
+ * Ancien champ `reads` de /api/wattpad-stats/total : la partie entière, en milliers, de l'abréviation
+ * Wattpad de chaque roman (« 366K » + « 137K » = 503). Identique à l'ancien calcul sous le million ;
+ * au-delà, « 1.2M » compte 1200 milliers, et non 1 comme le donnait parseInt.
+ */
+export function legacyThousands(value: number): number {
+	if (!Number.isFinite(value) || value < 0) return 0
+	return value >= 1000 ? Math.floor(value / 1000) : Math.floor(value)
+}

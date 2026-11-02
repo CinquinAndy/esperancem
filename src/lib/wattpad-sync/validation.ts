@@ -39,28 +39,32 @@ const PARTS_DROP_TOLERANCE = 2
 const SPIKE_FACTOR = 3
 
 export type Anomaly = 'recul' | 'bond'
+export type AnomalyField = keyof BookCounts
 
 /** Écart suspect entre le relevé et la dernière valeur connue bonne, ou null. */
 export function anomaly(
 	candidate: BookCounts,
 	previous: BookCounts | null
-): { kind: Anomaly; detail: string } | null {
+): { detail: string; field: AnomalyField; kind: Anomaly } | null {
 	if (!previous) return null
 	if (candidate.reads < previous.reads) {
 		return {
 			detail: `lectures ${previous.reads} → ${candidate.reads}`,
+			field: 'reads',
 			kind: 'recul',
 		}
 	}
 	if (candidate.votes < previous.votes * (1 - VOTES_DROP_TOLERANCE)) {
 		return {
 			detail: `votes ${previous.votes} → ${candidate.votes}`,
+			field: 'votes',
 			kind: 'recul',
 		}
 	}
 	if (candidate.parts < previous.parts - PARTS_DROP_TOLERANCE) {
 		return {
 			detail: `chapitres ${previous.parts} → ${candidate.parts}`,
+			field: 'parts',
 			kind: 'recul',
 		}
 	}
@@ -70,10 +74,67 @@ export function anomaly(
 	) {
 		return {
 			detail: `lectures ${previous.reads} → ${candidate.reads}`,
+			field: 'reads',
 			kind: 'bond',
 		}
 	}
 	return null
+}
+
+/**
+ * Écart admis entre deux relevés anormaux successifs pour qu'ils confirment la même anomalie.
+ * Une vraie correction de Wattpad (recompte, chapitres retirés) donne une nouvelle valeur stable, qui ne
+ * bouge ensuite qu'au rythme des lectures : environ +100 par roman toutes les 6 h (0,03 %), et même un
+ * pic de lecture reste loin de 2 %. Une erreur de format ou d'unité donne des valeurs sans rapport entre
+ * elles (×3 à ×1000, ou une valeur différente à chaque relevé) : elles ne se confirment jamais entre elles.
+ */
+export const CONFIRMATION_TOLERANCE = 0.02
+
+function close(field: AnomalyField, a: number, b: number) {
+	const margin = Math.max(
+		CONFIRMATION_TOLERANCE * Math.max(a, b),
+		// Les chapitres se comptent à l'unité : 2 % de 48 ne laisserait aucune marge.
+		field === 'parts' ? PARTS_DROP_TOLERANCE : 0
+	)
+	return Math.abs(a - b) <= margin
+}
+
+/** Anomalie en attente de confirmation pour un roman : même type, même champ, valeurs proches. */
+export interface PendingAnomaly {
+	/** Nombre de relevés successifs (le dernier compris) qui montrent cette anomalie. */
+	count: number
+	field: AnomalyField
+	kind: Anomaly
+	/** Valeur du champ au dernier relevé anormal (référence de proximité du suivant). */
+	value: number
+}
+
+/**
+ * Suite des confirmations après un relevé réussi. Repart de zéro (null) si le relevé est invraisemblable
+ * ou normal ; repart à 1 si l'anomalie diffère de celle en attente (autre type, autre champ, ou valeur
+ * éloignée de plus de CONFIRMATION_TOLERANCE du relevé anormal précédent). Un échec de lecture se traite
+ * à part : l'appelant efface l'attente.
+ */
+export function nextPending(
+	pending: PendingAnomaly | null | undefined,
+	candidate: BookCounts,
+	previous: BookCounts | null
+): PendingAnomaly | null {
+	if (implausibility(candidate)) return null
+	const odd = anomaly(candidate, previous)
+	if (!odd) return null
+	const value = candidate[odd.field]
+	const continues =
+		!!pending &&
+		pending.kind === odd.kind &&
+		pending.field === odd.field &&
+		close(odd.field, pending.value, value)
+	return {
+		count: continues ? pending.count + 1 : 1,
+		field: odd.field,
+		kind: odd.kind,
+		value,
+	}
 }
 
 export type Verdict =
@@ -82,7 +143,8 @@ export type Verdict =
 
 /**
  * Décide si un relevé peut remplacer la dernière valeur connue bonne.
- * `streak` : nombre de relevés successifs (celui-ci compris) qui montrent la même anomalie.
+ * `streak` : nombre de relevés successifs (celui-ci compris) qui montrent la même anomalie, compté par
+ * `nextPending` (même type, même champ, valeurs proches, sans échec ni relevé normal entre deux).
  */
 export function judge(
 	candidate: BookCounts,

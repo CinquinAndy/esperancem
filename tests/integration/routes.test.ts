@@ -56,6 +56,7 @@ beforeAll(async () => {
 				PB_URL: stub.url,
 				REVALIDATE_SECRET: revalidateSecret,
 				WATTPAD_BASE_URL: stub.url,
+				WATTPAD_HEALTH_CACHE_MS: '0', // la santé relit PocketBase à chaque appel (modes changés en cours de test)
 				WATTPAD_SYNC: 'off', // les synchros sont déclenchées par les routes dans ces tests
 			},
 			stderr: 'pipe',

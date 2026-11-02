@@ -525,3 +525,210 @@ describe('stockage PocketBase', () => {
 		})
 	})
 })
+
+describe('confirmation d’une anomalie : trois relevés plausibles, de même nature et proches', () => {
+	// Base du relecteur : 366 186 lectures en base, relevés espacés de 6 h (synchro planifiée, sans forçage).
+	const base: BookCounts = { parts: 48, reads: 366186, votes: 11130 }
+	const SIX_HOURS = 6 * 3600_000
+	type Reading = BookCounts | 'echec' | 'pb-down'
+	const reads = (n: number): BookCounts => ({ ...base, reads: n })
+	const zero: BookCounts = { parts: 0, reads: 0, votes: 0 }
+
+	async function play(
+		readings: Reading[],
+		{ writeFailsAt = -1 }: { writeFailsAt?: number } = {}
+	) {
+		const pb = memoryStore({
+			'au-prix-du-silence': stored(APS, '2026-11-02T08:00:00.000Z'),
+			'coeurs-sombres': stored(base, '2026-11-02T08:00:00.000Z'),
+		})
+		let t = Date.parse('2026-11-02T09:00:00.000Z')
+		const outcomes: string[] = []
+		const reasons: (string | undefined)[] = []
+		for (const [i, reading] of readings.entries()) {
+			pb.ctl.readFails = reading === 'pb-down'
+			pb.ctl.writeFails = i === writeFailsAt
+			const report = await runSync({
+				fetchCounts: fromWattpad(book =>
+					book !== 'coeurs-sombres'
+						? { counts: fresh[book], ok: true, via: 'api' }
+						: reading === 'echec'
+							? { error: 'api : HTTP 429', ok: false }
+							: { counts: reading as BookCounts, ok: true, via: 'api' }
+				),
+				now: () => t,
+				store: pb.store,
+			})
+			expect(report.skipped).toBeUndefined()
+			outcomes.push(report.books[0].outcome)
+			reasons.push(report.books[0].reason)
+			t += SIX_HOURS
+		}
+		const written = pb.writes
+			.filter(w => w.book === 'coeurs-sombres')
+			.map(w => w.counts.reads)
+		pb.ctl.readFails = false
+		const display = await computeDisplayStats({ store: pb.store })
+		return {
+			displayed: display.books['coeurs-sombres'].reads,
+			outcomes,
+			reasons,
+			written,
+		}
+	}
+
+	test('0, 0, puis 300 000 : les zéros ne comptent pas, pas de « recul confirmé »', async () => {
+		const r = await play([zero, zero, reads(300_000)])
+		expect(r.outcomes).toEqual(['refuse', 'refuse', 'refuse'])
+		expect(r.reasons[2]).toContain('recul à confirmer (1/3)')
+		expect(r.written).toEqual([])
+		expect(r.displayed).toBe(base.reads)
+	})
+	test('0, 0, puis 1 500 000 : pas de « bond confirmé », rien d’affiché', async () => {
+		const r = await play([zero, zero, reads(1_500_000)])
+		expect(r.outcomes).toEqual(['refuse', 'refuse', 'refuse'])
+		expect(r.reasons[2]).toContain('bond à confirmer (1/3)')
+		expect(r.written).toEqual([])
+		expect(r.displayed).toBe(base.reads)
+	})
+	test('366 000, 1 500 000, 200 000 : anomalies de natures différentes, 200 000 refusé', async () => {
+		const r = await play([reads(366_000), reads(1_500_000), reads(200_000)])
+		expect(r.outcomes).toEqual(['refuse', 'refuse', 'refuse'])
+		expect(r.reasons).toEqual([
+			expect.stringContaining('recul à confirmer (1/3)'),
+			expect.stringContaining('bond à confirmer (1/3)'),
+			expect.stringContaining('recul à confirmer (1/3)'),
+		])
+		expect(r.written).toEqual([])
+		expect(r.displayed).toBe(base.reads)
+	})
+	test('reculs de valeurs éloignées (300 000, 250 000, 200 000) : jamais confirmés', async () => {
+		const r = await play([reads(300_000), reads(250_000), reads(200_000)])
+		expect(r.outcomes).toEqual(['refuse', 'refuse', 'refuse'])
+		expect(r.written).toEqual([])
+	})
+	test('vrai recul (recompte Wattpad) : trois relevés proches qui progressent, accepté au troisième', async () => {
+		const r = await play([reads(300_000), reads(300_080), reads(300_150)])
+		expect(r.outcomes).toEqual(['refuse', 'refuse', 'ecrit'])
+		expect(r.reasons[2]).toContain('recul confirmé')
+		expect(r.written).toEqual([300_150])
+		expect(r.displayed).toBe(300_150)
+	})
+	test('anomalie, échec Wattpad, anomalie, anomalie : l’échec remet le compte à zéro', async () => {
+		const r = await play([
+			reads(300_000),
+			'echec',
+			reads(300_050),
+			reads(300_100),
+			reads(300_150),
+		])
+		expect(r.outcomes).toEqual([
+			'refuse',
+			'echec-wattpad',
+			'refuse',
+			'refuse',
+			'ecrit',
+		])
+		expect(r.written).toEqual([300_150])
+	})
+	test('anomalie, PocketBase injoignable, anomalie, anomalie : pas de confirmation', async () => {
+		const r = await play([
+			reads(300_000),
+			'pb-down',
+			reads(300_050),
+			reads(300_100),
+		])
+		expect(r.outcomes).toEqual([
+			'refuse',
+			'pocketbase-injoignable',
+			'refuse',
+			'refuse',
+		])
+		expect(r.written).toEqual([])
+	})
+	test('anomalie, relevé normal, anomalie, anomalie : le relevé normal remet le compte à zéro', async () => {
+		const r = await play([
+			reads(300_000),
+			reads(366_300),
+			reads(300_050),
+			reads(300_100),
+		])
+		expect(r.outcomes).toEqual(['refuse', 'ecrit', 'refuse', 'refuse'])
+		expect(r.written).toEqual([366_300])
+		expect(r.displayed).toBe(366_300)
+	})
+	test('anomalie, zéro, anomalie, anomalie : un relevé invraisemblable remet aussi à zéro', async () => {
+		const r = await play([reads(300_000), zero, reads(300_050), reads(300_100)])
+		expect(r.outcomes).toEqual(['refuse', 'refuse', 'refuse', 'refuse'])
+		expect(r.written).toEqual([])
+	})
+	test('recul des lectures puis recul des votes : deux anomalies distinctes, pas de confirmation', async () => {
+		const r = await play([
+			reads(300_000),
+			{ ...base, reads: 366_300, votes: 5000 },
+			reads(300_050),
+		])
+		expect(r.outcomes).toEqual(['refuse', 'refuse', 'refuse'])
+		expect(r.reasons[1]).toContain('votes')
+		expect(r.written).toEqual([])
+	})
+	test('écriture refusée après confirmation : l’attente est gardée, le relevé suivant est écrit', async () => {
+		const r = await play(
+			[reads(300_000), reads(300_050), reads(300_100), reads(300_150)],
+			{ writeFailsAt: 2 }
+		)
+		expect(r.outcomes).toEqual(['refuse', 'refuse', 'echec-ecriture', 'ecrit'])
+		expect(r.written).toEqual([300_150])
+	})
+	test('après une écriture, l’attente est effacée', async () => {
+		await play([reads(300_000), reads(300_050), reads(300_100)])
+		expect(getSyncState().pending).toEqual({})
+	})
+})
+
+describe('lecture PocketBase par roman', () => {
+	test('une requête par roman : un roman absent d’une longue liste n’est plus perdu', async () => {
+		const filters: string[] = []
+		const fakePb = {
+			collection: () => ({
+				getList: async (_page: number, perPage: number, opts: any) => {
+					filters.push(`${perPage}:${opts.filter}`)
+					const book = opts.filter.match(/book = "([^"]+)"/)[1]
+					return {
+						items: [
+							{
+								book,
+								created: '9',
+								id: book,
+								parts: book === 'coeurs-sombres' ? '48' : '50',
+								reads: '1K',
+								reads_complete: book === 'coeurs-sombres' ? '366177' : '137098',
+								updated: '2026-11-02 04:14:47.175Z',
+								votes: '100',
+							},
+						],
+					}
+				},
+			}),
+		} as any
+		const all = await createPocketBaseStore(() => fakePb).readAll()
+		expect(filters.sort()).toEqual([
+			'1:is_active = true && book = "au-prix-du-silence"',
+			'1:is_active = true && book = "coeurs-sombres"',
+		])
+		expect(all['coeurs-sombres']?.counts?.reads).toBe(366177)
+		expect(all['au-prix-du-silence']?.counts?.reads).toBe(137098)
+	})
+	test('PocketBase injoignable : readAll lève (la synchro n’écrit pas à l’aveugle)', async () => {
+		const fakePb = {
+			collection: () => ({
+				getList: async () => {
+					throw new Error('down')
+				},
+			}),
+		} as any
+		await expect(createPocketBaseStore(() => fakePb).readAll()).rejects.toThrow(
+			'down'
+		)
+	})
+})

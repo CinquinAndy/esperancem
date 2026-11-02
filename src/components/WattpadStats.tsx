@@ -1,7 +1,7 @@
 'use client'
 
 import NumberFlow from '@number-flow/react'
-import { useEffect, useRef, useState } from 'react'
+import { type RefObject, useEffect, useRef, useState } from 'react'
 
 import {
 	useWattpadStats,
@@ -20,9 +20,76 @@ function formatExact(value: number): string {
 	return String(value).replace(/\B(?=(\d{3})+(?!\d))/g, '\u00a0')
 }
 
+/** Délai avant le comptage, une fois le compteur à l'écran (comme l'ancienne animation au chargement). */
+const COUNT_DELAY_MS = 300
+
+/**
+ * Valeur montrée par le compteur. Elle part de la vraie valeur : le HTML serveur porte les vrais chiffres,
+ * et un compteur déjà visible au chargement ne passe jamais par 0. Un compteur hors écran au chargement
+ * est remis à 0 sans animation (personne ne le voit), puis compte jusqu'à la vraie valeur quand il entre
+ * à l'écran. Sans IntersectionObserver ou avec « réduire les animations » : la vraie valeur, sans plus.
+ */
+function useCountUp(target: number, ref: RefObject<HTMLElement | null>) {
+	const [shown, setShown] = useState({ animated: true, value: target })
+	// idle : rien décidé ; waiting : remis à 0 hors écran, attend d'être vu ; done : suit la vraie valeur.
+	const phase = useRef<'idle' | 'waiting' | 'done'>('idle')
+	const latest = useRef(target)
+	latest.current = target
+
+	useEffect(() => {
+		const el = ref.current
+		if (
+			!el ||
+			typeof IntersectionObserver === 'undefined' ||
+			window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+		) {
+			phase.current = 'done'
+			return
+		}
+		let timer: ReturnType<typeof setTimeout> | undefined
+		let first = true
+		const observer = new IntersectionObserver(([entry]) => {
+			if (first) {
+				first = false
+				if (entry.isIntersecting || latest.current <= 0) {
+					phase.current = 'done'
+					observer.disconnect()
+					return
+				}
+				phase.current = 'waiting'
+				setShown({ animated: false, value: 0 })
+				return
+			}
+			if (entry.isIntersecting && phase.current === 'waiting') {
+				observer.disconnect()
+				timer = setTimeout(() => {
+					phase.current = 'done'
+					setShown({ animated: true, value: latest.current })
+				}, COUNT_DELAY_MS)
+			}
+		})
+		observer.observe(el)
+		return () => {
+			observer.disconnect()
+			clearTimeout(timer)
+		}
+	}, [ref])
+
+	// Nouveaux chiffres (rafraîchissement toutes les 5 min) : le compteur passe de l'ancienne à la nouvelle.
+	useEffect(() => {
+		if (phase.current === 'waiting') return
+		setShown(current =>
+			current.animated && current.value === target
+				? current
+				: { animated: true, value: target }
+		)
+	}, [target])
+
+	return shown
+}
+
 function StatItem({ label, value }: StatItemProps) {
-	const [displayValue, setDisplayValue] = useState(0)
-	const revealed = useRef(false)
+	const counter = useRef<HTMLDivElement>(null)
 	// Convert value to number for animation (handle exact numbers and K, M suffixes)
 	const getNumericValue = (val: string): number => {
 		if (!val || val === '0') return 0
@@ -50,29 +117,19 @@ function StatItem({ label, value }: StatItemProps) {
 	}
 
 	const numericValue = getNumericValue(value)
-
-	// Même animation qu'avant : le compteur part de 0 et monte vers la vraie valeur après 300 ms.
-	// Les chiffres arrivent maintenant avec la page (plus d'attente d'un appel réseau) et ne
-	// redescendent jamais à 0 ensuite.
-	useEffect(() => {
-		if (numericValue <= 0) return
-		if (revealed.current) {
-			setDisplayValue(numericValue)
-			return
-		}
-		const timer = setTimeout(() => {
-			revealed.current = true
-			setDisplayValue(numericValue)
-		}, 300) // 300ms delay before animation starts
-		return () => clearTimeout(timer)
-	}, [numericValue])
+	const shown = useCountUp(numericValue, counter)
 
 	return (
 		<div className='group flex flex-col items-center rounded-lg p-2 transition-all duration-300'>
 			{/* Le compteur animé est décoratif ; la vraie valeur est lue dans le texte masqué ci-dessous. */}
-			<div className='mb-1 text-2xl font-bold text-white' aria-hidden='true'>
+			<div
+				ref={counter}
+				className='mb-1 text-2xl font-bold text-white'
+				aria-hidden='true'
+			>
 				<NumberFlow
-					value={displayValue}
+					value={shown.value}
+					animated={shown.animated}
 					format={{
 						maximumFractionDigits: 0,
 						notation: 'standard',

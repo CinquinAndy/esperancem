@@ -10,19 +10,29 @@ Le site n'affiche jamais un chiffre lu en direct sur Wattpad. Il affiche la **de
    la page du roman, demandée en anglais et lue par ses libellés d'accessibilité (« Reads 366,177 », ou « Lectures 366,177 » si elle arrive en français), jamais par ses classes CSS générées.
 3. **Validation avant écriture** (`src/lib/wattpad-sync/validation.ts`) : nombres exacts uniquement (pas « 366K »),
    jamais 0, votes ≤ lectures. Un recul des lectures (ou des votes au-delà de 2 %, ou plus de 2 chapitres) et un
-   bond au-delà de ×3 sont refusés tant que 3 relevés successifs ne les confirment pas.
+   bond au-delà de ×3 sont refusés tant que 3 relevés successifs ne les confirment pas. Ne comptent comme
+   confirmation que des relevés plausibles, de même nature (recul ou bond, sur le même chiffre) et proches du
+   relevé anormal précédent (2 % d'écart au plus, ou 2 chapitres) ; un échec de lecture, un relevé invraisemblable
+   (0…) ou un relevé normal remettent le compte à zéro. Une vraie correction de Wattpad donne une valeur stable,
+   une erreur de format des valeurs sans rapport entre elles.
 4. **Stockage** : la collection PocketBase existante `wattpad_stats`, mêmes champs qu'avant. Aucune migration.
+   Lecture d'un enregistrement par roman (le plus récent actif), quelle que soit la taille de la collection.
 5. **Affichage** (`src/lib/wattpad-sync/display.ts`) : parmi PocketBase, la mémoire du processus et le relevé
    committé `src/data/wattpad-releve.json`, la valeur la plus récemment confirmée par Wattpad (à égalité, la plus
    haute). Toutes ont été validées : un chiffre ne vaut jamais 0, ne recule que si le recul a été confirmé trois
    fois, et reste affiché si PocketBase est injoignable au build ou au rendu.
+6. **Compteurs de l'accueil** (`src/components/WattpadStats.tsx`) : le HTML serveur porte les vrais chiffres (avec
+   ou sans JavaScript). Un compteur déjà à l'écran au chargement ne bouge pas ; un compteur hors écran est remis
+   à 0 sans être vu, puis compte jusqu'à la vraie valeur quand il arrive à l'écran. Avec « réduire les
+   animations », pas de comptage.
 
 Les routes publiques (`/api/wattpad-stats`, `/[book]`, `/total`) sont en lecture seule : une visite ne déclenche
 jamais d'appel à Wattpad ni d'écriture.
 
 ## Santé (pour le QG)
 
-`GET /api/wattpad-stats/health`, publique, sans secret :
+`GET /api/wattpad-stats/health`, publique, sans secret. La lecture de PocketBase y est gardée 5 s
+(`WATTPAD_HEALTH_CACHE_MS`, 0 dans les tests) ; l'état de la synchro est toujours celui du moment :
 
 - `statut` : `ok`, `en-retard` (dernière confirmation Wattpad > 24 h) ou `degrade` (PocketBase injoignable ou sans
   valeur valide) ;
@@ -53,10 +63,12 @@ node scripts/wattpad-releve.mjs
 ```bash
 bun run test                 # unitaires : chaque mode de panne
 bun run build && bun run test:integration   # vrai serveur Next + faux PocketBase/Wattpad
-PLAYWRIGHT_PATH=… E2E_BASE=http://127.0.0.1:3000 node tests/e2e/accueil.e2e.mjs   # navigateur
+PLAYWRIGHT_PATH=… bun run test:e2e   # navigateur, autonome (faux PocketBase + next start sur .next)
+PLAYWRIGHT_PATH=… E2E_BASE=http://127.0.0.1:3000 node tests/e2e/accueil.e2e.mjs   # sur un serveur déjà lancé
 ```
 
-Les tests d'intégration régénèrent des pages dans `.next` : refaire `bun run build` avant de servir ce build.
+Les tests d'intégration et le bout en bout autonome régénèrent des pages dans `.next` : refaire `bun run build`
+avant de servir ce build.
 
 ## Pannes connues et réponse
 
@@ -68,4 +80,5 @@ Les tests d'intégration régénèrent des pages dans `.next` : refaire `bun run
 | Redémarrage pendant une panne Wattpad      | zéros écrits 10 s après le démarrage       | rien écrit                                        |
 | PocketBase injoignable au build            | « Plus de ... lectures » figé dans la page | relevé committé                                   |
 | Appel du navigateur aux routes qui échoue  | compteurs à 0                              | chiffres déjà dans la page                        |
+| HTML serveur, ou navigateur sans JS        | compteurs à 0                              | vrais chiffres                                    |
 | Route de synchro publique                  | n'importe qui déclenchait une écriture     | protégée par `REVALIDATE_SECRET`                  |

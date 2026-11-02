@@ -10,6 +10,7 @@ import {
 
 import type { BookCounts } from './types'
 
+import { BOOK_TYPES } from './books'
 import { formatWattpadShort } from './format'
 import { implausibility, parseExactCount } from './validation'
 
@@ -22,7 +23,7 @@ export interface StoredRecord {
 }
 
 export interface StatsStore {
-	/** Lève une erreur si PocketBase est injoignable. */
+	/** Une lecture par roman suivi. Lève une erreur si PocketBase est injoignable. */
 	readAll(): Promise<Partial<Record<BookType, StoredRecord>>>
 	/** N'écrit que des chiffres déjà validés. Lève une erreur si l'écriture échoue. */
 	write(book: BookType, counts: BookCounts): Promise<void>
@@ -78,24 +79,31 @@ export function createPocketBaseStore(
 		signal: AbortSignal.timeout(TIMEOUT_MS),
 	})
 
-	async function latest(pb: PocketBase, book?: BookType) {
-		const filter = book
-			? `is_active = true && book = "${book}"`
-			: 'is_active = true'
+	/**
+	 * L'enregistrement actif le plus récemment créé pour ce roman (celui que l'écriture met à jour).
+	 * Une requête par roman : une liste globale limitée à une page pouvait ne pas contenir un roman
+	 * si d'anciens enregistrements actifs s'accumulaient.
+	 */
+	async function latest(pb: PocketBase, book: BookType) {
 		const list = await pb
 			.collection(COLLECTIONS.WATTPAD_STATS)
-			.getList<WattpadStats>(1, 50, { filter, sort: '-created', ...options() })
-		return list.items
+			.getList<WattpadStats>(1, 1, {
+				filter: `is_active = true && book = "${book}"`,
+				sort: '-created',
+				...options(),
+			})
+		return list.items.find(item => item.book === book)
 	}
 
 	return {
 		async readAll() {
-			const items = await latest(factory())
+			const pb = factory()
+			const entries = await Promise.all(
+				BOOK_TYPES.map(async book => [book, await latest(pb, book)] as const)
+			)
 			const result: Partial<Record<BookType, StoredRecord>> = {}
-			// Même règle que l'écriture : l'enregistrement actif le plus récemment créé fait foi.
-			for (const item of items) {
-				if (item.book && !result[item.book])
-					result[item.book] = readRecord(item)
+			for (const [book, item] of entries) {
+				if (item) result[book] = readRecord(item)
 			}
 			return result
 		},
@@ -103,7 +111,7 @@ export function createPocketBaseStore(
 			const pb = factory()
 			if (!(await authenticate(pb)))
 				throw new Error('PocketBase : jeton absent')
-			const [existing] = await latest(pb, book)
+			const existing = await latest(pb, book)
 			const fields = toRecordFields(book, counts)
 			const collection = pb.collection(COLLECTIONS.WATTPAD_STATS)
 			if (existing) await collection.update(existing.id, fields, options())

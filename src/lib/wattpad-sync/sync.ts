@@ -8,7 +8,7 @@ import { BOOKS, type BookConfig } from './books'
 import { chooseKnown, invalidateDisplayCache, loadSnapshot } from './display'
 import { fetchBookCounts } from './source'
 import { createPocketBaseStore } from './store'
-import { anomaly, judge } from './validation'
+import { judge, nextPending, type PendingAnomaly } from './validation'
 
 export type BookOutcome =
 	| 'ecrit'
@@ -38,8 +38,11 @@ export interface SyncState {
 	lastReport: SyncReport | null
 	/** Dernière confirmation par Wattpad, par roman (même si les chiffres n'ont pas bougé). */
 	lastSuccessAt: Partial<Record<BookType, string>>
-	/** Nombre de relevés successifs montrant la même anomalie (recul, bond), par roman. */
-	streaks: Partial<Record<BookType, number>>
+	/**
+	 * Anomalie (recul, bond) en attente de confirmation, par roman. Effacée par un échec de lecture, un
+	 * relevé invraisemblable, un relevé normal ou une écriture réussie.
+	 */
+	pending: Partial<Record<BookType, PendingAnomaly>>
 }
 
 export interface SyncDeps {
@@ -65,7 +68,7 @@ function emptyState(): SyncState {
 		lastAttemptAt: null,
 		lastReport: null,
 		lastSuccessAt: {},
-		streaks: {},
+		pending: {},
 	}
 }
 const sync = (shared.__wattpadSync ??= { running: null, state: emptyState() })
@@ -108,6 +111,7 @@ async function syncOnce(deps: SyncDeps): Promise<SyncReport> {
 	for (const book of books) {
 		if (!records) {
 			// Sans lecture fiable de la dernière valeur, on ne peut pas valider : on n'écrit rien.
+			delete state.pending[book.type]
 			reports.push({ book: book.type, outcome: 'pocketbase-injoignable' })
 			continue
 		}
@@ -116,6 +120,8 @@ async function syncOnce(deps: SyncDeps): Promise<SyncReport> {
 		const previous = chooseKnown(book.type, records[book.type], snapshot)
 		const fetched = await fetchCounts(book)
 		if (!fetched.ok) {
+			// Un échec coupe la série : les confirmations doivent être des relevés successifs.
+			delete state.pending[book.type]
 			reports.push({
 				book: book.type,
 				outcome: 'echec-wattpad',
@@ -123,10 +129,14 @@ async function syncOnce(deps: SyncDeps): Promise<SyncReport> {
 			})
 			continue
 		}
-		const odd = anomaly(fetched.counts, previous)
-		const streak = odd ? (state.streaks[book.type] ?? 0) + 1 : 0
-		state.streaks[book.type] = streak
-		const verdict = judge(fetched.counts, previous, streak)
+		const pending = nextPending(
+			state.pending[book.type],
+			fetched.counts,
+			previous
+		)
+		if (pending) state.pending[book.type] = pending
+		else delete state.pending[book.type]
+		const verdict = judge(fetched.counts, previous, pending?.count ?? 0)
 		if (!verdict.accepted) {
 			reports.push({
 				book: book.type,
@@ -152,7 +162,7 @@ async function syncOnce(deps: SyncDeps): Promise<SyncReport> {
 			})
 			continue
 		}
-		state.streaks[book.type] = 0
+		delete state.pending[book.type]
 		state.lastSuccessAt[book.type] = at
 		if (!same(fetched.counts, stored)) changed = true
 		reports.push({
@@ -171,7 +181,12 @@ async function syncOnce(deps: SyncDeps): Promise<SyncReport> {
 	state.lastReport = report
 	if (changed) {
 		invalidateDisplayCache()
-		await deps.onChanged?.().catch(() => {})
+		await deps.onChanged?.().catch(error => {
+			// Les pages se mettront à jour à leur prochaine régénération (1 h au plus) : on le signale.
+			console.warn(
+				`Wattpad : rafraîchissement des pages impossible (${error instanceof Error ? error.message : String(error)})`
+			)
+		})
 	}
 	return report
 }
