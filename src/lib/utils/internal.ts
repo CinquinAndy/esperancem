@@ -1,7 +1,7 @@
 import { unstable_noStore as noStore } from 'next/cache'
 
+import { runSync } from '@/lib/wattpad-sync/sync'
 import { WattpadStatsService } from '@/services/pocketbase'
-import { WattpadStatsUpdater } from '@/services/wattpad-stats-updater'
 
 /**
  * Internal utilities for admin and maintenance operations
@@ -63,12 +63,12 @@ export async function forceUpdateStats() {
 	noStore()
 
 	try {
-		const result = await WattpadStatsUpdater.performUpdate()
+		const result = await runSync({}, { force: true })
 
 		return {
-			stats: result.stats,
+			stats: result.books,
 			success: result.success,
-			timestamp: result.timestamp,
+			timestamp: result.at,
 		}
 	} catch (error) {
 		return {

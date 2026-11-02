@@ -17,13 +17,21 @@ async function runCron() {
 	console.info(`\n🔄 [${timestamp}] Running cron job...`)
 
 	try {
-		const response = await fetch(`${SITE_URL}/api/cron/update-wattpad-stats`)
+		// La route est protégée : REVALIDATE_SECRET requis.
+		const response = await fetch(`${SITE_URL}/api/cron/update-wattpad-stats`, {
+			headers: {
+				Authorization: `Bearer ${process.env.REVALIDATE_SECRET ?? ''}`,
+			},
+		})
 		const data = await response.json()
 
 		if (response.ok) {
 			console.info(`✅ [${timestamp}] Cron successful:`, data.message)
 		} else {
-			console.error(`❌ [${timestamp}] Cron failed:`, data.error)
+			console.error(
+				`❌ [${timestamp}] Cron failed:`,
+				data.error ?? data.results
+			)
 		}
 	} catch (error) {
 		console.error(`💥 [${timestamp}] Cron error:`, error.message)

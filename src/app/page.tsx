@@ -2,10 +2,7 @@ import { type Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
 
-import {
-	getWattpadStats,
-	type WattpadStatsResult,
-} from '@/app/actions/wattpad-stats'
+import { toLegacyStats } from '@/app/actions/wattpad-stats'
 import { Button } from '@/components/Button'
 import { Container } from '@/components/Container'
 import {
@@ -24,10 +21,11 @@ import {
 	getSocialLinks,
 	getWattpadRankings,
 } from '@/lib/content'
-import { formatWattpadStat } from '@/lib/wattpad'
+import { getDisplayStats } from '@/lib/wattpad-sync/display'
+import { formatThousandsPlus } from '@/lib/wattpad-sync/format'
 
-// Optimisation ISR : revalidate toutes les 6 heures
-export const revalidate = 21600
+// ISR : régénérée au plus tard toutes les heures (la synchro la rafraîchit aussi dès qu'un chiffre change)
+export const revalidate = 3600
 
 // Helper function to get icon component by name
 function getIconComponent(iconName: string | undefined) {
@@ -88,14 +86,11 @@ function SocialLink({
 }
 
 interface WattpadReadsTextProps {
-	stats: WattpadStatsResult | null
+	reads: string
 }
 
-function WattpadReadsText({ stats }: WattpadReadsTextProps) {
-	const formattedReads =
-		stats?.success && stats.stats?.reads
-			? formatWattpadStat(stats.stats.reads)
-			: '...'
+function WattpadReadsText({ reads }: WattpadReadsTextProps) {
+	const formattedReads = reads
 	return (
 		<span className='font-semibold text-zinc-200'>
 			{formattedReads} lectures
@@ -137,13 +132,13 @@ function BookCover({
 }
 
 interface BookProps {
-	stats: WattpadStatsResult | null
+	reads: string
 }
 
 function Book({
 	bookContent,
 	rankings = [],
-	stats,
+	reads,
 }: BookProps & { bookContent: any; rankings: any[] }) {
 	return (
 		<div className='flex flex-col gap-y-6 rounded-2xl border border-zinc-700/40 p-6'>
@@ -182,7 +177,7 @@ function Book({
 								</p>
 							))}
 							<p className='w-full text-zinc-300'>
-								Plus de <WattpadReadsText stats={stats} /> sur Wattpad
+								Plus de <WattpadReadsText reads={reads} /> sur Wattpad
 							</p>
 						</div>
 					)}
@@ -208,9 +203,9 @@ function Book({
 
 export default async function Home() {
 	// Optimisation : Récupérer toutes les données en parallèle avec cache
-	const [stats, pageData] = await Promise.all([
-		// Stats avec cache côté serveur
-		getWattpadStats(),
+	const [display, pageData] = await Promise.all([
+		// Dernière valeur connue bonne (PocketBase, sinon relevé committé) : jamais 0
+		getDisplayStats(),
 		// Toutes les données de contenu en une seule fois
 		Promise.all([
 			getContent('home', 'hero', 'main_title'),
@@ -233,6 +228,10 @@ export default async function Home() {
 		pageData
 	const [bookDescription, bookTitle, rankingsTitle, wattpadButton, wattpadUrl] =
 		bookContent
+
+	// « Plus de 503k+ lectures sur Wattpad » : lectures cumulées des deux romans (ticket QG 166).
+	// Pour n'afficher que Cœurs Sombres : display.books['coeurs-sombres'].reads
+	const readsLabel = formatThousandsPlus(display.total.reads)
 
 	// Fallback to original content if PocketBase data is not available
 	const title = mainTitle || '...'
@@ -294,11 +293,19 @@ export default async function Home() {
 							/>
 						</div>
 						<div className='space-y-10 lg:pl-16 xl:pl-24'>
-							<Book stats={stats} bookContent={bookData} rankings={rankings} />
+							<Book
+								reads={readsLabel}
+								bookContent={bookData}
+								rankings={rankings}
+							/>
 						</div>
 						{/* Stats pour Cœurs sombres */}
 						<div className='col-span-1 flex justify-center md:col-span-2'>
-							<WattpadStats statsType='coeurs-sombres' title='Cœurs sombres' />
+							<WattpadStats
+								statsType='coeurs-sombres'
+								title='Cœurs sombres'
+								initialStats={toLegacyStats(display.books['coeurs-sombres'])}
+							/>
 						</div>
 					</div>
 
@@ -306,7 +313,7 @@ export default async function Home() {
 					<div className='mx-auto grid max-w-xl grid-cols-1 items-start gap-y-20 lg:max-w-none lg:grid-cols-2'>
 						<div className='space-y-10 lg:pr-16 xl:pr-24'>
 							<Book
-								stats={stats}
+								reads={readsLabel}
 								bookContent={{
 									book_description: await getContent(
 										'home',
@@ -345,6 +352,9 @@ export default async function Home() {
 							<WattpadStats
 								statsType='au-prix-du-silence'
 								title='Au prix du silence'
+								initialStats={toLegacyStats(
+									display.books['au-prix-du-silence']
+								)}
 							/>
 						</div>
 					</div>

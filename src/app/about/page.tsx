@@ -2,6 +2,7 @@ import { type Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
 
+import { toLegacyStats } from '@/app/actions/wattpad-stats'
 import { Container } from '@/components/Container'
 import {
 	InstagramIcon,
@@ -15,7 +16,7 @@ import bookCover from '@/images/photos/cover_on_book.jpg'
 const newBookCover = '/au_prix_du_silence_cover.png'
 import { getContentWithFallback, getSocialLinks } from '@/lib/content'
 import { generateAboutMetadata } from '@/lib/metadata'
-import { fetchWattpadStats } from '@/lib/wattpad'
+import { getDisplayStats } from '@/lib/wattpad-sync/display'
 
 function SocialLink({
 	children,
@@ -52,6 +53,9 @@ function MailIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
 	)
 }
 
+// Régénérée au plus tard toutes les heures (description avec le nombre de lecteurs)
+export const revalidate = 3600
+
 export async function generateMetadata(): Promise<Metadata> {
 	return await generateAboutMetadata()
 }
@@ -59,7 +63,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function About() {
 	// Fetch content and social links from PocketBase
 	const [
-		initialStats,
+		display,
 		socialLinks,
 		mainTitle,
 		mainContent,
@@ -67,7 +71,7 @@ export default async function About() {
 		bookContent,
 		email,
 	] = await Promise.all([
-		fetchWattpadStats(),
+		getDisplayStats(),
 		getSocialLinks(),
 		getContentWithFallback('about', 'hero', 'main_title', '...'),
 		getContentWithFallback('about', 'hero', 'biography', '...'),
@@ -79,7 +83,7 @@ export default async function About() {
 	return (
 		<WattpadStatsProvider
 			statsType='coeurs-sombres'
-			initialStats={initialStats}
+			initialStats={toLegacyStats(display.books['coeurs-sombres'])}
 		>
 			<Container className='mt-16 sm:mt-32'>
 				<div className='grid grid-cols-1 gap-y-16 lg:grid-cols-2 lg:grid-rows-[auto_1fr] lg:gap-y-12'>

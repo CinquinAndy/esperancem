@@ -1,6 +1,10 @@
 import { ImageResponse } from 'next/og'
 
-import { fetchWattpadStats, formatWattpadStat } from '@/lib/wattpad'
+import { getDisplayStats } from '@/lib/wattpad-sync/display'
+import {
+	formatThousandsPlus,
+	formatWattpadShort,
+} from '@/lib/wattpad-sync/format'
 
 // Image metadata
 export const alt = "Portrait d'Espérance Masson, autrice de dark romance"
@@ -9,11 +13,13 @@ export const size = {
 	width: 1200,
 }
 export const contentType = 'image/png'
+// Régénérée au plus tard toutes les heures avec les derniers chiffres connus
+export const revalidate = 3600
 
 // Image generation
 export default async function Image() {
-	// Fetch real Wattpad stats
-	const stats = await fetchWattpadStats()
+	// Chiffres : dernière valeur connue bonne (aucune lecture de Wattpad au rendu)
+	const stats = (await getDisplayStats()).books['coeurs-sombres']
 
 	return new ImageResponse(
 		<div
@@ -153,7 +159,7 @@ export default async function Image() {
 								fontWeight: 'bold',
 							}}
 						>
-							{stats?.reads ? formatWattpadStat(stats.reads) : '85k+'}
+							{formatThousandsPlus(stats.reads)}
 						</div>
 						<div
 							style={{
@@ -181,7 +187,7 @@ export default async function Image() {
 								fontWeight: 'bold',
 							}}
 						>
-							{stats?.votes || '5k+'}
+							{formatWattpadShort(stats.votes)}
 						</div>
 						<div
 							style={{
@@ -209,7 +215,7 @@ export default async function Image() {
 								fontWeight: 'bold',
 							}}
 						>
-							{stats?.parts || '50+'}
+							{String(stats.parts)}
 						</div>
 						<div
 							style={{

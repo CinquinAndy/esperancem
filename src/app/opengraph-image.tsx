@@ -1,7 +1,11 @@
 import { ImageResponse } from 'next/og'
 
 import { getContentWithFallback } from '@/lib/content'
-import { fetchWattpadStats, formatWattpadStat } from '@/lib/wattpad'
+import { getDisplayStats } from '@/lib/wattpad-sync/display'
+import {
+	formatThousandsPlus,
+	formatWattpadShort,
+} from '@/lib/wattpad-sync/format'
 
 // Image metadata
 export const alt = 'Cœurs Sombres - Dark Romance par Espérance Masson'
@@ -10,12 +14,14 @@ export const size = {
 	width: 1200,
 }
 export const contentType = 'image/png'
+// Régénérée au plus tard toutes les heures avec les derniers chiffres connus
+export const revalidate = 3600
 
 // Image generation
 export default async function Image() {
-	// Fetch real Wattpad stats and content from PocketBase
-	const [stats, title, subtitle, author] = await Promise.all([
-		fetchWattpadStats(),
+	// Chiffres : dernière valeur connue bonne (aucune lecture de Wattpad au rendu)
+	const [display, title, subtitle, author] = await Promise.all([
+		getDisplayStats(),
 		getContentWithFallback('opengraph', 'image', 'title', 'Cœurs Sombres'),
 		getContentWithFallback(
 			'opengraph',
@@ -30,6 +36,8 @@ export default async function Image() {
 			'par Espérance Masson'
 		),
 	])
+
+	const stats = display.books['coeurs-sombres']
 
 	return new ImageResponse(
 		<div
@@ -160,7 +168,7 @@ export default async function Image() {
 								fontWeight: 'bold',
 							}}
 						>
-							{stats?.reads ? formatWattpadStat(stats.reads) : '85k+'}
+							{formatThousandsPlus(stats.reads)}
 						</div>
 						<div style={{ color: '#a1a1aa', fontSize: 14 }}>Lectures</div>
 					</div>
@@ -181,7 +189,7 @@ export default async function Image() {
 								fontWeight: 'bold',
 							}}
 						>
-							{stats?.votes || '5k+'}
+							{formatWattpadShort(stats.votes)}
 						</div>
 						<div style={{ color: '#a1a1aa', fontSize: 14 }}>J&apos;aime</div>
 					</div>
@@ -202,7 +210,7 @@ export default async function Image() {
 								fontWeight: 'bold',
 							}}
 						>
-							{stats?.parts || '50+'}
+							{String(stats.parts)}
 						</div>
 						<div style={{ color: '#a1a1aa', fontSize: 14 }}>Chapitres</div>
 					</div>
