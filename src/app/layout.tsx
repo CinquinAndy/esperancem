@@ -57,16 +57,12 @@ export default async function RootLayout({
 			{
 				'@id': 'https://esperancem.fr/#book-coeurs-sombres',
 				'@type': 'Book',
-				aggregateRating: {
-					'@type': 'AggregateRating',
-					bestRating: '5',
-					ratingCount: '3000',
-					ratingValue: '5',
-				},
+				// Pas d'aggregateRating : aucune note réelle ne l'appuie (Wattpad ne note pas les histoires).
 				author: {
 					'@id': 'https://esperancem.fr/#person',
 				},
-				datePublished: '2025',
+				// Premier chapitre publié sur Wattpad : firstPublishedPart.createDate de l'histoire 368278312.
+				datePublished: '2024-12-05',
 				description:
 					"Roman dark romance suivant Angèle qui tombe sous l'emprise de Lucas Ferrari, un chef de mafia. Entre haine et attirance, leur lutte pour survivre pourrait bien les mener à leur perte.",
 				genre: ['Dark Romance', 'Romance', 'Fiction'],

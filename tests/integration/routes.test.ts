@@ -221,3 +221,40 @@ describe('santé et premier rendu', () => {
 		expect(html).not.toContain('0k+')
 	})
 })
+
+describe('en-têtes et données structurées', () => {
+	const umami = 'https://umami.wadefade.fr'
+	const directive = (csp: string, nom: string) =>
+		csp
+			.split(';')
+			.map(d => d.trim().split(/\s+/))
+			.find(([n]) => n === nom)
+			?.slice(1) ?? []
+
+	test('la CSP autorise Umami pour le script et l’envoi, et nulle part ailleurs', async () => {
+		const r = await fetch(site + '/')
+		expect(await r.text()).toContain(`${umami}/script.js`)
+		const csp = r.headers.get('content-security-policy')!
+		expect(directive(csp, 'script-src')).toContain(umami)
+		expect(directive(csp, 'connect-src')).toContain(umami)
+		const ailleurs = csp
+			.split(';')
+			.filter(d => !/^\s*(script-src|connect-src)\s/.test(d))
+		expect(ailleurs.join(';')).not.toContain('umami')
+	})
+
+	test('le JSON-LD du roman : aucune note inventée, date de parution Wattpad', async () => {
+		for (const chemin of ['/', '/about']) {
+			const html = await (await fetch(site + chemin)).text()
+			const bloc = html.match(
+				/<script type="application\/ld\+json">([\s\S]*?)<\/script>/
+			)
+			expect(bloc).not.toBeNull()
+			const graph = JSON.parse(bloc![1])['@graph'] as any[]
+			const livre = graph.find(n => n['@type'] === 'Book')
+			expect(livre.aggregateRating).toBeUndefined()
+			expect(JSON.stringify(graph)).not.toContain('AggregateRating')
+			expect(livre.datePublished).toBe('2024-12-05')
+		}
+	})
+})
