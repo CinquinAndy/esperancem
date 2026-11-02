@@ -1,6 +1,8 @@
 // Faux PocketBase + faux Wattpad pour les tests d'intégration (aucun accès réseau extérieur).
 // Contrôle : GET /__mode?wattpad=ok|403|429|garbage|partial|zero|format|apidown&pb=ok|down
-//            GET /__writes, GET /__reset
+//            GET /__writes (écritures acceptées et refusées), GET /__reset
+// Les écritures dans wattpad_stats passent par le schéma de production (voir WATTPAD_STATS_SCHEMA) :
+// un champ hors schéma répond 400 comme PocketBase, avec le détail par champ.
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 
@@ -20,6 +22,53 @@ const API: Record<
 	// Une heure après la base (366 177 lectures, 11 126 votes) : progression réaliste, dans les bornes d'un relevé.
 	'368278312': { numParts: 48, readCount: 366500, voteCount: 11140 },
 	'395344686': { numParts: 50, readCount: 137300, voteCount: 6600 },
+}
+
+/**
+ * Schéma de `wattpad_stats` en production : export PocketBase (`file.json`, supprimé par ddf8bda, à lire avec
+ * `git show ddf8bda^:file.json`) : quatre champs texte de 50 caractères au plus, aucun requis, aucun index.
+ * `book` a été ajouté après cet export (dc2e4d2) : on n'accepte que les deux romans suivis.
+ */
+const TEXT_MAX = 50
+const BOOKS = ['coeurs-sombres', 'au-prix-du-silence']
+
+/** Erreurs par champ, au format de PocketBase ; vide si l'enregistrement est accepté. */
+export function validateWattpadStats(body: Record<string, unknown>) {
+	const errors: Record<string, { code: string; message: string }> = {}
+	for (const name of ['reads', 'reads_complete', 'votes', 'parts']) {
+		const value = body[name]
+		if (value === undefined || value === null) continue
+		if (typeof value !== 'string' && typeof value !== 'number')
+			errors[name] = {
+				code: 'validation_invalid_value',
+				message: 'Invalid value.',
+			}
+		else if (String(value).length > TEXT_MAX)
+			errors[name] = {
+				code: 'validation_max_text_constraint',
+				message: `Must be no more than ${TEXT_MAX} character(s).`,
+			}
+	}
+	if (body.is_active !== undefined && typeof body.is_active !== 'boolean')
+		errors.is_active = {
+			code: 'validation_invalid_value',
+			message: 'Invalid value.',
+		}
+	if (
+		body.last_updated !== undefined &&
+		body.last_updated !== '' &&
+		Number.isNaN(Date.parse(String(body.last_updated)))
+	)
+		errors.last_updated = {
+			code: 'validation_invalid_date',
+			message: 'Must be a valid date.',
+		}
+	if (body.book !== undefined && !BOOKS.includes(String(body.book)))
+		errors.book = {
+			code: 'validation_invalid_value',
+			message: 'Invalid value.',
+		}
+	return errors
 }
 
 function initialStats() {
@@ -68,6 +117,7 @@ export function startStub() {
 	let stats = initialStats()
 	let mode = { pb: 'ok', wattpad: 'ok' }
 	let writes: any[] = []
+	let rejected: any[] = []
 
 	const server = Bun.serve({
 		async fetch(req) {
@@ -79,10 +129,12 @@ export function startStub() {
 				}
 				return Response.json(mode)
 			}
-			if (url.pathname === '/__writes') return Response.json({ stats, writes })
+			if (url.pathname === '/__writes')
+				return Response.json({ rejected, stats, writes })
 			if (url.pathname === '/__reset') {
 				stats = initialStats()
 				writes = []
+				rejected = []
 				mode = { pb: 'ok', wattpad: 'ok' }
 				return Response.json({ ok: true })
 			}
@@ -140,6 +192,22 @@ export function startStub() {
 				})
 			}
 			const body = await req.json()
+			if (name === 'wattpad_stats') {
+				const errors = validateWattpadStats(body)
+				if (Object.keys(errors).length > 0) {
+					rejected.push({ body, errors, id, method: req.method })
+					return Response.json(
+						{
+							data: errors,
+							message: id
+								? 'Failed to update record.'
+								: 'Failed to create record.',
+							status: 400,
+						},
+						{ status: 400 }
+					)
+				}
+			}
 			writes.push({
 				auth: req.headers.get('authorization') !== null,
 				body,

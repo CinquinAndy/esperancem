@@ -50,19 +50,26 @@ export interface StoredHistory {
 
 /**
  * Marque des enregistrements d'historique, dans le champ texte `reads`, suivie de la date de la valeur et de la
- * valeur suivante (« historique-synchro 2026-11-02T12:00:00.000Z 366277,11128,48 » : lectures, votes, chapitres).
- * Ils sont inactifs (`is_active = false`) : le site et l'ancien code ne lisent que les actifs. La marque les
- * distingue des anciens enregistrements désactivés, qui ne doivent jamais servir de référence.
+ * valeur suivante (« historique-synchro mvz7iio0 366277,11128,48 » : date en millisecondes depuis 1970 écrites en
+ * base 36, puis lectures, votes, chapitres). Ils sont inactifs (`is_active = false`) : le site et l'ancien code ne
+ * lisent que les actifs. La marque les distingue des anciens enregistrements désactivés, qui ne doivent jamais
+ * servir de référence.
+ *
+ * `reads` est un champ texte limité à 50 caractères dans PocketBase (export du schéma, `file.json` supprimé par
+ * ddf8bda) : l'ancien format avec la date ISO (59 caractères) était refusé en HTTP 400.
  */
 export const HISTORY_MARK = 'historique-synchro'
+
+/** Longueur maximale des champs texte de `wattpad_stats` (reads, reads_complete, votes, parts) en production. */
+export const TEXT_FIELD_MAX = 50
 
 /** Lit un enregistrement d'historique ; null s'il n'en est pas un ou si ses chiffres sont invalides. */
 export function readHistoryRecord(record: WattpadStats): StoredHistory | null {
 	const match = record.reads?.match(
-		new RegExp(`^${HISTORY_MARK} (\\S+) (\\d+),(\\d+),(\\d+)$`)
+		new RegExp(`^${HISTORY_MARK} ([0-9a-z]{1,11}) (\\d+),(\\d+),(\\d+)$`)
 	)
 	if (record.is_active !== false || !match) return null
-	const at = Date.parse(match[1])
+	const at = parseInt(match[1], 36)
 	const successor = {
 		parts: Number(match[4]),
 		reads: Number(match[2]),
@@ -74,7 +81,8 @@ export function readHistoryRecord(record: WattpadStats): StoredHistory | null {
 		votes: parseExactCount(record.votes),
 	}
 	if (
-		Number.isNaN(at) ||
+		!Number.isSafeInteger(at) ||
+		Number.isNaN(new Date(at).getTime()) ||
 		counts.reads === null ||
 		counts.votes === null ||
 		counts.parts === null ||
@@ -89,15 +97,26 @@ export function readHistoryRecord(record: WattpadStats): StoredHistory | null {
 	}
 }
 
+/** Champs de l'enregistrement d'historique. Lève une erreur si un champ dépasse ce que PocketBase accepte. */
 export function toHistoryFields(book: BookType, value: StoredHistory) {
-	return {
+	const at = Date.parse(value.checkedAt)
+	if (Number.isNaN(at) || at < 0)
+		throw new Error(`historique : date invalide (${value.checkedAt})`)
+	const fields = {
 		book,
 		is_active: false,
 		parts: String(value.counts.parts),
-		reads: `${HISTORY_MARK} ${value.checkedAt} ${value.successor.reads},${value.successor.votes},${value.successor.parts}`,
+		reads: `${HISTORY_MARK} ${at.toString(36)} ${value.successor.reads},${value.successor.votes},${value.successor.parts}`,
 		reads_complete: String(value.counts.reads),
 		votes: String(value.counts.votes),
 	}
+	for (const name of ['parts', 'reads', 'reads_complete', 'votes'] as const) {
+		if (fields[name].length > TEXT_FIELD_MAX)
+			throw new Error(
+				`historique : champ ${name} trop long (${fields[name].length} > ${TEXT_FIELD_MAX})`
+			)
+	}
+	return fields
 }
 
 const TIMEOUT_MS = 5000

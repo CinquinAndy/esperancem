@@ -138,9 +138,16 @@ describe('route de synchro protégée', () => {
 			['POST', '137098'],
 		])
 		expect(
-			history.every(x => x.body.reads.startsWith('historique-synchro '))
+			history.every(
+				x =>
+					x.body.reads.startsWith('historique-synchro ') &&
+					x.body.reads.length <= 50
+			)
 		).toBe(true)
 		expect(w.every(x => x.auth)).toBe(true)
+		// Le faux PocketBase applique le schéma de production : aucune écriture refusée.
+		const { rejected } = await (await fetch(`${stub.url}/__writes`)).json()
+		expect(rejected).toEqual([])
 	})
 })
 

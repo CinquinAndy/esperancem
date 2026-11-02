@@ -1,4 +1,5 @@
-import { beforeEach, describe, expect, test } from 'bun:test'
+import { afterAll, beforeEach, describe, expect, test } from 'bun:test'
+import PocketBase, { ClientResponseError } from 'pocketbase'
 
 import type { SourceResult } from '@/lib/wattpad-sync/source'
 import type { StatsStore, StoredRecord } from '@/lib/wattpad-sync/store'
@@ -15,10 +16,18 @@ import {
 	createPocketBaseStore,
 	readHistoryRecord,
 	readRecord,
+	TEXT_FIELD_MAX,
 	toHistoryFields,
 	toRecordFields,
 } from '@/lib/wattpad-sync/store'
-import { getSyncState, resetSyncState, runSync } from '@/lib/wattpad-sync/sync'
+import {
+	describeWriteError,
+	getSyncState,
+	resetSyncState,
+	runSync,
+} from '@/lib/wattpad-sync/sync'
+
+import { startStub } from '../integration/stub'
 
 const snapshot = loadSnapshot()
 const CS = snapshot['coeurs-sombres']
@@ -824,11 +833,44 @@ describe('historique de la synchro dans PocketBase', () => {
 			book: 'coeurs-sombres',
 			is_active: false,
 			parts: '48',
-			reads: 'historique-synchro 2026-11-02T12:00:00.000Z 366277,11128,48',
+			reads: 'historique-synchro mvz7iio0 366277,11128,48',
 			reads_complete: '366177',
 			votes: '11126',
 		})
 		expect(readHistoryRecord(row({}))).toEqual(value)
+	})
+	test('tient dans le champ texte `reads` de production (50 caractères), même avec de gros chiffres', () => {
+		const big = {
+			checkedAt: '2099-12-31T23:59:59.999Z',
+			counts: { parts: 999, reads: 99_999_999, votes: 9_999_999 },
+			successor: { parts: 999, reads: 99_999_999, votes: 9_999_999 },
+		}
+		const fields = toHistoryFields('au-prix-du-silence', big)
+		expect(fields.reads.length).toBeLessThanOrEqual(TEXT_FIELD_MAX)
+		expect(readHistoryRecord({ ...row({}), ...fields })).toEqual(big)
+		// Ancien format (date ISO, 59 caractères) : refusé par PocketBase, jamais stocké ni relu.
+		expect(
+			'historique-synchro 2026-11-02T12:00:00.000Z 366277,11128,48'.length
+		).toBeGreaterThan(TEXT_FIELD_MAX)
+		expect(
+			readHistoryRecord(
+				row({
+					reads: 'historique-synchro 2026-11-02T12:00:00.000Z 366277,11128,48',
+				})
+			)
+		).toBeNull()
+	})
+	test('champ trop long ou date invalide : erreur avant tout envoi', () => {
+		const huge = 123_456_789_012_345
+		expect(() =>
+			toHistoryFields('coeurs-sombres', {
+				...value,
+				successor: { parts: huge, reads: huge, votes: huge },
+			})
+		).toThrow('trop long')
+		expect(() =>
+			toHistoryFields('coeurs-sombres', { ...value, checkedAt: 'demain' })
+		).toThrow('date invalide')
 	})
 	test('ancien enregistrement désactivé, enregistrement actif, chiffres invalides : jamais une référence', () => {
 		expect(readHistoryRecord(row({ reads: '300K' }))).toBeNull()
@@ -842,14 +884,10 @@ describe('historique de la synchro dans PocketBase', () => {
 		).toBeNull()
 		// Sans valeur suivante, ou valeur suivante impossible : on ne peut pas vérifier qu'il est à jour.
 		expect(
-			readHistoryRecord(
-				row({ reads: 'historique-synchro 2026-11-02T12:00:00.000Z' })
-			)
+			readHistoryRecord(row({ reads: 'historique-synchro mvz7iio0' }))
 		).toBeNull()
 		expect(
-			readHistoryRecord(
-				row({ reads: 'historique-synchro 2026-11-02T12:00:00.000Z 0,0,0' })
-			)
+			readHistoryRecord(row({ reads: 'historique-synchro mvz7iio0 0,0,0' }))
 		).toBeNull()
 	})
 	test('écriture : met à jour l’enregistrement marqué, sinon en crée un, jamais un actif', async () => {
@@ -908,5 +946,50 @@ describe('historique de la synchro dans PocketBase', () => {
 			'jeton absent'
 		)
 		expect(writes).toBe(0)
+	})
+})
+
+describe('historique face au schéma de production (faux PocketBase, vrai SDK)', () => {
+	const stub = startStub()
+	afterAll(() => stub.server.stop(true))
+	const pb = () => new PocketBase(stub.url)
+	const value = {
+		checkedAt: '2026-11-02T12:00:00.000Z',
+		counts: { parts: 48, reads: 366177, votes: 11126 },
+		successor: { parts: 48, reads: 366277, votes: 11128 },
+	}
+
+	test('ancien format : HTTP 400 sur `reads`, comme en production', async () => {
+		const error = await pb()
+			.collection('wattpad_stats')
+			.create({
+				...toHistoryFields('coeurs-sombres', value),
+				reads: 'historique-synchro 2026-11-02T12:00:00.000Z 366277,11128,48',
+			})
+			.catch(e => e)
+		expect(error).toBeInstanceOf(ClientResponseError)
+		expect(error.status).toBe(400)
+		expect(describeWriteError(error)).toBe(
+			'HTTP 400, reads: validation_max_text_constraint'
+		)
+	})
+	test('nouveau format : accepté, relu tel qu’écrit, puis mis à jour sur place', async () => {
+		const store = createPocketBaseStore(pb, async () => true)
+		await store.writeHistory!('coeurs-sombres', value)
+		expect((await store.readHistory!())['coeurs-sombres']).toEqual(value)
+		const next = {
+			checkedAt: '2026-11-02T13:00:00.000Z',
+			counts: value.successor,
+			successor: { parts: 48, reads: 366400, votes: 11130 },
+		}
+		await store.writeHistory!('coeurs-sombres', next)
+		expect((await store.readHistory!())['coeurs-sombres']).toEqual(next)
+		const { rejected, writes } = await (
+			await fetch(`${stub.url}/__writes`)
+		).json()
+		expect(rejected.map((r: any) => r.body.reads)).toEqual([
+			'historique-synchro 2026-11-02T12:00:00.000Z 366277,11128,48',
+		])
+		expect(writes.map((w: any) => w.method)).toEqual(['POST', 'PATCH'])
 	})
 })

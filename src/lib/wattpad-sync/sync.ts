@@ -217,6 +217,25 @@ async function restoreHistory(
 	}
 }
 
+/**
+ * Statut HTTP et, pour un refus de PocketBase, les champs refusés avec leur code
+ * (« HTTP 400, reads: validation_max_text_constraint ») ; jamais les valeurs envoyées.
+ */
+export function describeWriteError(error: unknown): string {
+	const status = (error as { status?: number })?.status
+	if (!status) return error instanceof Error ? error.message : String(error)
+	const data = (error as { response?: { data?: unknown } })?.response?.data
+	const fields =
+		data && typeof data === 'object'
+			? Object.entries(data as Record<string, { code?: unknown }>)
+					.map(([name, detail]) =>
+						typeof detail?.code === 'string' ? `${name}: ${detail.code}` : name
+					)
+					.join(', ')
+			: ''
+	return fields ? `HTTP ${status}, ${fields}` : `HTTP ${status}`
+}
+
 /** Garde la valeur d'avant la valeur écrite dans PocketBase. Un échec est signalé, sans annuler l'écriture. */
 async function persistHistory(store: StatsStore, book: BookType) {
 	const history = state.history[book]
@@ -232,9 +251,8 @@ async function persistHistory(store: StatsStore, book: BookType) {
 		})
 		state.persisted[book] = key(value, successor)
 	} catch (error) {
-		const status = (error as { status?: number })?.status
 		console.warn(
-			`Wattpad : historique de ${book} non gardé (${status ? `HTTP ${status}` : error instanceof Error ? error.message : String(error)}), il reste en mémoire`
+			`Wattpad : historique de ${book} non gardé (${describeWriteError(error)}), il reste en mémoire`
 		)
 	}
 }

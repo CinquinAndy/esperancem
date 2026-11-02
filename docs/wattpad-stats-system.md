@@ -29,7 +29,12 @@ Le site n'affiche jamais un chiffre lu en direct sur Wattpad. Il affiche la **de
    Lecture d'un enregistrement par roman (le plus récent actif), quelle que soit la taille de la collection.
    Historique de la synchro : un enregistrement **inactif** de plus par roman (`is_active = false`, champ `reads`
    commençant par `historique-synchro ` suivi de la date de la valeur et de la valeur suivante), qui garde la
-   valeur écrite avant la valeur actuelle. Il n'est repris après un redémarrage que si sa valeur suivante est
+   valeur écrite avant la valeur actuelle. Format : `historique-synchro mvz7iio0 366277,11128,48` (date en
+   millisecondes depuis 1970 écrites en base 36, puis lectures, votes, chapitres de la valeur suivante). Les champs
+   texte de `wattpad_stats` (`reads`, `reads_complete`, `votes`, `parts`) sont limités à 50 caractères en
+   production (export du schéma : `git show ddf8bda^:file.json`) ; le premier format, avec la date ISO
+   (59 caractères), était refusé en HTTP 400. Le faux PocketBase des tests (`tests/integration/stub.ts`) applique
+   ce schéma. Il n'est repris après un redémarrage que si sa valeur suivante est
    encore la valeur active ; sinon (écriture de l'historique échouée, ancien code ou modification à la main
    entre-temps) il est ignoré. Le site et l'ancien code ne lisent que les enregistrements actifs ; les anciens
    enregistrements désactivés, sans cette marque, ne servent jamais de référence. Si cet enregistrement ne peut être
