@@ -9,20 +9,25 @@ Le site n'affiche jamais un chiffre lu en direct sur Wattpad. Il affiche la **de
 2. **Source** : l'API JSON publique de Wattpad (`/api/v3/stories/<id>`), non documentée mais stable ; en secours,
    la page du roman, demandée en anglais et lue par ses libellés d'accessibilité (« Reads 366,177 », ou « Lectures 366,177 » si elle arrive en français), jamais par ses classes CSS générées.
 3. **Validation avant écriture** (`src/lib/wattpad-sync/validation.ts`) : nombres exacts uniquement (pas « 366K »),
-   jamais 0, votes ≤ lectures. Chaque chiffre est contrôlé, pas seulement le premier anormal : un recul (lectures ;
-   votes au-delà de 2 % ; plus de 2 chapitres) ou un bond (lectures au-delà de ×1,5 ; votes au-delà de ×1,5 ou qui
-   montent plus que les lectures, au-delà de 50 ; plus de 5 chapitres d'un coup) est refusé tant que 3 relevés
-   successifs ne le confirment pas. Ne comptent comme confirmation que des relevés plausibles, avec exactement les
-   mêmes anomalies (même nature, mêmes chiffres) et proches du relevé anormal précédent sur les trois chiffres
-   (2 % d'écart au plus, ou 2 chapitres) ; un échec de lecture, un relevé invraisemblable
-   (0…) ou un relevé normal remettent le compte à zéro. Une vraie correction de Wattpad donne une valeur stable,
-   une erreur de format des valeurs sans rapport entre elles.
+   jamais 0 (ni lecture, ni vote, ni chapitre), votes ≤ lectures. Une API qui renvoie des chiffres impossibles
+   passe la main à la page. Chaque chiffre est ensuite comparé à la référence (valeur affichée) avec des **bornes
+   symétriques**, proportionnelles au temps écoulé depuis la référence (pas de 6 h, au moins un, plafonné à 7 jours) :
+   lectures ± 0,5 % ou ± 1 000 par pas ; votes ± 15 par pas, plus 1 pour 10 lectures et 50 par chapitre d'écart ;
+   chapitres ± 2. Rythme réel (02/11/2026) : +100 lectures et +1 vote par 6 h (Cœurs sombres), +40 lectures (Au prix
+   du silence), jusqu'à +400 lectures et +60 votes le jour d'un chapitre. Un relevé dans les bornes de la référence,
+   ou d'une des 4 dernières valeurs écrites (mêmes bornes, jamais élargies), est écrit tout de suite : un faux qui
+   passe juste sous une borne ne bloque donc jamais la vraie valeur suivante. Hors bornes, recul ou bond est refusé
+   tant que 3 relevés successifs ne le confirment pas. Ne comptent comme confirmation que des relevés plausibles,
+   avec exactement les mêmes anomalies et proches du relevé anormal précédent sur les trois chiffres (2 % d'écart au
+   plus, ou 2 chapitres) ; un échec de lecture, un relevé invraisemblable ou un relevé normal remettent le compte à
+   zéro. Une **anomalie grave** (un chiffre divisé ou multiplié par 2, ou des chapitres sous le relevé committé
+   moins 2) exige en plus 7 jours de relevés cohérents sans interruption.
 4. **Stockage** : la collection PocketBase existante `wattpad_stats`, mêmes champs qu'avant. Aucune migration.
    Lecture d'un enregistrement par roman (le plus récent actif), quelle que soit la taille de la collection.
 5. **Affichage** (`src/lib/wattpad-sync/display.ts`) : parmi PocketBase, la mémoire du processus et le relevé
    committé `src/data/wattpad-releve.json`, la valeur la plus récemment confirmée par Wattpad (à égalité, la plus
-   haute). Toutes ont été validées : un chiffre ne vaut jamais 0, ne recule que si le recul a été confirmé trois
-   fois, et reste affiché si PocketBase est injoignable au build ou au rendu.
+   haute). Toutes ont été validées : un chiffre ne vaut jamais 0, ne recule au-delà des bornes que si le recul a été
+   confirmé, et reste affiché si PocketBase est injoignable au build ou au rendu.
 6. **Compteurs de l'accueil** (`src/components/WattpadStats.tsx`) : le HTML serveur porte les vrais chiffres (avec
    ou sans JavaScript). Un compteur déjà à l'écran au chargement ne bouge pas ; un compteur hors écran est remis
    à 0 sans être vu, puis compte jusqu'à la vraie valeur quand il arrive à l'écran. Avec « réduire les
