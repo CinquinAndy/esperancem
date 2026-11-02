@@ -7,7 +7,7 @@ Le site n'affiche jamais un chiffre lu en direct sur Wattpad. Il affiche la **de
 1. **Relevé** : toutes les 6 heures (et 10 s après chaque démarrage), le serveur Next.js lui-même interroge
    Wattpad (`src/instrumentation.ts` → `src/lib/cron/wattpad-stats.ts`). Rien à installer sur la machine.
 2. **Source** : l'API JSON publique de Wattpad (`/api/v3/stories/<id>`), non documentée mais stable ; en secours,
-   la page du roman, lue par ses libellés d'accessibilité (« Reads 366,177 »), jamais par ses classes CSS générées.
+   la page du roman, demandée en anglais et lue par ses libellés d'accessibilité (« Reads 366,177 », ou « Lectures 366,177 » si elle arrive en français), jamais par ses classes CSS générées.
 3. **Validation avant écriture** (`src/lib/wattpad-sync/validation.ts`) : nombres exacts uniquement (pas « 366K »),
    jamais 0, votes ≤ lectures. Un recul des lectures (ou des votes au-delà de 2 %, ou plus de 2 chapitres) et un
    bond au-delà de ×3 sont refusés tant que 3 relevés successifs ne les confirment pas.
