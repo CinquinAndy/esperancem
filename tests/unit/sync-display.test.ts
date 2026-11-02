@@ -567,13 +567,22 @@ describe('confirmation d’une anomalie : trois relevés plausibles, de même na
 		const written = pb.writes
 			.filter(w => w.book === 'coeurs-sombres')
 			.map(w => w.counts.reads)
+		const writtenCounts = pb.writes
+			.filter(w => w.book === 'coeurs-sombres')
+			.map(w => w.counts)
 		pb.ctl.readFails = false
 		const display = await computeDisplayStats({ store: pb.store })
 		return {
 			displayed: display.books['coeurs-sombres'].reads,
+			displayedCounts: {
+				parts: display.books['coeurs-sombres'].parts,
+				reads: display.books['coeurs-sombres'].reads,
+				votes: display.books['coeurs-sombres'].votes,
+			},
 			outcomes,
 			reasons,
 			written,
+			writtenCounts,
 		}
 	}
 
@@ -606,6 +615,33 @@ describe('confirmation d’une anomalie : trois relevés plausibles, de même na
 		const r = await play([reads(300_000), reads(250_000), reads(200_000)])
 		expect(r.outcomes).toEqual(['refuse', 'refuse', 'refuse'])
 		expect(r.written).toEqual([])
+	})
+	// Relecture 3 : un chiffre faux isolé vers le haut ne doit ni s'afficher ni bloquer la vraie valeur ensuite.
+	for (const [name, bad] of [
+		['votes ×5', { ...base, votes: base.votes * 5 }],
+		['chapitres 48 → 480', { ...base, parts: 480 }],
+		['lectures ×2,5', { ...base, reads: Math.floor(base.reads * 2.5) }],
+	] as const) {
+		test(`bond isolé (${name}) refusé, la vraie valeur passe au relevé suivant`, async () => {
+			const real = { ...base, reads: base.reads + 10, votes: base.votes + 1 }
+			const r = await play([bad, real])
+			expect(r.outcomes).toEqual(['refuse', 'ecrit'])
+			expect(r.reasons[0]).toContain('bond à confirmer (1/3)')
+			expect(r.writtenCounts).toEqual([real])
+			expect(r.displayedCounts).toEqual(real)
+		})
+	}
+	test('recul confirmé deux fois, puis 3e relevé avec votes et chapitres faux : rien de publié', async () => {
+		const low = base.reads - 5000
+		const r = await play([
+			reads(low),
+			reads(low + 10),
+			{ parts: 1, reads: low + 20, votes: 11 },
+		])
+		expect(r.outcomes).toEqual(['refuse', 'refuse', 'refuse'])
+		expect(r.reasons[2]).toContain('à confirmer (1/3)')
+		expect(r.writtenCounts).toEqual([])
+		expect(r.displayedCounts).toEqual(base)
 	})
 	test('vrai recul (recompte Wattpad) : trois relevés proches qui progressent, accepté au troisième', async () => {
 		const r = await play([reads(300_000), reads(300_080), reads(300_150)])

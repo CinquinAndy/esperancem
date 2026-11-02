@@ -104,6 +104,43 @@ describe('judge', () => {
 			judge({ parts: 48, reads: 366177000, votes: 11126 }, previous, 1).accepted
 		).toBe(false)
 	})
+	test('bonds isolés refusés : votes ×1,5, chapitres +6, lectures ×1,5', () => {
+		for (const bad of [
+			{ parts: 48, reads: 366200, votes: 55610 },
+			{ parts: 48, reads: 366200, votes: 16700 },
+			{ parts: 54, reads: 366200, votes: 11126 },
+			{ parts: 480, reads: 366200, votes: 11126 },
+			{ parts: 48, reads: 915410, votes: 11126 },
+			{ parts: 48, reads: 549300, votes: 11126 },
+		]) {
+			const v = judge(bad, previous, 1)
+			expect(v.accepted).toBe(false)
+			if (!v.accepted) expect(v.reason).toContain('bond à confirmer (1/3)')
+		}
+	})
+	test('votes qui montent plus que les lectures : bond à confirmer', () => {
+		expect(
+			judge({ parts: 48, reads: 366264, votes: 11300 }, previous, 1).accepted
+		).toBe(false)
+	})
+	test('hausses réelles acceptées : votes et chapitres au rythme normal', () => {
+		for (const ok of [
+			{ parts: 49, reads: 366500, votes: 11140 },
+			{ parts: 53, reads: 370000, votes: 11300 },
+			{ parts: 48, reads: 500000, votes: 11126 },
+		]) {
+			expect(judge(ok, previous, 0)).toEqual({ accepted: true })
+		}
+	})
+	test('toutes les anomalies du relevé sont signalées, pas seulement la première', () => {
+		const v = judge({ parts: 1, reads: 361197, votes: 11 }, previous, 3)
+		expect(v.accepted).toBe(true)
+		if (v.accepted) {
+			expect(v.confirmedAnomaly).toContain('lectures 366164 → 361197')
+			expect(v.confirmedAnomaly).toContain('votes 11122 → 11')
+			expect(v.confirmedAnomaly).toContain('chapitres 48 → 1')
+		}
+	})
 	test('zéro refusé même confirmé', () => {
 		expect(judge({ parts: 0, reads: 0, votes: 0 }, previous, 10).accepted).toBe(
 			false
@@ -122,7 +159,11 @@ describe('nextPending', () => {
 		expect(nextPending(null, at(366300), previous)).toBeNull()
 		expect(
 			nextPending(
-				{ count: 2, field: 'reads', kind: 'recul', value: 300000 },
+				{
+					count: 2,
+					counts: at(300000),
+					signature: 'recul:reads',
+				},
 				at(0, 0, 0),
 				previous
 			)
@@ -132,9 +173,8 @@ describe('nextPending', () => {
 		const one = nextPending(null, at(300000), previous)
 		expect(one).toEqual({
 			count: 1,
-			field: 'reads',
-			kind: 'recul',
-			value: 300000,
+			counts: at(300000),
+			signature: 'recul:reads',
 		})
 		const two = nextPending(one, at(305000), previous)
 		expect(two?.count).toBe(2)
@@ -147,16 +187,34 @@ describe('nextPending', () => {
 		const one = nextPending(null, at(300000), previous)
 		expect(nextPending(one, at(1_500_000), previous)).toMatchObject({
 			count: 1,
-			kind: 'bond',
+			signature: 'bond:reads',
 		})
 		expect(nextPending(one, at(366300, 5000), previous)).toMatchObject({
 			count: 1,
-			field: 'votes',
+			signature: 'recul:votes',
 		})
+	})
+	test('un champ de plus en anomalie : le compte repart à 1 (cas D de la relecture)', () => {
+		const one = nextPending(null, at(361186), previous)
+		const two = nextPending(one, at(361196), previous)
+		expect(two?.count).toBe(2)
+		const three = nextPending(two, at(361206, 11, 1), previous)
+		expect(three).toMatchObject({
+			count: 1,
+			signature: 'recul:parts,recul:reads,recul:votes',
+		})
+	})
+	test('même anomalie mais un autre champ éloigné du relevé précédent : le compte repart à 1', () => {
+		// Chapitres 47 puis 50 : aucun des deux n'est une anomalie face à 48, mais ils s'écartent de 3.
+		const one = nextPending(null, at(300000, 11130, 47), previous)
+		const two = nextPending(one, at(300010, 11130, 50), previous)
+		expect(two).toMatchObject({ count: 1, signature: 'recul:reads' })
+		const near = nextPending(one, at(300010, 11120, 48), previous)
+		expect(near?.count).toBe(2)
 	})
 	test('chapitres : un chapitre d’écart reste la même anomalie', () => {
 		const one = nextPending(null, at(366300, 11130, 40), previous)
-		expect(one).toMatchObject({ count: 1, field: 'parts' })
+		expect(one).toMatchObject({ count: 1, signature: 'recul:parts' })
 		expect(nextPending(one, at(366400, 11130, 41), previous)?.count).toBe(2)
 		expect(nextPending(one, at(366400, 11130, 30), previous)?.count).toBe(1)
 	})

@@ -9,10 +9,12 @@ Le site n'affiche jamais un chiffre lu en direct sur Wattpad. Il affiche la **de
 2. **Source** : l'API JSON publique de Wattpad (`/api/v3/stories/<id>`), non documentée mais stable ; en secours,
    la page du roman, demandée en anglais et lue par ses libellés d'accessibilité (« Reads 366,177 », ou « Lectures 366,177 » si elle arrive en français), jamais par ses classes CSS générées.
 3. **Validation avant écriture** (`src/lib/wattpad-sync/validation.ts`) : nombres exacts uniquement (pas « 366K »),
-   jamais 0, votes ≤ lectures. Un recul des lectures (ou des votes au-delà de 2 %, ou plus de 2 chapitres) et un
-   bond au-delà de ×3 sont refusés tant que 3 relevés successifs ne les confirment pas. Ne comptent comme
-   confirmation que des relevés plausibles, de même nature (recul ou bond, sur le même chiffre) et proches du
-   relevé anormal précédent (2 % d'écart au plus, ou 2 chapitres) ; un échec de lecture, un relevé invraisemblable
+   jamais 0, votes ≤ lectures. Chaque chiffre est contrôlé, pas seulement le premier anormal : un recul (lectures ;
+   votes au-delà de 2 % ; plus de 2 chapitres) ou un bond (lectures au-delà de ×1,5 ; votes au-delà de ×1,5 ou qui
+   montent plus que les lectures, au-delà de 50 ; plus de 5 chapitres d'un coup) est refusé tant que 3 relevés
+   successifs ne le confirment pas. Ne comptent comme confirmation que des relevés plausibles, avec exactement les
+   mêmes anomalies (même nature, mêmes chiffres) et proches du relevé anormal précédent sur les trois chiffres
+   (2 % d'écart au plus, ou 2 chapitres) ; un échec de lecture, un relevé invraisemblable
    (0…) ou un relevé normal remettent le compte à zéro. Une vraie correction de Wattpad donne une valeur stable,
    une erreur de format des valeurs sans rapport entre elles.
 4. **Stockage** : la collection PocketBase existante `wattpad_stats`, mêmes champs qu'avant. Aucune migration.
