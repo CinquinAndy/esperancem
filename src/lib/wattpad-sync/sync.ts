@@ -49,14 +49,20 @@ export interface SyncState {
 	/**
 	 * Dernières valeurs écrites, par roman (la plus récente en dernier, HISTORY_SIZE au plus). Un relevé
 	 * cohérent avec l'une d'elles est accepté tout de suite : si un faux relevé est passé sous les bornes,
-	 * la vraie valeur suivante reste acceptée grâce à la valeur d'avant le faux. En mémoire seulement : un
-	 * redémarrage repart de la valeur de PocketBase (les bornes symétriques suffisent alors dans le cas courant).
+	 * la vraie valeur suivante reste acceptée grâce à la valeur d'avant le faux ; le jour d'un chapitre, le
+	 * pic de votes du relevé suivant passe grâce à la valeur d'avant le chapitre.
+	 * Les bornes symétriques ne suffisent pas à elles seules : pendant qu'un faux à la baisse reste au bord
+	 * de la borne, la vraie valeur continue de croître dans l'autre sens et s'en écarte de plus d'une borne.
+	 * La valeur d'avant la valeur actuelle est donc aussi gardée dans PocketBase (`writeHistory`) et relue
+	 * au premier relevé après un redémarrage (`readHistory`) ; seul le reste de l'historique est en mémoire.
 	 */
 	history: Partial<Record<BookType, AcceptedValue[]>>
 	lastAttemptAt: string | null
 	lastReport: SyncReport | null
 	/** Dernière confirmation par Wattpad, par roman (même si les chiffres n'ont pas bougé). */
 	lastSuccessAt: Partial<Record<BookType, string>>
+	/** Valeur gardée dans PocketBase par roman, telle qu'écrite ou relue (évite de la réécrire à l'identique). */
+	persisted: Partial<Record<BookType, string>>
 	/**
 	 * Anomalie (recul, bond) en attente de confirmation, par roman. Effacée par un échec de lecture, un
 	 * relevé invraisemblable, un relevé normal ou une écriture réussie.
@@ -91,6 +97,7 @@ function emptyState(): SyncState {
 		lastReport: null,
 		lastSuccessAt: {},
 		pending: {},
+		persisted: {},
 	}
 }
 const sync = (shared.__wattpadSync ??= { running: null, state: emptyState() })
@@ -151,6 +158,65 @@ function nextHistory(
 	return [...base, written].slice(-HISTORY_SIZE)
 }
 
+/** Valeur à garder dans PocketBase : la plus récente valeur écrite différente de celle qui vient de l'être. */
+function valueToPersist(history: AcceptedValue[]): AcceptedValue {
+	const written = history.at(-1)!
+	return (
+		history
+			.slice(0, -1)
+			.reverse()
+			.find(v => !same(v.counts, written.counts)) ?? written
+	)
+}
+
+const key = (value: AcceptedValue) =>
+	`${value.checkedAt} ${value.counts.reads} ${value.counts.votes} ${value.counts.parts}`
+
+/**
+ * Après un redémarrage, l'historique en mémoire est vide : on le reprend de PocketBase (la valeur d'avant la
+ * valeur actuelle). Un échec de lecture laisse l'historique vide, sans bloquer la synchro.
+ */
+async function restoreHistory(store: StatsStore, books: readonly BookConfig[]) {
+	if (!store.readHistory) return
+	if (books.every(book => (state.history[book.type]?.length ?? 0) > 0)) return
+	let stored: Awaited<ReturnType<NonNullable<StatsStore['readHistory']>>>
+	try {
+		stored = await store.readHistory()
+	} catch (error) {
+		console.warn(
+			`Wattpad : historique de la synchro illisible (${error instanceof Error ? error.message : String(error)})`
+		)
+		return
+	}
+	for (const book of books) {
+		const value = stored[book.type]
+		if (!value || (state.history[book.type]?.length ?? 0) > 0) continue
+		const restored = { checkedAt: value.checkedAt, counts: { ...value.counts } }
+		state.history[book.type] = [restored]
+		state.persisted[book.type] = key(restored)
+	}
+}
+
+/** Garde la valeur d'avant la valeur écrite dans PocketBase. Un échec est signalé, sans annuler l'écriture. */
+async function persistHistory(store: StatsStore, book: BookType) {
+	const history = state.history[book]
+	if (!store.writeHistory || !history?.length) return
+	const value = valueToPersist(history)
+	if (state.persisted[book] === key(value)) return
+	try {
+		await store.writeHistory(book, {
+			checkedAt: value.checkedAt,
+			counts: { ...value.counts },
+		})
+		state.persisted[book] = key(value)
+	} catch (error) {
+		const status = (error as { status?: number })?.status
+		console.warn(
+			`Wattpad : historique de ${book} non gardé (${status ? `HTTP ${status}` : error instanceof Error ? error.message : String(error)}), il reste en mémoire`
+		)
+	}
+}
+
 async function syncOnce(deps: SyncDeps): Promise<SyncReport> {
 	const now = deps.now ?? Date.now
 	const nowMs = now()
@@ -168,6 +234,7 @@ async function syncOnce(deps: SyncDeps): Promise<SyncReport> {
 		records = null
 	}
 	const snapshot = loadSnapshot()
+	if (records) await restoreHistory(store, books)
 
 	const reports: BookReport[] = []
 	let changed = false
@@ -213,7 +280,8 @@ async function syncOnce(deps: SyncDeps): Promise<SyncReport> {
 			verdict = { accepted: true }
 			if (coherentWith > 0) {
 				const ref = history[history.length - coherentWith]
-				verdict.confirmedAnomaly = `cohérent avec la valeur du ${ref.checkedAt} : ${previous.reads} lectures, ${previous.votes} votes, ${previous.parts} chapitres écartés`
+				// La valeur affichée n'est pas forcément fausse (jour de chapitre) : on dit seulement qu'elle est sautée.
+				verdict.confirmedAnomaly = `cohérent avec la valeur du ${ref.checkedAt}, hors bornes de la valeur affichée (${previous.reads} lectures, ${previous.votes} votes, ${previous.parts} chapitres)`
 			}
 		} else {
 			pending = nextPending(state.pending[book.type], counts, previous, {
@@ -260,6 +328,7 @@ async function syncOnce(deps: SyncDeps): Promise<SyncReport> {
 			checkedAt: at,
 			counts: { ...counts },
 		})
+		await persistHistory(store, book.type)
 		state.lastSuccessAt[book.type] = at
 		if (!same(fetched.counts, stored)) changed = true
 		reports.push({

@@ -2,7 +2,11 @@
 // toutes les 6 h. Rythme réel : Cœurs sombres +100 lectures par relevé, Au prix du silence +40.
 import { beforeEach, describe, expect, test } from 'bun:test'
 
-import type { StatsStore, StoredRecord } from '@/lib/wattpad-sync/store'
+import type {
+	StatsStore,
+	StoredHistory,
+	StoredRecord,
+} from '@/lib/wattpad-sync/store'
 import type { BookCounts } from '@/lib/wattpad-sync/types'
 
 import {
@@ -30,12 +34,23 @@ function makeStore() {
 			},
 			updatedAt: new Date(clock).toISOString(),
 		}
-	const ctl = { readFails: false, writeFails: false }
+	const ctl = {
+		historyReadFails: false,
+		historyWriteFails: false,
+		readFails: false,
+		writeFails: false,
+	}
 	const writes: { book: string; counts: BookCounts }[] = []
+	// Historique gardé par la synchro : survit au redémarrage simulé (même objet store).
+	const history: Record<string, StoredHistory> = {}
 	const store: StatsStore = {
 		async readAll() {
 			if (ctl.readFails) throw new Error('down')
 			return structuredClone(records) as any
+		},
+		async readHistory() {
+			if (ctl.historyReadFails) throw new Error('down')
+			return structuredClone(history) as any
 		},
 		async write(book, counts) {
 			if (ctl.writeFails) throw Object.assign(new Error('x'), { status: 500 })
@@ -45,8 +60,13 @@ function makeStore() {
 				updatedAt: new Date(clock).toISOString(),
 			}
 		},
+		async writeHistory(book, value) {
+			if (ctl.historyWriteFails)
+				throw Object.assign(new Error('x'), { status: 403 })
+			history[book] = structuredClone(value)
+		},
 	}
-	return { ctl, records, store, writes }
+	return { ctl, history, records, store, writes }
 }
 
 // Vraie évolution : chaque relevé, +100 lectures CS, +40 APS, +2 votes, un chapitre tous les 10 relevés.
@@ -96,6 +116,13 @@ beforeEach(() => {
 	resetSyncState()
 	resetDisplayMemory()
 })
+
+/** Redémarrage du serveur (déploiement, conteneur relancé) : la mémoire du processus est perdue. */
+function restart() {
+	resetSyncState()
+	resetDisplayMemory()
+}
+const TEN_SECONDS = 10_000
 
 describe('évolution normale : chaque relevé passe sans délai', () => {
 	test('8 jours, 4 relevés par jour, chapitres de temps en temps', async () => {
@@ -390,6 +417,121 @@ describe('un faux accepté ne bloque jamais la vraie valeur', () => {
 				).toBeLessThanOrEqual(1830)
 			}
 		}
+	})
+})
+
+describe('redémarrage : l’historique de la synchro survit (cinquième relecture)', () => {
+	const cs = (step: number) => both(step)['coeurs-sombres']
+	const withCs = (step: number, c: BookCounts) => ({
+		...both(step),
+		'coeurs-sombres': c,
+	})
+	// Faux à la baisse juste sous la borne (1 830 lectures pour un pas), accepté, puis redémarrage.
+	for (const [label, delay] of [
+		['1 h', 3600 * 1000],
+		['6 h', SIX_HOURS],
+	] as const) {
+		test(`faux à la baisse accepté puis redémarrage, relevé ${label} après : la vraie valeur passe tout de suite`, async () => {
+			const pb = makeStore()
+			await releve(pb, both(1))
+			const fake = { ...cs(2), reads: cs(1).reads - 1830 }
+			expect(
+				(await releve(pb, withCs(2, fake))).out('coeurs-sombres').outcome
+			).toBe('ecrit')
+			restart()
+			// Relevé de démarrage (10 s après), puis toutes les 6 h.
+			const first = await releve(pb, both(3), delay + TEN_SECONDS)
+			expect(first.out('coeurs-sombres').outcome).toBe('ecrit')
+			expect(shown(first.display.books['coeurs-sombres'])).toEqual(cs(3))
+			for (let step = 4; step <= 6; step++) {
+				const r = await releve(pb, both(step))
+				expect(r.out('coeurs-sombres').outcome).toBe('ecrit')
+				expect(shown(r.display.books['coeurs-sombres'])).toEqual(cs(step))
+			}
+		})
+	}
+
+	test('panne de 2 jours, faux de −14 000 accepté, redémarrage : la vraie valeur passe au relevé suivant', async () => {
+		const pb = makeStore()
+		await releve(pb, both(1))
+		for (let i = 0; i < 7; i++)
+			await releve(pb, { 'au-prix-du-silence': null, 'coeurs-sombres': null })
+		const fake = { ...cs(9), reads: cs(1).reads - 14_000 }
+		expect(
+			(await releve(pb, withCs(9, fake))).out('coeurs-sombres').outcome
+		).toBe('ecrit')
+		restart()
+		const r = await releve(pb, both(10), TEN_SECONDS)
+		expect(r.out('coeurs-sombres').outcome).toBe('ecrit')
+		expect(r.out('coeurs-sombres').reason).toContain(
+			'cohérent avec la valeur du'
+		)
+		expect(shown(r.display.books['coeurs-sombres'])).toEqual(cs(10))
+	})
+
+	test('jour de chapitre coupé par un redémarrage : le pic de votes passe tout de suite', async () => {
+		const pb = makeStore()
+		const s = snapshot['coeurs-sombres']
+		const t1 = { parts: s.parts + 1, reads: s.reads + 150, votes: s.votes + 10 }
+		expect(
+			(await releve(pb, withCs(1, t1))).out('coeurs-sombres').outcome
+		).toBe('ecrit')
+		restart()
+		const t2 = {
+			parts: s.parts + 1,
+			reads: t1.reads + 400,
+			votes: t1.votes + 60,
+		}
+		const r2 = await releve(pb, withCs(2, t2))
+		expect(r2.out('coeurs-sombres').outcome).toBe('ecrit')
+		expect(shown(r2.display.books['coeurs-sombres'])).toEqual(t2)
+		const t3 = {
+			parts: s.parts + 1,
+			reads: t2.reads + 100,
+			votes: t2.votes + 2,
+		}
+		expect(
+			(await releve(pb, withCs(3, t3))).out('coeurs-sombres').outcome
+		).toBe('ecrit')
+	})
+
+	test('le même pic de votes sans chapitre dans l’historique reste refusé (la marge n’est pas élargie)', async () => {
+		const pb = makeStore()
+		await releve(pb, both(1))
+		restart()
+		const t2 = { ...cs(2), reads: cs(1).reads + 400, votes: cs(1).votes + 70 }
+		const r = await releve(pb, withCs(2, t2))
+		expect(r.out('coeurs-sombres').outcome).toBe('refuse')
+	})
+
+	test('historique illisible et impossible à garder : la synchro écrit quand même, l’historique reste en mémoire', async () => {
+		const pb = makeStore()
+		pb.ctl.historyReadFails = true
+		pb.ctl.historyWriteFails = true
+		await releve(pb, both(1))
+		const fake = { ...cs(2), reads: cs(1).reads - 1830 }
+		const r2 = await releve(pb, withCs(2, fake))
+		expect(r2.report.books.map(b => b.outcome)).toEqual(['ecrit', 'ecrit'])
+		// Sans redémarrage, la mémoire suffit.
+		const r3 = await releve(pb, both(3))
+		expect(r3.out('coeurs-sombres').outcome).toBe('ecrit')
+		expect(pb.history).toEqual({})
+	})
+
+	test('anomalie confirmée : l’historique gardé repart de la nouvelle valeur, l’ancienne n’est plus une référence', async () => {
+		const pb = makeStore()
+		await releve(pb, both(1))
+		// Vrai recul (recompte de Wattpad) de 20 000 lectures, confirmé au 3e relevé.
+		for (let step = 2; step <= 4; step++)
+			await releve(
+				pb,
+				withCs(step, { ...cs(step), reads: cs(step).reads - 20_000 })
+			)
+		expect(pb.history['coeurs-sombres'].counts.reads).toBe(cs(4).reads - 20_000)
+		restart()
+		// Un faux qui revient à l’ancienne valeur n’est pas accepté grâce à elle.
+		const r = await releve(pb, both(5))
+		expect(r.out('coeurs-sombres').outcome).toBe('refuse')
 	})
 })
 

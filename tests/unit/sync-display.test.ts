@@ -13,7 +13,9 @@ import {
 import { buildHealth } from '@/lib/wattpad-sync/health'
 import {
 	createPocketBaseStore,
+	readHistoryRecord,
 	readRecord,
+	toHistoryFields,
 	toRecordFields,
 } from '@/lib/wattpad-sync/store'
 import { getSyncState, resetSyncState, runSync } from '@/lib/wattpad-sync/sync'
@@ -118,8 +120,8 @@ describe('synchro : modes de panne', () => {
 	})
 	test('relevé valide : écrit les chiffres exacts', async () => {
 		const pb = memoryStore({
-			'coeurs-sombres': stored(CS),
 			'au-prix-du-silence': stored(APS),
+			'coeurs-sombres': stored(CS),
 		})
 		const report = await runSync({ fetchCounts: okSource, store: pb.store })
 		expect(report.success).toBe(true)
@@ -147,8 +149,8 @@ describe('synchro : modes de panne', () => {
 	})
 	test('recul : refusé deux fois, accepté à la troisième confirmation', async () => {
 		const pb = memoryStore({
-			'coeurs-sombres': stored(CS),
 			'au-prix-du-silence': stored(APS),
+			'coeurs-sombres': stored(CS),
 		})
 		const drop = fromWattpad(book =>
 			book === 'coeurs-sombres'
@@ -189,8 +191,8 @@ describe('synchro : modes de panne', () => {
 	})
 	test('redémarrage : l’état en mémoire repart de zéro, la référence reste PocketBase', async () => {
 		const pb = memoryStore({
-			'coeurs-sombres': stored(CS),
 			'au-prix-du-silence': stored(APS),
+			'coeurs-sombres': stored(CS),
 		})
 		await runSync({ fetchCounts: okSource, store: pb.store })
 		resetSyncState() // simule un redémarrage du conteneur
@@ -798,5 +800,99 @@ describe('lecture PocketBase par roman', () => {
 		await expect(createPocketBaseStore(() => fakePb).readAll()).rejects.toThrow(
 			'down'
 		)
+	})
+})
+
+describe('historique de la synchro dans PocketBase', () => {
+	const value = {
+		checkedAt: '2026-11-02T12:00:00.000Z',
+		counts: { parts: 48, reads: 366177, votes: 11126 },
+	}
+	const row = (extra: Record<string, unknown>) =>
+		({
+			book: 'coeurs-sombres',
+			created: '',
+			id: 'h',
+			updated: '',
+			...toHistoryFields('coeurs-sombres', value),
+			...extra,
+		}) as any
+
+	test('enregistrement inactif marqué : relu tel qu’écrit', () => {
+		expect(toHistoryFields('coeurs-sombres', value)).toEqual({
+			book: 'coeurs-sombres',
+			is_active: false,
+			parts: '48',
+			reads: 'historique-synchro 2026-11-02T12:00:00.000Z',
+			reads_complete: '366177',
+			votes: '11126',
+		})
+		expect(readHistoryRecord(row({}))).toEqual(value)
+	})
+	test('ancien enregistrement désactivé, enregistrement actif, chiffres invalides : jamais une référence', () => {
+		expect(readHistoryRecord(row({ reads: '300K' }))).toBeNull()
+		expect(readHistoryRecord(row({ is_active: true }))).toBeNull()
+		expect(readHistoryRecord(row({ votes: '0' }))).toBeNull()
+		expect(readHistoryRecord(row({ reads_complete: '366K' }))).toBeNull()
+		expect(
+			readHistoryRecord(row({ reads: 'historique-synchro pas une date' }))
+		).toBeNull()
+	})
+	test('écriture : met à jour l’enregistrement marqué, sinon en crée un, jamais un actif', async () => {
+		const calls: any[] = []
+		let items: any[] = []
+		const fakePb = {
+			collection: () => ({
+				create: async (fields: any) => calls.push(['create', fields]),
+				getList: async (_p: number, _n: number, o: any) => {
+					calls.push(['list', o.filter])
+					return { items }
+				},
+				update: async (id: string, fields: any) =>
+					calls.push(['update', id, fields]),
+			}),
+		} as any
+		const store = createPocketBaseStore(
+			() => fakePb,
+			async () => true
+		)
+		await store.writeHistory!('coeurs-sombres', value)
+		expect(calls).toEqual([
+			[
+				'list',
+				'is_active = false && book = "coeurs-sombres" && reads ~ "historique-synchro "',
+			],
+			['create', toHistoryFields('coeurs-sombres', value)],
+		])
+		calls.length = 0
+		items = [row({})]
+		await store.writeHistory!('coeurs-sombres', value)
+		expect(calls[1]).toEqual([
+			'update',
+			'h',
+			toHistoryFields('coeurs-sombres', value),
+		])
+		expect(await store.readHistory!()).toEqual({
+			'au-prix-du-silence': undefined,
+			'coeurs-sombres': value,
+		} as any)
+	})
+	test('sans jeton : aucune écriture de l’historique', async () => {
+		let writes = 0
+		const fakePb = {
+			collection: () => ({
+				create: async () => writes++,
+				getList: async () => ({ items: [] }),
+				update: async () => writes++,
+			}),
+		} as any
+		const store = createPocketBaseStore(
+			() => fakePb,
+			async () => false
+		)
+		await expect(store.writeHistory!('coeurs-sombres', value)).rejects.toThrow(
+			'jeton absent'
+		)
+		expect(writes).toBe(0)
 	})
 })

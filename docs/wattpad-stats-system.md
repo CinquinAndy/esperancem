@@ -16,7 +16,10 @@ Le site n'affiche jamais un chiffre lu en direct sur Wattpad. Il affiche la **de
    chapitres ± 2. Rythme réel (02/11/2026) : +100 lectures et +1 vote par 6 h (Cœurs sombres), +40 lectures (Au prix
    du silence), jusqu'à +400 lectures et +60 votes le jour d'un chapitre. Un relevé dans les bornes de la référence,
    ou d'une des 4 dernières valeurs écrites (mêmes bornes, jamais élargies), est écrit tout de suite : un faux qui
-   passe juste sous une borne ne bloque donc jamais la vraie valeur suivante. Hors bornes, recul ou bond est refusé
+   passe juste sous une borne ne bloque donc pas la vraie valeur suivante, et le pic de votes qui suit un nouveau
+   chapitre passe grâce à la valeur d'avant le chapitre. Les bornes symétriques seules n'y suffiraient pas : la
+   vraie valeur continue de croître pendant qu'un faux à la baisse reste au bord de la borne. La valeur d'avant la
+   valeur actuelle est donc aussi gardée dans PocketBase (voir Stockage) et relue après un redémarrage. Hors bornes, recul ou bond est refusé
    tant que 3 relevés successifs ne le confirment pas. Ne comptent comme confirmation que des relevés plausibles,
    avec exactement les mêmes anomalies et proches du relevé anormal précédent sur les trois chiffres (2 % d'écart au
    plus, ou 2 chapitres) ; un échec de lecture, un relevé invraisemblable ou un relevé normal remettent le compte à
@@ -24,6 +27,11 @@ Le site n'affiche jamais un chiffre lu en direct sur Wattpad. Il affiche la **de
    moins 2) exige en plus 7 jours de relevés cohérents sans interruption.
 4. **Stockage** : la collection PocketBase existante `wattpad_stats`, mêmes champs qu'avant. Aucune migration.
    Lecture d'un enregistrement par roman (le plus récent actif), quelle que soit la taille de la collection.
+   Historique de la synchro : un enregistrement **inactif** de plus par roman (`is_active = false`, champ `reads`
+   commençant par `historique-synchro ` suivi de la date de la valeur), qui garde la valeur écrite avant la valeur
+   actuelle. Le site et l'ancien code ne lisent que les enregistrements actifs ; les anciens enregistrements
+   désactivés, sans cette marque, ne servent jamais de référence. Si cet enregistrement ne peut être ni lu ni
+   écrit, la synchro écrit quand même et garde l'historique en mémoire seulement (message dans les journaux).
 5. **Affichage** (`src/lib/wattpad-sync/display.ts`) : parmi PocketBase, la mémoire du processus et le relevé
    committé `src/data/wattpad-releve.json`, la valeur la plus récemment confirmée par Wattpad (à égalité, la plus
    haute). Toutes ont été validées : un chiffre ne vaut jamais 0, ne recule au-delà des bornes que si le recul a été
@@ -48,7 +56,9 @@ jamais d'appel à Wattpad ni d'écriture.
 - `synchro` : dernière tentative, échecs consécutifs, résultat et motif par roman (`ecrit`, `refuse`,
   `echec-wattpad`, `echec-ecriture`, `pocketbase-injoignable`).
 
-La dernière tentative est gardée en mémoire : après un redémarrage, elle est vide jusqu'au relevé de +10 s.
+La dernière tentative est gardée en mémoire : après un redémarrage, elle est vide jusqu'au relevé de +10 s. Les
+confirmations d'anomalie en cours (1/3, 2/3) le sont aussi : un redémarrage les fait repartir de zéro, ce qui retarde
+une vraie anomalie sans jamais en accepter une fausse.
 
 ## Commandes
 

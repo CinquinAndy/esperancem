@@ -129,7 +129,17 @@ describe('route de synchro protégée', () => {
 		expect(status).toBe(200)
 		expect(body.results.map((r: any) => r.outcome)).toEqual(['ecrit', 'ecrit'])
 		const w = await writes()
-		expect(w.map(x => x.body.reads_complete)).toEqual(['366500', '137300'])
+		const active = w.filter(x => x.body.is_active)
+		expect(active.map(x => x.body.reads_complete)).toEqual(['366500', '137300'])
+		// Historique de la synchro : la valeur d'avant, dans un enregistrement inactif marqué (créé une fois).
+		const history = w.filter(x => x.body.is_active === false)
+		expect(history.map(x => [x.method, x.body.reads_complete])).toEqual([
+			['POST', '366177'],
+			['POST', '137098'],
+		])
+		expect(
+			history.every(x => x.body.reads.startsWith('historique-synchro '))
+		).toBe(true)
 		expect(w.every(x => x.auth)).toBe(true)
 	})
 })

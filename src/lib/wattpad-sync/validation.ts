@@ -39,8 +39,10 @@ export const CONFIRMATIONS_REQUIRED = 3
  * au temps écoulé depuis la référence, compté en pas de 6 h (le rythme du minuteur), au moins un pas.
  * Rythme réel observé (02/11/2026) : Cœurs sombres environ +100 lectures et +1 vote par 6 h, Au prix du
  * silence environ +40 lectures ; le jour d'un chapitre, jusqu'à +400 lectures et +60 votes.
- * Symétriques : si un faux relevé passe juste sous une borne, la vraie valeur suivante, qui s'en écarte
- * d'autant dans l'autre sens, passe aussi ; un faux accepté ne bloque donc pas la vraie valeur.
+ * Symétriques, mais cela ne suffit pas à rattraper un faux accepté : pendant qu'un faux à la baisse reste au
+ * bord de la borne, la vraie valeur continue de croître et s'en écarte de plus d'une borne. C'est l'historique
+ * de la synchro (`SyncState.history`, dont la valeur d'avant la valeur actuelle est gardée dans PocketBase)
+ * qui fait passer la vraie valeur suivante, y compris après un redémarrage.
  */
 export const STEP_MS = 6 * 3600 * 1000
 /** Au-delà de 7 jours sans référence plus récente, les bornes cessent de s'élargir. */

@@ -49,6 +49,18 @@ function initialStats() {
 			updated,
 			votes: '6570',
 		},
+		// Ancien enregistrement désactivé, plausible : ne doit servir ni d'affichage ni de référence.
+		{
+			book: 'coeurs-sombres',
+			created: '2025-03-01 09:00:00.000Z',
+			id: 'w0',
+			is_active: false,
+			parts: '40',
+			reads: '300K',
+			reads_complete: '300000',
+			updated: '2025-03-01 09:00:00.000Z',
+			votes: '9000',
+		},
 	]
 }
 
@@ -58,8 +70,6 @@ export function startStub() {
 	let writes: any[] = []
 
 	const server = Bun.serve({
-		hostname: '127.0.0.1',
-		port: 0,
 		async fetch(req) {
 			const url = new URL(req.url)
 			if (url.pathname === '/__mode') {
@@ -112,10 +122,15 @@ export function startStub() {
 			const [, name, id] = col
 			if (req.method === 'GET') {
 				let items: any[] = name === 'wattpad_stats' ? stats : []
-				const book = url.searchParams
-					.get('filter')
-					?.match(/book = "([^"]+)"/)?.[1]
+				// Comme PocketBase : filtres sur le roman, l'état actif et le début du champ `reads`.
+				const filter = url.searchParams.get('filter') ?? ''
+				const book = filter.match(/book = "([^"]+)"/)?.[1]
+				const active = filter.match(/is_active = (true|false)/)?.[1]
+				const like = filter.match(/reads ~ "([^"]+)"/)?.[1]
 				if (book) items = items.filter(i => i.book === book)
+				if (active)
+					items = items.filter(i => i.is_active === (active === 'true'))
+				if (like) items = items.filter(i => String(i.reads).includes(like))
 				return Response.json({
 					items,
 					page: 1,
@@ -135,8 +150,20 @@ export function startStub() {
 			const now = new Date().toISOString().replace('T', ' ')
 			const rec = stats.find(s => s.id === id)
 			if (rec) Object.assign(rec, body, { updated: now })
+			else if (req.method === 'POST' && name === 'wattpad_stats') {
+				const created = {
+					...body,
+					created: now,
+					id: `n${stats.length + 1}`,
+					updated: now,
+				}
+				stats.push(created)
+				return Response.json(created)
+			}
 			return Response.json(rec ?? body)
 		},
+		hostname: '127.0.0.1',
+		port: 0,
 	})
 	return { server, url: `http://127.0.0.1:${server.port}` }
 }
