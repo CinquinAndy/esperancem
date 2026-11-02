@@ -66,7 +66,8 @@ export function resetDisplayMemory() {
 /**
  * Choisit la valeur à afficher : la plus récemment confirmée par Wattpad parmi PocketBase, la mémoire du
  * processus et le relevé committé (à égalité de date, la plus avancée en lectures). Toutes ont été validées
- * avant d'être retenues : 0 est impossible, et un recul n'apparaît que s'il a été confirmé par la synchro.
+ * avant d'être retenues : 0 est impossible, et un recul au-delà des bornes d'un relevé normal n'apparaît que
+ * s'il a été confirmé par la synchro.
  * Une base restée en arrière (plus ancienne) ne fait donc pas reculer l'affichage.
  */
 export function pickBest(candidates: KnownStats[]): KnownStats {

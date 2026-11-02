@@ -280,6 +280,37 @@ describe('affichage : jamais 0, jamais de recul', () => {
 		expect(d.books['coeurs-sombres'].reads).toBe(CS.reads)
 		expect(d.rejected['coeurs-sombres']).toBe('lectures à zéro')
 	})
+	test('0 vote en base (lectures et chapitres normaux) : écarté, motif exposé', () => {
+		expect(
+			readRecord({
+				book: 'coeurs-sombres',
+				created: '',
+				id: '1',
+				parts: '48',
+				reads: '366K',
+				reads_complete: '366177',
+				updated: '2026-11-02 05:00:00Z',
+				votes: '0',
+			})
+		).toMatchObject({ counts: null, invalidReason: 'votes à zéro' })
+	})
+	test('relevé committé avec 0 vote : refusé au chargement', () => {
+		const books = {
+			'au-prix-du-silence': {
+				checkedAt: '2026-11-02T07:16:35.000Z',
+				parts: 50,
+				reads: 137098,
+				votes: 6570,
+			},
+			'coeurs-sombres': {
+				checkedAt: '2026-11-02T07:16:35.000Z',
+				parts: 48,
+				reads: 366177,
+				votes: 0,
+			},
+		}
+		expect(() => loadSnapshot({ books })).toThrow('coeurs-sombres')
+	})
 	test('valeur abrégée en base (« 366K ») : écartée', async () => {
 		const short = readRecord({
 			book: 'coeurs-sombres',

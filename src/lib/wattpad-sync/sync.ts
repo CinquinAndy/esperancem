@@ -132,10 +132,9 @@ function nextHistory(
 	if (coherentWith < 0) base = []
 	else if (coherentWith === 0) {
 		const last = history.at(-1)
+		// Mêmes chiffres que la dernière valeur écrite : c'est elle (la date de PocketBase diffère de la nôtre).
 		base =
-			last &&
-			last.checkedAt === previous.checkedAt &&
-			same(last.counts, previous)
+			last && same(last.counts, previous)
 				? history
 				: [
 						...history,
