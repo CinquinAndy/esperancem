@@ -2,13 +2,19 @@ import type { BookType } from '@/lib/pocketbase'
 
 import type { SourceResult } from './source'
 import type { StatsStore, StoredRecord } from './store'
-import type { BookCounts } from './types'
+import type { BookCounts, KnownStats } from './types'
 
 import { BOOKS, type BookConfig } from './books'
 import { chooseKnown, invalidateDisplayCache, loadSnapshot } from './display'
 import { fetchBookCounts } from './source'
 import { createPocketBaseStore } from './store'
-import { judge, nextPending, type PendingAnomaly } from './validation'
+import {
+	anomalies,
+	implausibility,
+	judge,
+	nextPending,
+	type PendingAnomaly,
+} from './validation'
 
 export type BookOutcome =
 	| 'ecrit'
@@ -32,8 +38,21 @@ export interface SyncReport {
 	success: boolean
 }
 
+/** Valeur écrite par la synchro, avec la date où Wattpad l'a donnée. */
+export interface AcceptedValue {
+	checkedAt: string
+	counts: BookCounts
+}
+
 export interface SyncState {
 	consecutiveFailures: number
+	/**
+	 * Dernières valeurs écrites, par roman (la plus récente en dernier, HISTORY_SIZE au plus). Un relevé
+	 * cohérent avec l'une d'elles est accepté tout de suite : si un faux relevé est passé sous les bornes,
+	 * la vraie valeur suivante reste acceptée grâce à la valeur d'avant le faux. En mémoire seulement : un
+	 * redémarrage repart de la valeur de PocketBase (les bornes symétriques suffisent alors dans le cas courant).
+	 */
+	history: Partial<Record<BookType, AcceptedValue[]>>
 	lastAttemptAt: string | null
 	lastReport: SyncReport | null
 	/** Dernière confirmation par Wattpad, par roman (même si les chiffres n'ont pas bougé). */
@@ -56,6 +75,8 @@ export interface SyncDeps {
 }
 
 export const MIN_INTERVAL_MS = 15 * 60 * 1000
+/** Valeurs écrites gardées par roman : un jour de relevés toutes les 6 h. */
+const HISTORY_SIZE = 4
 
 // État partagé par tout le processus : Next charge ce module plusieurs fois (instrumentation, routes,
 // pages), une variable de module ne serait pas vue par la route de santé.
@@ -65,6 +86,7 @@ const shared = globalThis as typeof globalThis & {
 function emptyState(): SyncState {
 	return {
 		consecutiveFailures: 0,
+		history: {},
 		lastAttemptAt: null,
 		lastReport: null,
 		lastSuccessAt: {},
@@ -83,15 +105,57 @@ export function resetSyncState() {
 	sync.running = null
 }
 
+function elapsedSince(nowMs: number, checkedAt: string) {
+	const at = Date.parse(checkedAt)
+	// Date absente ou dans le futur (horloges décalées) : un pas de 6 h, le minimum des bornes.
+	return Number.isNaN(at) ? undefined : Math.max(0, nowMs - at)
+}
+
 function same(a: BookCounts, b: BookCounts | null) {
 	return (
 		!!b && a.reads === b.reads && a.votes === b.votes && a.parts === b.parts
 	)
 }
 
+/**
+ * Valeurs écrites après une écriture réussie. Accepté grâce à une valeur plus ancienne : les valeurs plus
+ * récentes que celle-ci (le faux relevé passé) sont oubliées. Anomalie confirmée : on repart de la nouvelle
+ * valeur seule.
+ */
+function nextHistory(
+	history: AcceptedValue[],
+	previous: KnownStats,
+	coherentWith: number,
+	written: AcceptedValue
+): AcceptedValue[] {
+	let base: AcceptedValue[]
+	if (coherentWith < 0) base = []
+	else if (coherentWith === 0) {
+		const last = history.at(-1)
+		base =
+			last &&
+			last.checkedAt === previous.checkedAt &&
+			same(last.counts, previous)
+				? history
+				: [
+						...history,
+						{
+							checkedAt: previous.checkedAt,
+							counts: {
+								parts: previous.parts,
+								reads: previous.reads,
+								votes: previous.votes,
+							},
+						},
+					]
+	} else base = history.slice(0, history.length - coherentWith + 1)
+	return [...base, written].slice(-HISTORY_SIZE)
+}
+
 async function syncOnce(deps: SyncDeps): Promise<SyncReport> {
 	const now = deps.now ?? Date.now
-	const at = new Date(now()).toISOString()
+	const nowMs = now()
+	const at = new Date(nowMs).toISOString()
 	const books = deps.books ?? BOOKS
 	const store = deps.store ?? createPocketBaseStore()
 	const fetchCounts = deps.fetchCounts ?? (book => fetchBookCounts(book))
@@ -129,14 +193,44 @@ async function syncOnce(deps: SyncDeps): Promise<SyncReport> {
 			})
 			continue
 		}
-		const pending = nextPending(
-			state.pending[book.type],
-			fetched.counts,
-			previous
-		)
+		const counts = fetched.counts
+		const history = state.history[book.type] ?? []
+		const elapsedMs = elapsedSince(nowMs, previous.checkedAt)
+		// Référence affichée d'abord, puis les valeurs écrites plus anciennes (de la plus récente à la plus
+		// ancienne) : la première avec laquelle le relevé est cohérent l'accepte. Toutes sont jugées avec le
+		// temps écoulé depuis la référence affichée : une valeur plus ancienne n'élargit jamais les bornes
+		// (sinon un faux de +48 votes passerait en comparant à la valeur d'il y a 12 h).
+		const coherentWith = implausibility(counts)
+			? -1
+			: [
+					{ checkedAt: previous.checkedAt, counts: previous },
+					...[...history].reverse(),
+				].findIndex(
+					ref => anomalies(counts, ref.counts, elapsedMs).length === 0
+				)
+		let pending: PendingAnomaly | null = null
+		let verdict: ReturnType<typeof judge>
+		if (coherentWith >= 0) {
+			verdict = { accepted: true }
+			if (coherentWith > 0) {
+				const ref = history[history.length - coherentWith]
+				verdict.confirmedAnomaly = `cohérent avec la valeur du ${ref.checkedAt} : ${previous.reads} lectures, ${previous.votes} votes, ${previous.parts} chapitres écartés`
+			}
+		} else {
+			pending = nextPending(state.pending[book.type], counts, previous, {
+				elapsedMs,
+				now: nowMs,
+			})
+			verdict = judge(counts, previous, pending?.count ?? 0, {
+				elapsedMs,
+				floor: snapshot[book.type],
+				pendingForMs: pending?.since
+					? Math.max(0, nowMs - Date.parse(pending.since))
+					: 0,
+			})
+		}
 		if (pending) state.pending[book.type] = pending
 		else delete state.pending[book.type]
-		const verdict = judge(fetched.counts, previous, pending?.count ?? 0)
 		if (!verdict.accepted) {
 			reports.push({
 				book: book.type,
@@ -163,6 +257,10 @@ async function syncOnce(deps: SyncDeps): Promise<SyncReport> {
 			continue
 		}
 		delete state.pending[book.type]
+		state.history[book.type] = nextHistory(history, previous, coherentWith, {
+			checkedAt: at,
+			counts: { ...counts },
+		})
 		state.lastSuccessAt[book.type] = at
 		if (!same(fetched.counts, stored)) changed = true
 		reports.push({

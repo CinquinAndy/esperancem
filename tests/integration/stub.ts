@@ -17,7 +17,8 @@ const API: Record<
 	string,
 	{ numParts: number; readCount: number; voteCount: number }
 > = {
-	'368278312': { numParts: 48, readCount: 366500, voteCount: 11200 },
+	// Une heure après la base (366 177 lectures, 11 126 votes) : progression réaliste, dans les bornes d'un relevé.
+	'368278312': { numParts: 48, readCount: 366500, voteCount: 11140 },
 	'395344686': { numParts: 50, readCount: 137300, voteCount: 6600 },
 }
 

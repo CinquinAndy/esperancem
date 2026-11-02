@@ -141,7 +141,7 @@ describe('modes de panne, de bout en bout côté serveur', () => {
 		['garbage', 'echec-wattpad'],
 		['partial', 'echec-wattpad'],
 		['format', 'echec-wattpad'],
-		['zero', 'refuse'],
+		['zero', 'echec-wattpad'],
 	]
 	for (const [wattpad, outcome] of cases) {
 		test(`Wattpad « ${wattpad} » : ${outcome}, rien écrit, l’affichage garde la dernière valeur bonne`, async () => {

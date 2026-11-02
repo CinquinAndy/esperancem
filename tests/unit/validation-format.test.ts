@@ -6,6 +6,7 @@ import {
 	legacyThousands,
 } from '@/lib/wattpad-sync/format'
 import {
+	anomalies,
 	CONFIRMATIONS_REQUIRED,
 	implausibility,
 	judge,
@@ -52,6 +53,9 @@ describe('implausibility', () => {
 		expect(implausibility({ parts: 0, reads: 10, votes: 1 })).toBe(
 			'chapitres à zéro'
 		)
+		expect(implausibility({ parts: 48, reads: 366177, votes: 0 })).toBe(
+			'votes à zéro'
+		)
 	})
 	test('incohérences refusées', () => {
 		expect(implausibility({ parts: 48, reads: 10, votes: 20 })).toBe(
@@ -89,10 +93,17 @@ describe('judge', () => {
 		const confirmed = judge(drop, previous, CONFIRMATIONS_REQUIRED)
 		expect(confirmed.accepted).toBe(true)
 	})
-	test('légère baisse des votes (votes retirés) acceptée', () => {
+	test('légère baisse des votes (quelques votes retirés) acceptée', () => {
 		expect(
-			judge({ parts: 48, reads: 366200, votes: 11000 }, previous, 0).accepted
+			judge({ parts: 48, reads: 366200, votes: 11115 }, previous, 0).accepted
 		).toBe(true)
+	})
+	test('baisse des votes au-delà de la borne absolue refusée (−122, puis −1,9 %)', () => {
+		for (const votes of [11000, Math.round(11122 * 0.981)]) {
+			expect(
+				judge({ parts: 48, reads: 366200, votes }, previous, 1).accepted
+			).toBe(false)
+		}
 	})
 	test('forte baisse des votes refusée', () => {
 		expect(
@@ -125,21 +136,76 @@ describe('judge', () => {
 	})
 	test('hausses réelles acceptées : votes et chapitres au rythme normal', () => {
 		for (const ok of [
-			{ parts: 49, reads: 366500, votes: 11140 },
-			{ parts: 53, reads: 370000, votes: 11300 },
-			{ parts: 48, reads: 500000, votes: 11126 },
+			{ parts: 48, reads: 366264, votes: 11124 },
+			{ parts: 49, reads: 366564, votes: 11182 },
+			{ parts: 50, reads: 366464, votes: 11162 },
+			// Lectures en retard sur les votes le jour d'un chapitre (Au prix du silence).
+			{ parts: 49, reads: 366204, votes: 11182 },
 		]) {
 			expect(judge(ok, previous, 0)).toEqual({ accepted: true })
 		}
 	})
+	test('faux relevés juste sous les anciens seuils : refusés', () => {
+		for (const bad of [
+			{ parts: 48, reads: 366164 + 5000, votes: 11124 },
+			{ parts: 48, reads: Math.round(366164 * 1.4), votes: 11124 },
+			{ parts: 51, reads: 366264, votes: 11124 },
+			{ parts: 53, reads: 366264, votes: 11124 },
+			{ parts: 48, reads: 366264, votes: 11122 + 48 },
+			{ parts: 45, reads: 366264, votes: 11124 },
+		]) {
+			expect(judge(bad, previous, 1).accepted).toBe(false)
+		}
+	})
+	test('bornes symétriques : un faux juste sous la borne puis la vraie valeur passent tous les deux', () => {
+		const truth = { parts: 48, reads: 366264, votes: 11124 }
+		const fake = { parts: 50, reads: 366164 + 1800, votes: 11122 + 50 }
+		expect(judge(fake, previous, 0).accepted).toBe(true)
+		expect(judge(truth, fake, 0).accepted).toBe(true)
+	})
+	test('bornes proportionnelles au temps écoulé', () => {
+		const twoDays = 2 * 24 * 3600_000
+		const later = { parts: 49, reads: 366164 + 4000, votes: 11122 + 30 }
+		expect(anomalies(later, previous)).not.toEqual([])
+		expect(anomalies(later, previous, twoDays)).toEqual([])
+		// Plafonnées à 7 jours : une référence très ancienne n'ouvre pas la porte à ×1,4.
+		const fake = { ...later, reads: Math.round(366164 * 1.4) }
+		expect(anomalies(fake, previous, 365 * 24 * 3600_000)).not.toEqual([])
+	})
+	test('anomalie grave (chapitres 48 → 1, votes ÷1000) : 3 relevés ne suffisent pas, il faut 7 jours', () => {
+		const bad = { parts: 1, reads: 361197, votes: 11 }
+		const v = judge(bad, previous, 10, { pendingForMs: 6 * 24 * 3600_000 })
+		expect(v.accepted).toBe(false)
+		if (!v.accepted) expect(v.reason).toContain('anomalie grave')
+		expect(
+			judge(bad, previous, 2, { pendingForMs: 8 * 24 * 3600_000 }).accepted
+		).toBe(false)
+	})
+	test('chapitres sous le relevé committé : anomalie grave', () => {
+		const floor = { parts: 48, reads: 366177, votes: 11126 }
+		const v = judge({ parts: 40, reads: 366200, votes: 11120 }, previous, 3, {
+			floor,
+		})
+		expect(v.accepted).toBe(false)
+		if (!v.accepted) expect(v.reason).toContain('sous le relevé committé')
+	})
 	test('toutes les anomalies du relevé sont signalées, pas seulement la première', () => {
-		const v = judge({ parts: 1, reads: 361197, votes: 11 }, previous, 3)
+		const v = judge({ parts: 1, reads: 361197, votes: 11 }, previous, 3, {
+			pendingForMs: 7 * 24 * 3600_000,
+		})
 		expect(v.accepted).toBe(true)
 		if (v.accepted) {
 			expect(v.confirmedAnomaly).toContain('lectures 366164 → 361197')
 			expect(v.confirmedAnomaly).toContain('votes 11122 → 11')
 			expect(v.confirmedAnomaly).toContain('chapitres 48 → 1')
 		}
+	})
+	test('0 vote refusé même confirmé', () => {
+		expect(
+			judge({ parts: 48, reads: 366200, votes: 0 }, previous, 10, {
+				pendingForMs: 30 * 24 * 3600_000,
+			}).accepted
+		).toBe(false)
 	})
 	test('zéro refusé même confirmé', () => {
 		expect(judge({ parts: 0, reads: 0, votes: 0 }, previous, 10).accepted).toBe(
@@ -170,14 +236,17 @@ describe('nextPending', () => {
 		).toBeNull()
 	})
 	test('même anomalie, valeur proche : le compte avance', () => {
-		const one = nextPending(null, at(300000), previous)
+		const one = nextPending(null, at(300000), previous, { now: 0 })
 		expect(one).toEqual({
 			count: 1,
 			counts: at(300000),
 			signature: 'recul:reads',
+			since: new Date(0).toISOString(),
 		})
-		const two = nextPending(one, at(305000), previous)
+		const two = nextPending(one, at(305000), previous, { now: 6 * 3600_000 })
 		expect(two?.count).toBe(2)
+		// La série garde la date de son premier relevé.
+		expect(two?.since).toBe(new Date(0).toISOString())
 	})
 	test('valeur éloignée de plus de 2 % : le compte repart à 1', () => {
 		const one = nextPending(null, at(300000), previous)

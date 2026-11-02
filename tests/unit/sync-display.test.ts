@@ -153,7 +153,7 @@ describe('synchro : modes de panne', () => {
 		const drop = fromWattpad(book =>
 			book === 'coeurs-sombres'
 				? {
-						counts: { ...fresh[book], reads: CS.reads - 500 },
+						counts: { ...fresh[book], reads: CS.reads - 5000 },
 						ok: true,
 						via: 'api',
 					}
@@ -195,8 +195,9 @@ describe('synchro : modes de panne', () => {
 		await runSync({ fetchCounts: okSource, store: pb.store })
 		resetSyncState() // simule un redémarrage du conteneur
 		resetDisplayMemory()
+		// Recul hors bornes (−5 000 lectures en un relevé) : la mémoire perdue ne le rend pas acceptable.
 		const lower = fromWattpad(book => ({
-			counts: { ...fresh[book], reads: fresh[book].reads - 1 },
+			counts: { ...fresh[book], reads: fresh[book].reads - 5000 },
 			ok: true,
 			via: 'api',
 		}))
@@ -600,8 +601,8 @@ describe('confirmation d’une anomalie : trois relevés plausibles, de même na
 		expect(r.written).toEqual([])
 		expect(r.displayed).toBe(base.reads)
 	})
-	test('366 000, 1 500 000, 200 000 : anomalies de natures différentes, 200 000 refusé', async () => {
-		const r = await play([reads(366_000), reads(1_500_000), reads(200_000)])
+	test('360 000, 1 500 000, 200 000 : anomalies de natures différentes, 200 000 refusé', async () => {
+		const r = await play([reads(360_000), reads(1_500_000), reads(200_000)])
 		expect(r.outcomes).toEqual(['refuse', 'refuse', 'refuse'])
 		expect(r.reasons).toEqual([
 			expect.stringContaining('recul à confirmer (1/3)'),

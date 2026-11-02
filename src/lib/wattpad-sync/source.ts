@@ -1,7 +1,7 @@
 import type { BookConfig } from './books'
 import type { BookCounts } from './types'
 
-import { parseExactCount } from './validation'
+import { implausibility, parseExactCount } from './validation'
 
 export interface SourceOptions {
 	baseUrl?: string
@@ -73,6 +73,9 @@ async function fromApi(
 	if (counts.reads === null || counts.votes === null || counts.parts === null) {
 		return { error: 'api : champs absents ou au mauvais format', ok: false }
 	}
+	// Chiffres impossibles (0 vote, 0 lecture…) : l'API est cassée, on tente la page.
+	const wrong = implausibility(counts as BookCounts)
+	if (wrong) return { error: `api : ${wrong}`, ok: false }
 	return { counts: counts as BookCounts, ok: true, via: 'api' }
 }
 
@@ -113,6 +116,8 @@ async function fromPage(
 		return { error: `page : HTTP ${response.status}`, ok: false }
 	const counts = parseStoryPage(await response.text())
 	if (!counts) return { error: 'page : chiffres introuvables', ok: false }
+	const wrong = implausibility(counts)
+	if (wrong) return { error: `page : ${wrong}`, ok: false }
 	return { counts, ok: true, via: 'page' }
 }
 

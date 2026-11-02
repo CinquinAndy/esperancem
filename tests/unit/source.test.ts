@@ -154,14 +154,38 @@ describe('fetchBookCounts : modes de panne de Wattpad', () => {
 		if (!r.ok)
 			expect(r.error).toBe('api : délai dépassé ; page : délai dépassé')
 	})
-	test('zéros renvoyés par l’API : la source les transmet, la validation les refusera', async () => {
-		const { r } = await run(() =>
-			api({ ...ok, numParts: 0, readCount: 0, voteCount: 0 })
+	test('zéros renvoyés par l’API, page illisible : échec, rien de transmis', async () => {
+		const { r } = await run(url =>
+			url.includes('/api/')
+				? api({ ...ok, numParts: 0, readCount: 0, voteCount: 0 })
+				: new Response('<html></html>')
 		)
 		expect(r).toEqual({
-			counts: { parts: 0, reads: 0, votes: 0 },
+			error: 'api : lectures à zéro ; page : chiffres introuvables',
+			ok: false,
+		})
+	})
+	test('0 vote renvoyé par l’API : la page prend le relais avec les vrais chiffres', async () => {
+		const { r } = await run(url =>
+			url.includes('/api/')
+				? api({ ...ok, voteCount: 0 })
+				: new Response(storyPage)
+		)
+		expect(r).toEqual({
+			counts: { parts: 48, reads: 366177, votes: 11126 },
 			ok: true,
-			via: 'api',
+			via: 'page',
+		})
+	})
+	test('0 vote sur la page aussi : échec, rien de transmis', async () => {
+		const { r } = await run(url =>
+			url.includes('/api/')
+				? api({ ...ok, voteCount: 0 })
+				: new Response(storyPage.replaceAll('11,126', '0'))
+		)
+		expect(r).toEqual({
+			error: 'api : votes à zéro ; page : votes à zéro',
+			ok: false,
 		})
 	})
 })
