@@ -14,8 +14,10 @@ export type SourceResult =
 	| { error: string; ok: false }
 
 const DEFAULT_BASE_URL = 'https://www.wattpad.com'
+// Anglais demandé : la page du roman traduit ses libellés selon cette langue (« Lectures », « Chapitres »
+// en français). Le lecteur de page accepte quand même les deux langues, au cas où l'en-tête serait ignoré.
 const HEADERS = {
-	'Accept-Language': 'fr-FR,fr;q=0.9,en;q=0.8',
+	'Accept-Language': 'en-US,en;q=0.9',
 	'User-Agent':
 		'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36',
 }
@@ -75,7 +77,7 @@ async function fromApi(
 }
 
 /**
- * Page publique du roman, en secours. Lit les libellés d'accessibilité (« Reads 366,177 »), jamais les
+ * Page publique du roman, en secours. Lit les libellés d'accessibilité (« Reads 366,177 » en anglais, « Lectures 366,177 » en français), jamais les
  * classes CSS générées (« uG9U1 ») qui changent à chaque mise en ligne de Wattpad. L'état JSON embarqué
  * n'est pas utilisé : il contient aussi les chiffres des romans recommandés.
  */
@@ -89,9 +91,9 @@ export function parseStoryPage(html: string): BookCounts | null {
 		if (values.size !== 1) return null
 		return [...values][0]
 	}
-	const reads = fromLabel('Reads')
+	const reads = fromLabel('(?:Reads|Lectures)')
 	const votes = fromLabel('Votes')
-	const parts = fromLabel('Parts')
+	const parts = fromLabel('(?:Parts|Chapitres)')
 	if (reads === null || votes === null || parts === null) return null
 	return { parts, reads, votes }
 }

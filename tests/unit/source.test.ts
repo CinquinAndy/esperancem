@@ -10,6 +10,10 @@ const storyPage = readFileSync(
 	join(fixtures, 'wattpad-story-coeurs-sombres.html'),
 	'utf8'
 )
+const storyPageFr = readFileSync(
+	join(fixtures, 'wattpad-story-coeurs-sombres-fr.html'),
+	'utf8'
+)
 const book = BOOKS[0]
 
 type Handler = (url: string) => Response | Promise<Response>
@@ -55,9 +59,16 @@ describe('parseStoryPage (page réelle du 02/11/2026)', () => {
 			votes: 11126,
 		})
 	})
-	test('page sans les libellés (format changé) : rien plutôt que 0', () => {
+	test('page servie en français (« Lectures », « Chapitres ») : lecture intacte', () => {
+		expect(parseStoryPage(storyPageFr)).toEqual({
+			parts: 48,
+			reads: 366177,
+			votes: 11126,
+		})
+	})
+	test('page sans les libellés connus (format changé) : rien plutôt que 0', () => {
 		expect(
-			parseStoryPage(storyPage.replace(/>Reads /g, '>Lectures '))
+			parseStoryPage(storyPage.replace(/>Reads /g, '>Leituras '))
 		).toBeNull()
 		expect(parseStoryPage('<html>nouvelle maquette</html>')).toBeNull()
 	})
@@ -78,6 +89,26 @@ describe('fetchBookCounts : modes de panne de Wattpad', () => {
 		})
 		expect(calls).toHaveLength(1)
 		expect(calls[0]).toContain('/api/v3/stories/368278312')
+	})
+	test('la page du roman est demandée en anglais (libellés stables)', async () => {
+		const languages: (string | null)[] = []
+		const impl = (async (_input: RequestInfo | URL, init?: RequestInit) => {
+			languages.push(new Headers(init?.headers).get('accept-language'))
+			return api('Forbidden', 403)
+		}) as typeof fetch
+		await fetchBookCounts(book, { baseUrl: 'https://w.test', fetchImpl: impl })
+		expect(languages).toHaveLength(2)
+		for (const l of languages) expect(l).toMatch(/^en/)
+	})
+	test('API refusée (403) et page servie en français : repli sur la page quand même', async () => {
+		const { r } = await run(url =>
+			url.includes('/api/') ? api('Forbidden', 403) : new Response(storyPageFr)
+		)
+		expect(r).toEqual({
+			counts: { parts: 48, reads: 366177, votes: 11126 },
+			ok: true,
+			via: 'page',
+		})
 	})
 	test('API refusée (403) : repli sur la page du roman', async () => {
 		const { r } = await run(url =>

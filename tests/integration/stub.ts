@@ -4,10 +4,15 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 
-const storyPage = readFileSync(
-	join(import.meta.dir, '..', 'fixtures', 'wattpad-story-coeurs-sombres.html'),
-	'utf8'
-)
+const fixture = (name: string) =>
+	readFileSync(join(import.meta.dir, '..', 'fixtures', name), 'utf8')
+const storyPage = fixture('wattpad-story-coeurs-sombres.html')
+const storyPageFr = fixture('wattpad-story-coeurs-sombres-fr.html')
+// Comme le vrai Wattpad (vérifié le 02/11/2026) : libellés traduits selon la première langue demandée.
+const pageFor = (req: Request) =>
+	/^\s*fr/i.test(req.headers.get('accept-language') ?? '')
+		? storyPageFr
+		: storyPage
 const API: Record<
 	string,
 	{ numParts: number; readCount: number; voteCount: number }
@@ -94,7 +99,7 @@ export function startStub() {
 					return Response.json(data)
 				}
 				if (m === 'apidown' && page![1] === '368278312')
-					return new Response(storyPage)
+					return new Response(pageFor(req))
 				return new Response('<html><body>nouvelle maquette</body></html>')
 			}
 			const col = url.pathname.match(
