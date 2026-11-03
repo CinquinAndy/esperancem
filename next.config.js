@@ -2,10 +2,8 @@
 const nextConfig = {
 	// Enable compression
 	compress: true,
-	// Enable instrumentation for cron jobs
+	// src/instrumentation.ts est chargé d'office depuis Next 15 (plus besoin d'instrumentationHook)
 	experimental: {
-		// Enable instrumentation hook for server startup tasks (like cron jobs)
-		instrumentationHook: true,
 		// Enable optimized fetch caching
 		optimizePackageImports: ['@/lib', '@/services'],
 		// Secure Server Actions configuration
@@ -78,6 +76,8 @@ const nextConfig = {
 		formats: ['image/webp', 'image/avif'],
 		imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
 		minimumCacheTTL: 86400, // 24 hours cache for images
+		// Next 16 n'accepte plus que la qualité 75 par défaut : les photos de l'accueil et de /about sont en quality={100}
+		qualities: [75, 100],
 		// Optimize image loading
 		unoptimized: false,
 	},

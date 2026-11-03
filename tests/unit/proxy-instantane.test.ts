@@ -4,7 +4,7 @@
 import { describe, expect, test } from 'bun:test'
 import { NextRequest } from 'next/server'
 
-import { middleware } from '@/middleware'
+import { proxy } from '@/proxy'
 
 import { lireFiltre, repondre, trier } from '../donnees/serveur-instantane.mjs'
 
@@ -13,9 +13,9 @@ const requete = (chemin: string, headers: Record<string, string> = {}) =>
 		headers: { host: 'esperancem.fr', ...headers },
 	})
 
-describe('middleware', () => {
+describe('proxy (ancien middleware)', () => {
 	test('en-têtes de sécurité et CSP sur une page', () => {
-		const r = middleware(requete('/'))
+		const r = proxy(requete('/'))
 		expect(r.headers.get('x-frame-options')).toBe('DENY')
 		expect(r.headers.get('x-content-type-options')).toBe('nosniff')
 		expect(r.headers.get('referrer-policy')).toBe('origin-when-cross-origin')
@@ -25,20 +25,20 @@ describe('middleware', () => {
 	})
 
 	test('ancienne route /api/pocketbase : 404', async () => {
-		const r = middleware(requete('/api/pocketbase/x'))
+		const r = proxy(requete('/api/pocketbase/x'))
 		expect(r.status).toBe(404)
 	})
 
 	test('admin depuis une autre origine : 403 ; même origine : laisse passer', () => {
 		expect(
-			middleware(
+			proxy(
 				requete('/api/admin/wattpad-stats', {
 					origin: 'https://ailleurs.example',
 				})
 			).status
 		).toBe(403)
 		expect(
-			middleware(
+			proxy(
 				requete('/api/admin/wattpad-stats', { origin: 'https://esperancem.fr' })
 			).status
 		).toBe(200)
