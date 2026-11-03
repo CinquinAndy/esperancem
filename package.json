@@ -60,7 +60,7 @@
 		"eslint-config-next": "15.5.20",
 		"@eslint/eslintrc": "3.3.6",
 		"prettier": "3.9.5",
-		"prettier-plugin-tailwindcss": "0.8.0",
+		"prettier-plugin-tailwindcss": "0.8.1",
 		"husky": "9.1.7",
 		"typescript-eslint": "8.63.0"
 	}
