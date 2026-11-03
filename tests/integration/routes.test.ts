@@ -63,14 +63,15 @@ beforeAll(async () => {
 			stdout: 'pipe',
 		}
 	)
-	for (let i = 0; i < 60; i++) {
+	// Jusqu'à 80 s : un runner GitHub chargé a déjà mis plus de 30 s à démarrer `next start`.
+	for (let i = 0; i < 160; i++) {
 		try {
 			if ((await fetch(`${site}/api/wattpad-stats/health`)).ok) return
 		} catch {}
 		await Bun.sleep(500)
 	}
 	throw new Error('Le serveur Next ne répond pas')
-}, 60_000)
+}, 90_000)
 
 afterAll(() => {
 	server?.kill()

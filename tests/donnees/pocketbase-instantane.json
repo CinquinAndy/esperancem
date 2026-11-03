@@ -1,0 +1,358 @@
+{
+	"_source": "https://esperancem.fr (HTML public), relevé le 2026-11-03",
+	"seo_metadata": [
+		{
+			"created": "2026-11-03 12:00:00.000Z",
+			"description": "<p>D&eacute;couvrez l'univers sombre et passionn&eacute; d'Esp&eacute;rance Masson.&nbsp;</p>",
+			"id": "seoaccueil00001",
+			"is_active": true,
+			"keywords": [
+				"Cœurs Sombres Wattpad",
+				"Au prix du silence Wattpad",
+				"Lucas Ferrari",
+				"Angèle roman",
+				"dark romance française",
+				"enemies to lovers français",
+				"mafia romance Wattpad",
+				"roman passion sombre",
+				"autrice française Wattpad",
+				"livre gratuit Wattpad",
+				"romance française 2025"
+			],
+			"og_description": "<p>Plongez dans l'univers dark romance d'Esp&eacute;rance Masson. \"C&oelig;urs Sombres\" - \"Au prix du silence\".</p>",
+			"og_title": "Espérance Masson - Autrice Dark Romance",
+			"og_url": "https://esperancem.fr",
+			"page": "home",
+			"title": "Accueil - Espérance Masson | Autrice",
+			"twitter_creator": "@esp_masson",
+			"twitter_description": "<p>D&eacute;couvrez l'univers d'Esp&eacute;rance Masson, autrice fran&ccedil;aise de dark romance. \"C&oelig;urs Sombres\", \"Au prix du silence\".</p>",
+			"twitter_site": "@esp_masson",
+			"twitter_title": "Espérance Masson - Autrice de Dark Romance",
+			"updated": "2026-11-03 12:00:00.000Z"
+		}
+	],
+	"site_content": [
+		{
+			"content": "<p>Espérance Masson, autrice française de dark romance</p>",
+			"created": "2026-11-03 12:00:00.000Z",
+			"id": "contenu00000001",
+			"is_active": true,
+			"key": "main_title",
+			"order": 1,
+			"page": "home",
+			"section": "hero",
+			"updated": "2026-11-03 12:00:00.000Z"
+		},
+		{
+			"content": "<p>Salut les loulous ! Bienvenue dans mon univers sombre et passionné. J'écris des histoires d'âmes tourmentées, d'amours impossibles et de la part d'ombre qui sommeille en chacun de nous.</p>",
+			"created": "2026-11-03 12:00:00.000Z",
+			"id": "contenu00000002",
+			"is_active": true,
+			"key": "main_description",
+			"order": 2,
+			"page": "home",
+			"section": "hero",
+			"updated": "2026-11-03 12:00:00.000Z"
+		},
+		{
+			"content": "<p>Cœurs Sombres - Dark Romance Wattpad</p>",
+			"created": "2026-11-03 12:00:00.000Z",
+			"id": "contenu00000003",
+			"is_active": true,
+			"key": "book_title",
+			"order": 3,
+			"page": "home",
+			"section": "book",
+			"updated": "2026-11-03 12:00:00.000Z"
+		},
+		{
+			"content": "<p>Fuyant un passé qui la hante, Angèle rêve de reprendre le contrôle de sa vie et part avec sa meilleure amie aux États-Unis pour tout recommencer. Mais sa quête de liberté vire au cauchemar lorsqu'elle tombe sous l'emprise de Lucas Ferrari, un chef de mafia aussi froid qu'impitoyable, prêt à tout pour assouvir une vengeance qui le consume.</p>\n<p>Pris dans un jeu de pouvoir et de manipulation, Angèle et Lucas découvrent qu'ils sont liés par des secrets capables de tout détruire.</p>\n<p>Entre haine et attirance, leur lutte pour survivre pourrait bien les mener à leur perte.&nbsp; Succomberont-ils aux ténèbres du désir ou trouveront-ils enfin la paix au prix de leur âme ?</p>",
+			"created": "2026-11-03 12:00:00.000Z",
+			"id": "contenu00000004",
+			"is_active": true,
+			"key": "book_description",
+			"order": 4,
+			"page": "home",
+			"section": "book",
+			"updated": "2026-11-03 12:00:00.000Z"
+		},
+		{
+			"content": "Succès Wattpad - Classements #1",
+			"created": "2026-11-03 12:00:00.000Z",
+			"id": "contenu00000005",
+			"is_active": true,
+			"key": "rankings_title",
+			"order": 5,
+			"page": "home",
+			"section": "book",
+			"updated": "2026-11-03 12:00:00.000Z"
+		},
+		{
+			"content": "<p>Lire Cœurs Sombres gratuitement sur Wattpad</p>",
+			"created": "2026-11-03 12:00:00.000Z",
+			"id": "contenu00000006",
+			"is_active": true,
+			"key": "wattpad_button",
+			"order": 6,
+			"page": "home",
+			"section": "book",
+			"updated": "2026-11-03 12:00:00.000Z"
+		},
+		{
+			"content": "https://www.wattpad.com/story/368278312-c%C5%93urs-sombres",
+			"created": "2026-11-03 12:00:00.000Z",
+			"id": "contenu00000007",
+			"is_active": true,
+			"key": "wattpad_url",
+			"order": 7,
+			"page": "home",
+			"section": "book",
+			"updated": "2026-11-03 12:00:00.000Z"
+		},
+		{
+			"content": "<p>Au prix du silence - Dark Romance MxM Wattpad</p>",
+			"created": "2026-11-03 12:00:00.000Z",
+			"id": "contenu00000008",
+			"is_active": true,
+			"key": "book_title_2",
+			"order": 8,
+			"page": "home",
+			"section": "book",
+			"updated": "2026-11-03 12:00:00.000Z"
+		},
+		{
+			"content": "<p>Dans l'ombre de Gênes, entre vols d'œuvres d'art et guerres de clans, Alessio pensait ne jamais revoir Alexeï. Jusqu'à ce que les yeux bleus qu'il croyait perdus à jamais se posent sur lui. Chargés d'une haine pure.</p>\n<p>Alexeï est de retour après une année d'absence. Son regard dit tout ce que ses lèvres taisent : quelque chose s'est brisé entre eux, quelque chose d'irréparable. Une nuit dont personne ne parle, des secrets qui rongent, des silences qui brisent.</p>\n<p>Contraints de travailler ensemble dans un monde où la moindre erreur peut être fatale, ils vont devoir affronter ce qui les sépare. Entre mensonges d'hier et vérités d'aujourd'hui, une seule question les hante : Jusqu'où peut-on taire ce qu'on ressent... sans s'y perdre entièrement ?</p>\n<p>Car dans leur milieu, certains secrets ont un prix.<br>Et certains silences peuvent tuer.</p>",
+			"created": "2026-11-03 12:00:00.000Z",
+			"id": "contenu00000009",
+			"is_active": true,
+			"key": "book_description_2",
+			"order": 9,
+			"page": "home",
+			"section": "book",
+			"updated": "2026-11-03 12:00:00.000Z"
+		},
+		{
+			"content": "<p>Lire Au prix du silence gratuitement sur Wattpad</p>",
+			"created": "2026-11-03 12:00:00.000Z",
+			"id": "contenu00000010",
+			"is_active": true,
+			"key": "wattpad_button_2",
+			"order": 10,
+			"page": "home",
+			"section": "book",
+			"updated": "2026-11-03 12:00:00.000Z"
+		},
+		{
+			"content": "https://www.wattpad.com/story/395344686-au-prix-du-silence",
+			"created": "2026-11-03 12:00:00.000Z",
+			"id": "contenu00000011",
+			"is_active": true,
+			"key": "wattpad_url_2",
+			"order": 11,
+			"page": "home",
+			"section": "book",
+			"updated": "2026-11-03 12:00:00.000Z"
+		},
+		{
+			"content": "<p>Je suis Espérance Masson, autrice française de dark romance</p>",
+			"created": "2026-11-03 12:00:00.000Z",
+			"id": "contenu00000012",
+			"is_active": true,
+			"key": "main_title",
+			"order": 12,
+			"page": "about",
+			"section": "hero",
+			"updated": "2026-11-03 12:00:00.000Z"
+		},
+		{
+			"content": "<p>Salut tout le monde ! J'espère que vous allez bien.</p>\n<p>Bienvenue dans mon univers où j'explore les profondeurs de l'âme humaine à travers mes dark romances psychologiques.&nbsp;</p>\n<p data-p-id=\"1727588decfb19592de930c7ed59e0ff\">Mes romans ne sont pas parfaits, mais ils sont nés de quelque chose de vrai. Chaque scène, chaque mot, chaque silence a été écrit avec l'intention qu'il ait un sens, qu'il s'inscrive dans un fil invisible qui relie tout : les douleurs enfouies, les amitiés précieuses, les traumas qu'on croit dépasser mais qui nous poursuivent, les violences qui marquent à vie, et cette part d'humanité qu'on cherche à sauver.</p>\n<p data-p-id=\"6c60f09e9c12bc858c6dc133d52417a7\">Je ne veux pas écrire pour plaire. Je veux écrire pour faire ressentir. Et si mes livres sont, pour ne serait-ce qu'un seul lecteur, un coup de cœur, un tremblement, un écho lointain mais réel, alors je saurais que j'ai atteint mon but.</p>\n<p>N'hésitez pas à venir me retrouver sur mes réseaux sociaux pour découvrir les coulisses de l'écriture de mes romans et échanger avec d'autres passionnés de lecture.</p>",
+			"created": "2026-11-03 12:00:00.000Z",
+			"id": "contenu00000013",
+			"is_active": true,
+			"key": "biography",
+			"order": 13,
+			"page": "about",
+			"section": "hero",
+			"updated": "2026-11-03 12:00:00.000Z"
+		},
+		{
+			"content": "<p>Cœurs Sombres - Mon premier roman Wattpad</p>",
+			"created": "2026-11-03 12:00:00.000Z",
+			"id": "contenu00000014",
+			"is_active": true,
+			"key": "book_title",
+			"order": 14,
+			"page": "about",
+			"section": "book",
+			"updated": "2026-11-03 12:00:00.000Z"
+		},
+		{
+			"content": "<p><em>Cœurs Sombres</em> est né d'une passion pour les histoires complexes où l'amour et la violence s'entremêlent.&nbsp;</p>\n<p>Cette dark romance explore les zones grises de l'âme humaine, là où la rédemption et la destruction se côtoient dans un équilibre fragile. L'histoire d'Angèle et Lucas vous plonge dans un univers où la mafia est maître. Elle mêle tension, secrets et famille.&nbsp;</p>\n<p>Si vous êtes tentés, je vous encourage à aller lire la liste des TW dans l'avant propos sur mon compte Wattpad. Faites attention à vous les loulous &lt;3</p>",
+			"created": "2026-11-03 12:00:00.000Z",
+			"id": "contenu00000015",
+			"is_active": true,
+			"key": "book_description",
+			"order": 15,
+			"page": "about",
+			"section": "book",
+			"updated": "2026-11-03 12:00:00.000Z"
+		},
+		{
+			"content": "<p>Au prix du silence&nbsp;- Mon second roman Wattpad</p>",
+			"created": "2026-11-03 12:00:00.000Z",
+			"id": "contenu00000016",
+			"is_active": true,
+			"key": "book_title_2",
+			"order": 16,
+			"page": "about",
+			"section": "book",
+			"updated": "2026-11-03 12:00:00.000Z"
+		},
+		{
+			"content": "<p data-start=\"505\" data-end=\"751\"><em data-start=\"505\" data-end=\"525\">Au prix du silence</em> est une histoire qui touche, qui fait vibrer. Si vous vous laissez tenter, comprenez que ce ne sont pas les mots qu'il faut lire, mais les silences qu'il faut écouter.</p>\n<p data-start=\"505\" data-end=\"751\">Dans ce roman, derrière les cicatrices, les trahisons et la violence, il y a une seule chose : l’amour, le vrai. Celui qui fait mal, qui fait peur, mais qui sauve.</p>\n<p data-start=\"758\" data-end=\"919\">Ce roman, c’est ma façon de dire qu’on peut aimer si fort qu’on préfère se taire, encaisser, se briser, plutôt que blesser ceux qu’on aime.</p>\n<p data-start=\"926\" data-end=\"1090\">C’est une déclaration à tous ceux qui portent des secrets trop lourds pour protéger les autres.<br data-start=\"1686\" data-end=\"1689\">À ceux qui aiment en silence.<br data-start=\"1720\" data-end=\"1723\">À ceux qui se sont perdus dans l’ombre pour survivre à la lumière.</p>\n<p data-start=\"1097\" data-end=\"1210\">C’est brut, c’est viscéral, c’est imparfait... mais vrai.</p>\n<p data-start=\"1217\" data-end=\"1289\"><em data-start=\"1217\" data-end=\"1289\">Je l’ai écrit avec les tripes. Laissez-le vous percuter en plein cœur.</em></p>",
+			"created": "2026-11-03 12:00:00.000Z",
+			"id": "contenu00000017",
+			"is_active": true,
+			"key": "book_description_2",
+			"order": 17,
+			"page": "about",
+			"section": "book",
+			"updated": "2026-11-03 12:00:00.000Z"
+		},
+		{
+			"content": "esperance.masson@gmail.com",
+			"created": "2026-11-03 12:00:00.000Z",
+			"id": "contenu00000018",
+			"is_active": true,
+			"key": "email",
+			"order": 18,
+			"page": "about",
+			"section": "contact",
+			"updated": "2026-11-03 12:00:00.000Z"
+		},
+		{
+			"content": "© 2024 Espérance Masson. Tous droits réservés.",
+			"created": "2026-11-03 12:00:00.000Z",
+			"id": "contenu00000019",
+			"is_active": true,
+			"key": "copyright",
+			"order": 19,
+			"page": "layout",
+			"section": "site",
+			"updated": "2026-11-03 12:00:00.000Z"
+		}
+	],
+	"site_settings": [],
+	"social_links": [
+		{
+			"created": "2026-11-03 12:00:00.000Z",
+			"display_name": "Instagram",
+			"icon": "InstagramIcon",
+			"id": "reseau000000001",
+			"is_active": true,
+			"order": 1,
+			"platform": "instagram",
+			"updated": "2026-11-03 12:00:00.000Z",
+			"url": "https://www.instagram.com/esp_masson/",
+			"username": ""
+		},
+		{
+			"created": "2026-11-03 12:00:00.000Z",
+			"display_name": "TikTok",
+			"icon": "TikTokIcon",
+			"id": "reseau000000002",
+			"is_active": true,
+			"order": 2,
+			"platform": "tiktok",
+			"updated": "2026-11-03 12:00:00.000Z",
+			"url": "https://www.tiktok.com/@_esperance_masson",
+			"username": ""
+		},
+		{
+			"created": "2026-11-03 12:00:00.000Z",
+			"display_name": "Wattpad",
+			"icon": "WattpadIcon",
+			"id": "reseau000000003",
+			"is_active": true,
+			"order": 3,
+			"platform": "wattpad",
+			"updated": "2026-11-03 12:00:00.000Z",
+			"url": "https://www.wattpad.com/user/Esperancem",
+			"username": ""
+		}
+	],
+	"wattpad_rankings": [
+		{
+			"category": "proximitée forcée",
+			"created": "2026-11-03 12:00:00.000Z",
+			"date": "2025-06-16 12:00:00.000Z",
+			"id": "classement00001",
+			"is_active": true,
+			"position": 1
+		},
+		{
+			"category": "crimes",
+			"created": "2026-11-03 12:00:00.000Z",
+			"date": "2025-06-08 12:00:00.000Z",
+			"id": "classement00002",
+			"is_active": true,
+			"position": 1
+		},
+		{
+			"category": "meurtres",
+			"created": "2026-11-03 12:00:00.000Z",
+			"date": "2025-05-30 12:00:00.000Z",
+			"id": "classement00003",
+			"is_active": true,
+			"position": 1
+		},
+		{
+			"category": "trahisons",
+			"created": "2026-11-03 12:00:00.000Z",
+			"date": "2025-05-26 12:00:00.000Z",
+			"id": "classement00004",
+			"is_active": true,
+			"position": 1
+		},
+		{
+			"category": "amitiés",
+			"created": "2026-11-03 12:00:00.000Z",
+			"date": "2025-04-28 12:00:00.000Z",
+			"id": "classement00005",
+			"is_active": true,
+			"position": 1
+		},
+		{
+			"category": "ennemiestolovers",
+			"created": "2026-11-03 12:00:00.000Z",
+			"date": "2025-04-24 12:00:00.000Z",
+			"id": "classement00006",
+			"is_active": true,
+			"position": 1
+		}
+	],
+	"wattpad_stats": [
+		{
+			"book": "coeurs-sombres",
+			"created": "2026-11-03 12:00:00.000Z",
+			"id": "stats0000000001",
+			"is_active": true,
+			"parts": "48",
+			"reads": "366K",
+			"reads_complete": "366425",
+			"updated": "2099-01-01 00:00:00.000Z",
+			"votes": "11156"
+		},
+		{
+			"book": "au-prix-du-silence",
+			"created": "2026-11-03 12:00:00.000Z",
+			"id": "stats0000000002",
+			"is_active": true,
+			"parts": "50",
+			"reads": "137K",
+			"reads_complete": "137220",
+			"updated": "2099-01-01 00:00:00.000Z",
+			"votes": "6594"
+		}
+	]
+}

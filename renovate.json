@@ -1,13 +1,107 @@
 {
 	"$schema": "https://docs.renovatebot.com/renovate-schema.json",
-	"extends": ["config:base"],
+	"extends": ["config:recommended"],
+	"timezone": "Europe/Paris",
+	"schedule": ["* 0-6 * * *"],
+	"dependencyDashboard": true,
+	"rangeStrategy": "bump",
+	"minimumReleaseAge": "3 days",
+	"internalChecksFilter": "strict",
+	"automerge": true,
+	"automergeType": "pr",
+	"automergeStrategy": "squash",
+	"platformAutomerge": true,
+	"lockFileMaintenance": {
+		"enabled": true,
+		"automerge": true,
+		"schedule": ["* 0-6 * * 1"]
+	},
+	"customManagers": [
+		{
+			"customType": "regex",
+			"description": "Version de Playwright attendue par le job e2e de la CI (doit suivre l'image du conteneur).",
+			"managerFilePatterns": ["/^\\.github/workflows/ci\\.yml$/"],
+			"matchStrings": [
+				"# renovate: playwright\\s+test \"\\$attendue\" = \"(?<currentValue>[0-9.]+)\""
+			],
+			"depNameTemplate": "@playwright/test",
+			"datasourceTemplate": "npm"
+		}
+	],
 	"packageRules": [
 		{
-			"matchUpdateTypes": ["minor", "patch"],
-			"matchCurrentVersion": "!/^0/",
-			"automerge": true,
-			"automergeType": "pr",
-			"automergeStrategy": "squash"
+			"description": "Next.js et ses paquets liés, ensemble.",
+			"matchPackageNames": ["next", "eslint-config-next", "/^@next\\//"],
+			"groupName": "next"
+		},
+		{
+			"description": "Next 16 reste de côté : il change l'image Open Graph (police par défaut différente, couverture absente). La migration (codemods lint et proxy, images.qualities, tsconfig) est prête sur la branche chore/next-16-pret. Les correctifs de la 15.5 (sécurité) continuent d'arriver.",
+			"matchPackageNames": ["next", "eslint-config-next", "/^@next\\//"],
+			"allowedVersions": "<16"
+		},
+		{
+			"description": "ESLint 10 casse eslint-config-next 15 (@rushstack/eslint-patch ne reconnaît pas ESLint 10). À lever avec le passage à Next 16.",
+			"matchPackageNames": ["eslint", "@eslint/js"],
+			"allowedVersions": "<10"
+		},
+		{
+			"description": "React, React DOM et leurs types, ensemble.",
+			"matchPackageNames": [
+				"react",
+				"react-dom",
+				"@types/react",
+				"@types/react-dom"
+			],
+			"groupName": "react"
+		},
+		{
+			"description": "Tailwind CSS et ses paquets.",
+			"matchPackageNames": [
+				"tailwindcss",
+				"/^@tailwindcss\\//",
+				"prettier-plugin-tailwindcss",
+				"tailwind-merge"
+			],
+			"groupName": "tailwind"
+		},
+		{
+			"description": "ESLint, ses configurations et ses plugins.",
+			"matchPackageNames": [
+				"eslint",
+				"/^@eslint\\//",
+				"typescript-eslint",
+				"/^@typescript-eslint\\//",
+				"/^eslint-plugin-/",
+				"eslint-config-prettier"
+			],
+			"groupName": "eslint"
+		},
+		{
+			"description": "MDX.",
+			"matchPackageNames": ["/^@mdx-js\\//"],
+			"groupName": "mdx"
+		},
+		{
+			"description": "Playwright : le paquet npm, l'image Docker du job e2e et la version vérifiée par la CI bougent ensemble. Pas de fusion automatique : un nouveau Chromium change le rendu au pixel près, il faut régénérer les captures de référence (bun run test:visuel:maj) et les relire avant de fusionner.",
+			"matchPackageNames": ["@playwright/test", "mcr.microsoft.com/playwright"],
+			"groupName": "playwright",
+			"automerge": false
+		},
+		{
+			"description": "Image Playwright : le tag est v<version>-noble.",
+			"matchDatasources": ["docker"],
+			"matchPackageNames": ["mcr.microsoft.com/playwright"],
+			"versioning": "regex:^v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?<compatibility>-.+)?$"
+		},
+		{
+			"description": "La production tourne sous Node 22 (RAILPACK_NODE_VERSION=22 dans Coolify, setup-node 22 en CI) : les types de Node restent sur la 22.",
+			"matchPackageNames": ["@types/node"],
+			"allowedVersions": "<23"
+		},
+		{
+			"description": "TypeScript 7 (réécriture native) est refusé par typescript-eslint, qui demande typescript <6.1.0. On reste sur 6.0.x jusqu'à ce que typescript-eslint l'accepte.",
+			"matchPackageNames": ["typescript"],
+			"allowedVersions": "<6.1"
 		}
 	]
 }

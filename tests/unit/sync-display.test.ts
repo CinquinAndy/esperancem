@@ -172,8 +172,11 @@ describe('synchro : modes de panne', () => {
 		)
 		const outcomes: string[] = []
 		for (let i = 0; i < 3; i++) {
+			// Heure fixée une heure après l'enregistrement : les bornes dépendent du temps écoulé, le test
+			// ne doit pas dépendre du jour où il tourne (il échouait à partir du 03/11/2026).
+			const now = () => Date.parse('2026-11-02T05:14:47.175Z') + i * 60_000
 			const r = await runSync(
-				{ fetchCounts: drop, store: pb.store },
+				{ fetchCounts: drop, now, store: pb.store },
 				{ force: true }
 			)
 			outcomes.push(r.books[0].outcome)
