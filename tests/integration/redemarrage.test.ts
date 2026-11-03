@@ -46,11 +46,14 @@ afterAll(() => {
 
 test('Wattpad refuse au redémarrage : aucune écriture, chiffres intacts, échec visible', async () => {
 	let health: any = null
-	for (let i = 0; i < 40; i++) {
+	// Attendre la fin de la synchro (résultats enregistrés), pas seulement son début : la tentative est datée
+	// avant les résultats, et un relevé lu entre les deux faisait échouer le test au hasard.
+	for (let i = 0; i < 90; i++) {
 		await Bun.sleep(1000)
 		try {
 			health = await (await fetch(`${site}/api/wattpad-stats/health`)).json()
-			if (health.synchro.derniereTentative) break
+			if (health.synchro.derniereTentative && health.synchro.resultats?.length)
+				break
 		} catch {}
 	}
 	expect(health.synchro.derniereTentative).not.toBeNull()
@@ -70,4 +73,4 @@ test('Wattpad refuse au redémarrage : aucune écriture, chiffres intacts, éche
 		await fetch(`${site}/api/wattpad-stats/coeurs-sombres`)
 	).json()
 	expect(book.data.readsComplete).toBe('366177')
-}, 60_000)
+}, 120_000)

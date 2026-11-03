@@ -1,0 +1,93 @@
+# Filet de tests : à chaque PR (Renovate compris) et à chaque push sur main.
+# Le job « tests » rassemble tout : c'est lui qu'il faut rendre obligatoire dans la protection de main.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  NEXT_TELEMETRY_DISABLED: '1'
+
+jobs:
+  verifications:
+    name: Lint, types, unitaires, build, intégration
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: package.json
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: bun install --frozen-lockfile
+      - name: Mise en forme (Prettier)
+        run: bun run format:check
+      - name: Lint (ESLint)
+        run: bun run lint
+      - name: Types (TypeScript)
+        run: bun run typecheck
+      - name: Tests unitaires
+        run: bun run test
+      - name: Build de production
+        run: bun run build
+      - name: Tests d'intégration (serveur Next sur faux PocketBase et faux Wattpad)
+        run: bun run test:integration
+
+  e2e:
+    name: E2E et visuel (Playwright)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    # Même image qu'en local (scripts/e2e-docker.sh) : les captures de référence en dépendent.
+    # La version suit celle de @playwright/test dans package.json (vérifié par l'étape « Version de Playwright »).
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.1-noble
+      options: --ipc=host --init
+    env:
+      HOME: /root
+    steps:
+      - uses: actions/checkout@v4
+      - name: Version de Playwright
+        run: |
+          attendue=$(node -p "require('./package.json').devDependencies['@playwright/test']")
+          test "$attendue" = "1.64.1" || { echo "::error::Mettre l'image du job e2e à v$attendue"; exit 1; }
+      - name: Bun
+        run: npm install -g "bun@$(node -p "require('./package.json').packageManager.split('@')[1]")"
+      - run: bun install --frozen-lockfile
+      - name: Build sur l'instantané PocketBase
+        run: bun run build:e2e
+      - name: Parcours, SEO et captures au pixel près
+        run: bun run test:e2e
+      # Après les captures : ce test régénère des pages dans .next.
+      - name: Bout en bout de la revalidation des compteurs
+        run: bun run test:e2e:revalidation
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: rapport-playwright
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 14
+
+  tests:
+    name: tests
+    if: always()
+    needs: [verifications, e2e]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Tous les jobs sont verts
+        run: |
+          test "${{ needs.verifications.result }}" = "success"
+          test "${{ needs.e2e.result }}" = "success"
