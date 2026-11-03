@@ -1,11 +1,21 @@
-import nextCoreWebVitals from 'eslint-config-next/core-web-vitals'
-import nextTypescript from 'eslint-config-next/typescript'
+import { FlatCompat } from '@eslint/eslintrc'
+import js from '@eslint/js'
 import perfectionist from 'eslint-plugin-perfectionist'
 import { defineConfig } from 'eslint/config'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+const compat = new FlatCompat({
+	allConfig: js.configs.all,
+	baseDirectory: __dirname,
+	recommendedConfig: js.configs.recommended,
+})
 
 export default defineConfig([
 	{
-		extends: [...nextCoreWebVitals, ...nextTypescript],
+		extends: compat.extends('next/core-web-vitals', 'next/typescript'),
 
 		plugins: {
 			perfectionist,
@@ -19,16 +29,11 @@ export default defineConfig([
 					allow: ['warn', 'error', 'info'],
 				},
 			],
+
 			'perfectionist/sort-enums': 'error',
 			'perfectionist/sort-imports': ['error'],
 			'perfectionist/sort-objects': 'error',
 			'perfectionist/sort-variable-declarations': 'error',
-			// Règles du React Compiler arrivées avec eslint-config-next 16 : elles signalent du code existant
-			// (TurbulentBackground, WattpadStats, hooks de stats). Avertissement seulement, le temps de corriger
-			// ces composants à part, sans changer leur rendu dans la mise à jour des paquets.
-			'react-hooks/purity': 'warn',
-			'react-hooks/refs': 'warn',
-			'react-hooks/set-state-in-effect': 'warn',
 		},
 
 		settings: {

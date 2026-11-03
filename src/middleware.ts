@@ -3,7 +3,7 @@ import { type NextRequest, NextResponse } from 'next/server'
 /**
  * Middleware to secure endpoints and prevent external access to sensitive data
  */
-export function proxy(request: NextRequest) {
+export function middleware(request: NextRequest) {
 	const { pathname } = request.nextUrl
 
 	// Block direct access to admin endpoints from external sources
