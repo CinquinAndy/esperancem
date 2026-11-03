@@ -30,6 +30,8 @@ const next = spawn(
 		env: {
 			...process.env,
 			ADMIN_SECRET: randomBytes(24).toString('hex'),
+			// Même année figée que le build (tests/e2e/construire.mjs) pour les pages régénérées.
+			COPYRIGHT_ANNEE: '2026',
 			NEXT_TELEMETRY_DISABLED: '1',
 			PB_TOKEN: '',
 			PB_URL: pocketbase.url,

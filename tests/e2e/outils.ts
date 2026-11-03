@@ -27,7 +27,10 @@ export interface Journal {
  * Prépare la page : horloge figée (Date.now et new Date() sans argument ; page.clock fait expirer les
  * captures à cause de la boucle WebGL), mesure d'audience bloquée, requêtes autres que GET refusées et notées.
  */
-export async function preparer(page: Page): Promise<Journal> {
+export async function preparer(
+	page: Page,
+	heure: number = HEURE_FIXE
+): Promise<Journal> {
 	const journal: Journal = { console: [], externes: [], nonGet: [] }
 	await page.addInitScript(t => {
 		const Origine = Date
@@ -42,7 +45,7 @@ export async function preparer(page: Page): Promise<Journal> {
 		}
 		// eslint-disable-next-line no-global-assign
 		Date = DateFigee as DateConstructor
-	}, HEURE_FIXE)
+	}, heure)
 	await page.route('**/*', route => {
 		const req = route.request()
 		const url = req.url()

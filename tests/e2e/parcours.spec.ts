@@ -159,3 +159,35 @@ test.describe('compteurs Wattpad', () => {
 		await contexte.close()
 	})
 })
+
+test.describe('copyright', () => {
+	const pied = (page: import('@playwright/test').Page) =>
+		page.locator('footer').getByText(/Tous droits réservés/)
+
+	for (const { chemin, id } of ROUTES) {
+		test(`${id} : l’année en cours, sans erreur d’hydratation`, async ({
+			page,
+		}) => {
+			const journal = await preparer(page)
+			await page.goto(chemin)
+			// Année du serveur (COPYRIGHT_ANNEE=2026 dans le build des tests), pas celle écrite dans le CMS (2024).
+			await expect(pied(page)).toHaveText(
+				'© 2026 Espérance Masson. Tous droits réservés.'
+			)
+			expect(journal.console.filter(m => !m.includes('404'))).toEqual([])
+		})
+	}
+
+	test('page générée l’an passé : le navigateur corrige l’année après l’hydratation', async ({
+		page,
+	}) => {
+		// Navigateur au 1er janvier 2027, serveur encore en 2026 (cas de la 404, générée au build seulement).
+		const journal = await preparer(page, Date.parse('2027-01-01T08:00:00.000Z'))
+		const reponse = await page.goto('/page-inexistante-test-404')
+		expect(await reponse!.text()).toContain('© 2026 Espérance Masson')
+		await expect(pied(page)).toHaveText(
+			'© 2027 Espérance Masson. Tous droits réservés.'
+		)
+		expect(journal.console.filter(m => !m.includes('404'))).toEqual([])
+	})
+})

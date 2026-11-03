@@ -1,6 +1,7 @@
 import Link from 'next/link'
 
 import { ContainerInner, ContainerOuter } from '@/components/Container'
+import { Copyright } from '@/components/Copyright'
 import {
 	InstagramIcon,
 	TikTokIcon,
@@ -8,6 +9,7 @@ import {
 	EmailIcon,
 } from '@/components/SocialIcons'
 import { getSocialLinks, getLayoutContent } from '@/lib/content'
+import { anneeDuServeur } from '@/lib/copyright'
 
 function SocialLink({
 	children,
@@ -89,10 +91,11 @@ export async function Footer() {
 								</Link>
 							</div>
 
-							{/* Copyright */}
-							<div
+							{/* Copyright : texte du CMS, avec l'année en cours */}
+							<Copyright
+								anneeServeur={anneeDuServeur()}
 								className='flex flex-col items-center gap-2 text-center text-sm text-zinc-500 md:items-end md:text-right'
-								dangerouslySetInnerHTML={{ __html: layoutContent.copyright }}
+								html={layoutContent.copyright}
 							/>
 						</div>
 					</ContainerInner>

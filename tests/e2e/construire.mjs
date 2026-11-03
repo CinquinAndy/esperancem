@@ -19,6 +19,8 @@ const build = spawn(join(racine, 'node_modules', '.bin', 'next'), ['build'], {
 	cwd: racine,
 	env: {
 		...process.env,
+		// Année du copyright figée : les captures de référence ne changent pas au 1er janvier.
+		COPYRIGHT_ANNEE: '2026',
 		NEXT_TELEMETRY_DISABLED: '1',
 		PB_TOKEN: '',
 		PB_URL: pocketbase.url,
