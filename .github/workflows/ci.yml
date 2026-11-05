@@ -30,7 +30,7 @@ jobs:
           bun-version-file: package.json
       - uses: actions/setup-node@v7
         with:
-          node-version: 22.23.4
+          node-version: 26.12.1
       - run: bun install --frozen-lockfile
       - name: Mise en forme (Prettier)
         run: bun run format:check
