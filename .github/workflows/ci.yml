@@ -73,7 +73,7 @@ jobs:
       # Après les captures : ce test régénère des pages dans .next.
       - name: Bout en bout de la revalidation des compteurs
         run: bun run test:e2e:revalidation
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: failure()
         with:
           name: rapport-playwright
