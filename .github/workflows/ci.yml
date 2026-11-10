@@ -62,7 +62,7 @@ jobs:
         run: |
           attendue=$(node -p "require('./package.json').devDependencies['@playwright/test']")
           # renovate: playwright
-          test "$attendue" = "1.64.1" || { echo "::error::Mettre l'image du job e2e à v$attendue"; exit 1; }
+          test "$attendue" = "1.65.0" || { echo "::error::Mettre l'image du job e2e à v$attendue"; exit 1; }
       - name: Bun
         run: npm install -g "bun@$(node -p "require('./package.json').packageManager.split('@')[1]")"
       - run: bun install --frozen-lockfile
