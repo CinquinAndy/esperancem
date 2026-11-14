@@ -65,7 +65,7 @@
 		"eslint-plugin-prettier": "5.5.7",
 		"eslint-plugin-react": "7.37.5",
 		"husky": "9.1.7",
-		"prettier": "3.9.10",
+		"prettier": "3.10.0",
 		"prettier-plugin-tailwindcss": "0.8.1",
 		"tailwindcss": "4.3.5",
 		"typescript": "6.0.3",
