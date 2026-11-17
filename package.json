@@ -41,7 +41,7 @@
 		"fast-glob": "3.3.3",
 		"next": "15.5.29",
 		"pocketbase": "0.29.0",
-		"postcss": "8.5.32",
+		"postcss": "8.5.33",
 		"react": "19.3.1",
 		"react-dom": "19.3.1",
 		"remark-gfm": "4.0.1",
