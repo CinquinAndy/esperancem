@@ -61,7 +61,7 @@
 		"eslint": "9.39.5",
 		"eslint-config-next": "15.5.29",
 		"eslint-config-prettier": "10.1.8",
-		"eslint-plugin-perfectionist": "5.13.0",
+		"eslint-plugin-perfectionist": "5.14.0",
 		"eslint-plugin-prettier": "5.5.7",
 		"eslint-plugin-react": "7.37.5",
 		"husky": "9.1.7",
