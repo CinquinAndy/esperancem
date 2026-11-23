@@ -35,7 +35,7 @@
 		"@number-flow/react": "0.6.2",
 		"@tailwindcss/typography": "0.5.20",
 		"@types/webpack-env": "1.18.8",
-		"autoprefixer": "10.6.2",
+		"autoprefixer": "10.7.0",
 		"cheerio": "1.2.0",
 		"clsx": "2.1.1",
 		"fast-glob": "3.3.3",
